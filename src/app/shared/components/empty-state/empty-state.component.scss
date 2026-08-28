@@ -1,0 +1,38 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--zh-muted-foreground);
+  background: var(--zh-card);
+  border: 1px dashed var(--zh-border);
+  border-radius: var(--zh-radius);
+}
+
+mat-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--zh-primary);
+  opacity: 0.8;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--zh-foreground);
+}
+
+p {
+  margin: 0.5rem 0 0;
+  max-width: 28rem;
+  font-size: 0.875rem;
+}
+
+.empty-state__actions {
+  margin-top: 1rem;
+}

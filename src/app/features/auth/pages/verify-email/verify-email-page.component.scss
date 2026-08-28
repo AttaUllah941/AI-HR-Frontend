@@ -1,0 +1,20 @@
+.auth-card {
+  width: min(100%, 26rem);
+  padding: 2rem;
+  background: var(--zh-card);
+  border: 1px solid var(--zh-border);
+  border-radius: calc(var(--zh-radius) + 4px);
+  box-shadow: var(--zh-shadow-md);
+  text-align: center;
+}
+
+header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+header p {
+  margin: 0.4rem 0 1.5rem;
+  color: var(--zh-muted-foreground);
+}

@@ -1,0 +1,26 @@
+// Angular Material component overrides to match Zenith UX
+
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  --mdc-filled-button-container-shape: calc(var(--zh-radius) - 2px);
+  --mdc-protected-button-container-shape: calc(var(--zh-radius) - 2px);
+}
+
+.mat-mdc-outlined-button {
+  --mdc-outlined-button-container-shape: calc(var(--zh-radius) - 2px);
+}
+
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-container-shape: calc(var(--zh-radius) - 2px);
+}
+
+.mat-mdc-card {
+  --mdc-elevated-card-container-shape: var(--zh-radius);
+  --mdc-outlined-card-container-shape: var(--zh-radius);
+  border: 1px solid var(--zh-border);
+  box-shadow: var(--zh-shadow-sm) !important;
+}
+
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-shape: calc(var(--zh-radius) - 2px);
+}

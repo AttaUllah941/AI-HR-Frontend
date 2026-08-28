@@ -1,0 +1,37 @@
+@use '@angular/material' as mat;
+
+// Material theme aligned to Zenith UX primary (indigo/violet hue ~265)
+html {
+  height: 100%;
+
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Inter,
+      density: 0,
+    )
+  );
+
+  // Override Material system tokens to match Lovable UX exactly
+  --mat-sys-primary: var(--zh-primary);
+  --mat-sys-on-primary: var(--zh-primary-foreground);
+  --mat-sys-primary-container: var(--zh-primary-soft);
+  --mat-sys-on-primary-container: var(--zh-foreground);
+  --mat-sys-secondary: var(--zh-secondary);
+  --mat-sys-on-secondary: var(--zh-secondary-foreground);
+  --mat-sys-surface: var(--zh-background);
+  --mat-sys-on-surface: var(--zh-foreground);
+  --mat-sys-surface-container: var(--zh-card);
+  --mat-sys-surface-container-low: var(--zh-muted);
+  --mat-sys-outline: var(--zh-border);
+  --mat-sys-outline-variant: var(--zh-input);
+  --mat-sys-error: var(--zh-destructive);
+  --mat-sys-on-error: var(--zh-destructive-foreground);
+  --mat-sys-corner-medium: var(--zh-radius);
+  --mat-sys-corner-large: calc(var(--zh-radius) + 4px);
+  --mat-sys-corner-small: calc(var(--zh-radius) - 4px);
+}

@@ -1,0 +1,70 @@
+.auth-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  background: var(--zh-background);
+}
+
+.auth-layout__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background:
+    radial-gradient(circle at 20% 20%, color-mix(in oklab, var(--zh-primary) 35%, transparent), transparent 45%),
+    radial-gradient(circle at 80% 80%, color-mix(in oklab, var(--zh-secondary) 30%, transparent), transparent 40%),
+    var(--zh-sidebar);
+  color: var(--zh-sidebar-foreground);
+}
+
+.auth-layout__brand-inner {
+  max-width: 28rem;
+}
+
+.auth-layout__logo {
+  width: 3rem;
+  height: 3rem;
+  border-radius: calc(var(--zh-radius) - 2px);
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.25rem;
+  font-weight: 700;
+  font-size: 1.35rem;
+  background: linear-gradient(135deg, var(--zh-primary), var(--zh-secondary));
+  color: white;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+p {
+  margin: 0.75rem 0 0;
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+.auth-layout__panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .auth-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-layout__brand {
+    min-height: 12rem;
+    padding: 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+}

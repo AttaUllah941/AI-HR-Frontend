@@ -1,0 +1,10 @@
+<div class="auth-card">
+  <header>
+    <h2>Verify your email</h2>
+    <p>{{ message() }}</p>
+  </header>
+
+  @if (status() !== 'pending') {
+    <a mat-flat-button color="primary" routerLink="/auth/login">Back to sign in</a>
+  }
+</div>

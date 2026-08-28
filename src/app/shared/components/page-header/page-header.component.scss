@@ -1,0 +1,28 @@
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.page-header__text h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--zh-foreground);
+}
+
+.page-header__text p {
+  margin: 0.35rem 0 0;
+  color: var(--zh-muted-foreground);
+  font-size: 0.875rem;
+}
+
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}

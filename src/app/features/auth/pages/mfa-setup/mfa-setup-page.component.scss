@@ -1,0 +1,66 @@
+.auth-card {
+  width: min(100%, 28rem);
+  padding: 2rem;
+  background: var(--zh-card);
+  border: 1px solid var(--zh-border);
+  border-radius: calc(var(--zh-radius) + 4px);
+  box-shadow: var(--zh-shadow-md);
+}
+
+header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+header p,
+.muted,
+.auth-card__footer {
+  color: var(--zh-muted-foreground);
+}
+
+header p {
+  margin: 0.4rem 0 1.25rem;
+}
+
+.full {
+  width: 100%;
+}
+
+.mfa-secret {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: calc(var(--zh-radius) - 2px);
+  background: var(--zh-muted);
+
+  span {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  code {
+    font-size: 0.95rem;
+    word-break: break-all;
+    color: var(--zh-foreground);
+  }
+}
+
+.break {
+  word-break: break-all;
+  font-size: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.auth-card__footer {
+  margin: 1.25rem 0 0;
+  text-align: center;
+
+  a {
+    color: var(--zh-primary);
+    font-weight: 600;
+  }
+}

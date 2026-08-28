@@ -1,0 +1,28 @@
+<app-page-header
+  title="Dashboard"
+  subtitle="Signed in — KPI widgets and charts arrive in Phase 3"
+/>
+
+<div class="kpi-grid">
+  @for (card of cards; track card.title) {
+    <mat-card class="kpi-card">
+      <div class="kpi-card__icon" [style.background]="card.tone">
+        <mat-icon>{{ card.icon }}</mat-icon>
+      </div>
+      <div>
+        <p class="kpi-card__label">{{ card.title }}</p>
+        <strong>{{ card.value }}</strong>
+      </div>
+    </mat-card>
+  }
+</div>
+
+<mat-card class="phase-note">
+  <h3>Authentication ready</h3>
+  <p>
+    JWT sessions, refresh tokens, RBAC claims, and MFA flows are live. Enable two-factor
+    authentication from
+    <a routerLink="/mfa-setup">MFA setup</a>
+    when you are ready.
+  </p>
+</mat-card>

@@ -1,0 +1,37 @@
+<div class="auth-card">
+  <header>
+    <h2>Set up authenticator</h2>
+    <p>Scan the secret into your authenticator app, then confirm with a code</p>
+  </header>
+
+  @if (loading()) {
+    <p class="muted">Preparing MFA setup…</p>
+  } @else if (setup(); as data) {
+    <div class="mfa-secret">
+      <span>Secret</span>
+      <code>{{ data.secret }}</code>
+    </div>
+    <p class="muted break">{{ data.otpauthUrl }}</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Confirmation code</mat-label>
+        <input matInput formControlName="code" inputmode="numeric" maxlength="6" />
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="primary"
+        class="full"
+        type="submit"
+        [disabled]="form.invalid || submitting()"
+      >
+        {{ submitting() ? 'Enabling…' : 'Enable MFA' }}
+      </button>
+    </form>
+  }
+
+  <p class="auth-card__footer">
+    <a routerLink="/dashboard">Skip for now</a>
+  </p>
+</div>

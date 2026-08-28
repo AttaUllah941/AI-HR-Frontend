@@ -1,0 +1,52 @@
+.auth-card {
+  width: min(100%, 28rem);
+  padding: 2rem;
+  background: var(--zh-card);
+  border: 1px solid var(--zh-border);
+  border-radius: calc(var(--zh-radius) + 4px);
+  box-shadow: var(--zh-shadow-md);
+}
+
+header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+header p {
+  margin: 0.4rem 0 1.5rem;
+  color: var(--zh-muted-foreground);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.full {
+  width: 100%;
+}
+
+.auth-card__footer {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  color: var(--zh-muted-foreground);
+
+  a {
+    color: var(--zh-primary);
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 520px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}

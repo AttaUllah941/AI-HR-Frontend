@@ -1,0 +1,49 @@
+// Design tokens extracted from Nova HR / Zenith Lovable UX
+// Source: https://zenith-hr-assistant.lovable.app/
+
+:root {
+  /* Brand */
+  --zh-primary: oklch(54.8% 0.22 265);
+  --zh-primary-foreground: oklch(99% 0 0);
+  --zh-primary-soft: oklch(95% 0.04 260);
+  --zh-secondary: oklch(72% 0.14 230);
+  --zh-secondary-foreground: oklch(99% 0 0);
+
+  /* Surfaces */
+  --zh-background: oklch(98.4% 0.005 247);
+  --zh-foreground: oklch(28% 0.03 260);
+  --zh-card: oklch(100% 0 0);
+  --zh-card-foreground: oklch(28% 0.03 260);
+  --zh-muted: oklch(96.5% 0.008 250);
+  --zh-muted-foreground: oklch(50% 0.02 258);
+  --zh-accent: oklch(96% 0.02 260);
+  --zh-accent-foreground: oklch(28% 0.03 260);
+  --zh-border: oklch(92% 0.008 255);
+  --zh-input: oklch(92% 0.008 255);
+  --zh-ring: oklch(54.8% 0.22 265);
+
+  /* Sidebar */
+  --zh-sidebar: oklch(22% 0.03 260);
+  --zh-sidebar-foreground: oklch(92% 0.01 258);
+  --zh-sidebar-accent: oklch(28% 0.03 260);
+  --zh-sidebar-accent-foreground: oklch(99% 0 0);
+  --zh-sidebar-border: oklch(30% 0.02 260);
+  --zh-sidebar-primary: oklch(54.8% 0.22 265);
+  --zh-sidebar-width: 16rem;
+  --zh-sidebar-width-collapsed: 4.5rem;
+
+  /* Feedback */
+  --zh-success: oklch(72% 0.18 145);
+  --zh-success-foreground: oklch(99% 0 0);
+  --zh-warning: oklch(78% 0.16 75);
+  --zh-warning-foreground: oklch(20% 0.04 60);
+  --zh-destructive: oklch(63% 0.24 25);
+  --zh-destructive-foreground: oklch(99% 0 0);
+
+  /* Shape & type */
+  --zh-radius: 0.875rem;
+  --zh-font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --zh-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --zh-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.08);
+  --zh-header-height: 4rem;
+}

@@ -1,0 +1,13 @@
+<div class="auth-layout">
+  <aside class="auth-layout__brand" aria-hidden="false">
+    <div class="auth-layout__brand-inner">
+      <div class="auth-layout__logo">Z</div>
+      <h1>{{ appName }}</h1>
+      <p>{{ appFullName }}</p>
+    </div>
+  </aside>
+  <section class="auth-layout__panel">
+    <router-outlet />
+  </section>
+  <app-loading-overlay />
+</div>

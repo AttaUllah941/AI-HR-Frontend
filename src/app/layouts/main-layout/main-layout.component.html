@@ -1,0 +1,83 @@
+<div
+  class="main-layout"
+  [class.main-layout--collapsed]="sidebarCollapsed()"
+  [class.main-layout--mobile-open]="mobileOpen()"
+>
+  <aside class="sidebar" [attr.aria-label]="'Primary navigation'">
+    <div class="sidebar__brand">
+      <div class="sidebar__logo" aria-hidden="true">Z</div>
+      @if (!sidebarCollapsed()) {
+        <div class="sidebar__brand-text">
+          <strong>{{ appName }}</strong>
+          <span>Enterprise HR</span>
+        </div>
+      }
+    </div>
+
+    <nav class="sidebar__nav">
+      @for (item of navItems; track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="is-active"
+          [matTooltip]="sidebarCollapsed() ? item.label : ''"
+          matTooltipPosition="right"
+          (click)="closeMobile()"
+        >
+          <mat-icon>{{ item.icon }}</mat-icon>
+          @if (!sidebarCollapsed()) {
+            <span>{{ item.label }}</span>
+          }
+        </a>
+      }
+    </nav>
+  </aside>
+
+  @if (mobileOpen()) {
+    <button type="button" class="sidebar-backdrop" aria-label="Close menu" (click)="closeMobile()"></button>
+  }
+
+  <div class="main-layout__content">
+    <header class="topbar">
+      <div class="topbar__left">
+        <button
+          mat-icon-button
+          type="button"
+          class="topbar__menu-mobile"
+          aria-label="Open navigation"
+          (click)="toggleMobile()"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          type="button"
+          class="topbar__menu-desktop"
+          aria-label="Toggle sidebar"
+          (click)="toggleSidebar()"
+        >
+          <mat-icon>menu_open</mat-icon>
+        </button>
+        <div class="topbar__search" role="search">
+          <mat-icon aria-hidden="true">search</mat-icon>
+          <input type="search" placeholder="Search employees, docs, policies." aria-label="Global search" />
+        </div>
+      </div>
+
+      <div class="topbar__right">
+        <button mat-icon-button type="button" aria-label="Notifications" routerLink="/notifications">
+          <mat-icon>notifications</mat-icon>
+        </button>
+        <button mat-icon-button type="button" aria-label="Profile" routerLink="/profile">
+          <mat-icon>account_circle</mat-icon>
+        </button>
+        <button mat-stroked-button type="button" (click)="logout()">Sign out</button>
+      </div>
+    </header>
+
+    <main id="main-content" class="page-content">
+      <router-outlet />
+    </main>
+  </div>
+
+  <app-loading-overlay />
+</div>
