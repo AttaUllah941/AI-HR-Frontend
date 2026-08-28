@@ -1,3 +1,4 @@
+// this file is used to configure the application
 import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
