@@ -6,6 +6,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import {
+  passwordErrorMessage,
+  passwordValidators,
+} from '../../../../core/validators/password.validators';
 
 @Component({
   selector: 'app-reset-password-page',
@@ -24,9 +28,10 @@ export class ResetPasswordPageComponent {
 
   readonly submitting = signal(false);
   readonly token = signal(this.route.snapshot.queryParamMap.get('token') ?? '');
+  readonly passwordErrorMessage = passwordErrorMessage;
 
   readonly form = this.fb.nonNullable.group({
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: ['', passwordValidators],
     confirmPassword: ['', [Validators.required, Validators.minLength(8)]],
   });
 

@@ -1,37 +1,71 @@
 <div class="auth-card">
-  <header>
-    <h2>Set up authenticator</h2>
-    <p>Scan the secret into your authenticator app, then confirm with a code</p>
-  </header>
+  @if (mfaEnabled()) {
+    <header>
+      <h2>Two-factor authentication</h2>
+      <p>MFA is enabled on your account. Enter your password and a current code to disable it.</p>
+    </header>
 
-  @if (loading()) {
-    <p class="muted">Preparing MFA setup…</p>
-  } @else if (setup(); as data) {
-    <div class="mfa-secret">
-      <span>Secret</span>
-      <code>{{ data.secret }}</code>
-    </div>
-    <p class="muted break">{{ data.otpauthUrl }}</p>
-
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <form [formGroup]="disableForm" (ngSubmit)="onDisable()">
       <mat-form-field appearance="outline" class="full">
-        <mat-label>Confirmation code</mat-label>
-        <input matInput formControlName="code" inputmode="numeric" maxlength="6" />
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password" autocomplete="current-password" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Authenticator code</mat-label>
+        <input matInput formControlName="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
       </mat-form-field>
 
       <button
-        mat-flat-button
-        color="primary"
+        mat-stroked-button
+        color="warn"
         class="full"
         type="submit"
-        [disabled]="form.invalid || submitting()"
+        [disabled]="disableForm.invalid || submitting()"
       >
-        {{ submitting() ? 'Enabling…' : 'Enable MFA' }}
+        {{ submitting() ? 'Disabling…' : 'Disable MFA' }}
       </button>
     </form>
+  } @else {
+    <header>
+      <h2>Set up authenticator</h2>
+      <p>Scan the QR code with your authenticator app, then confirm with a 6-digit code</p>
+    </header>
+
+    @if (loading()) {
+      <p class="muted">Preparing MFA setup…</p>
+    } @else if (setup(); as data) {
+      @if (qrDataUrl(); as qr) {
+        <div class="mfa-qr">
+          <img [src]="qr" width="200" height="200" alt="MFA QR code" />
+        </div>
+      }
+
+      <div class="mfa-secret">
+        <span>Manual entry secret</span>
+        <code>{{ data.secret }}</code>
+      </div>
+
+      <form [formGroup]="enableForm" (ngSubmit)="onEnable()">
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Confirmation code</mat-label>
+          <input matInput formControlName="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          color="primary"
+          class="full"
+          type="submit"
+          [disabled]="enableForm.invalid || submitting()"
+        >
+          {{ submitting() ? 'Enabling…' : 'Enable MFA' }}
+        </button>
+      </form>
+    }
   }
 
   <p class="auth-card__footer">
-    <a routerLink="/dashboard">Skip for now</a>
+    <a routerLink="/dashboard">Back to dashboard</a>
   </p>
 </div>

@@ -1,6 +1,7 @@
 // this file is used to define the routes for the app
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { permissionGuard } from './core/guards/permission.guard';
 
 export const routes: Routes = [
   {
@@ -20,6 +21,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
+        canActivate: [permissionGuard('dashboard:view')],
         loadChildren: () =>
           import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
       },
@@ -32,6 +34,7 @@ export const routes: Routes = [
       },
       {
         path: 'organization',
+        canActivate: [permissionGuard('organization:view')],
         loadComponent: () =>
           import('./features/organization/organization-placeholder.component').then(
             (m) => m.OrganizationPlaceholderComponent,
@@ -39,6 +42,7 @@ export const routes: Routes = [
       },
       {
         path: 'employees',
+        canActivate: [permissionGuard('employees:view')],
         loadComponent: () =>
           import('./features/employees/employees-placeholder.component').then(
             (m) => m.EmployeesPlaceholderComponent,
@@ -46,6 +50,7 @@ export const routes: Routes = [
       },
       {
         path: 'attendance',
+        canActivate: [permissionGuard('attendance:view')],
         loadComponent: () =>
           import('./features/attendance/attendance-placeholder.component').then(
             (m) => m.AttendancePlaceholderComponent,
@@ -53,6 +58,7 @@ export const routes: Routes = [
       },
       {
         path: 'leave',
+        canActivate: [permissionGuard('leave:view')],
         loadComponent: () =>
           import('./features/leave/leave-placeholder.component').then(
             (m) => m.LeavePlaceholderComponent,
@@ -60,6 +66,7 @@ export const routes: Routes = [
       },
       {
         path: 'payroll',
+        canActivate: [permissionGuard('payroll:view')],
         loadComponent: () =>
           import('./features/payroll/payroll-placeholder.component').then(
             (m) => m.PayrollPlaceholderComponent,
@@ -67,6 +74,7 @@ export const routes: Routes = [
       },
       {
         path: 'recruitment',
+        canActivate: [permissionGuard('recruitment:view')],
         loadComponent: () =>
           import('./features/recruitment/recruitment-placeholder.component').then(
             (m) => m.RecruitmentPlaceholderComponent,
@@ -74,6 +82,7 @@ export const routes: Routes = [
       },
       {
         path: 'performance',
+        canActivate: [permissionGuard('performance:view')],
         loadComponent: () =>
           import('./features/performance/performance-placeholder.component').then(
             (m) => m.PerformancePlaceholderComponent,
@@ -81,11 +90,13 @@ export const routes: Routes = [
       },
       {
         path: 'ai',
+        canActivate: [permissionGuard('ai:view')],
         loadComponent: () =>
           import('./features/ai/ai-placeholder.component').then((m) => m.AiPlaceholderComponent),
       },
       {
         path: 'reports',
+        canActivate: [permissionGuard('reports:view')],
         loadComponent: () =>
           import('./features/reports/reports-placeholder.component').then(
             (m) => m.ReportsPlaceholderComponent,
@@ -93,6 +104,7 @@ export const routes: Routes = [
       },
       {
         path: 'notifications',
+        canActivate: [permissionGuard('notifications:view')],
         loadComponent: () =>
           import('./features/notifications/notifications-placeholder.component').then(
             (m) => m.NotificationsPlaceholderComponent,
@@ -107,6 +119,7 @@ export const routes: Routes = [
       },
       {
         path: 'settings',
+        canActivate: [permissionGuard('settings:view')],
         loadComponent: () =>
           import('./features/settings/settings-placeholder.component').then(
             (m) => m.SettingsPlaceholderComponent,
@@ -114,6 +127,7 @@ export const routes: Routes = [
       },
       {
         path: 'files',
+        canActivate: [permissionGuard('files:view')],
         loadComponent: () =>
           import('./features/files/files-placeholder.component').then(
             (m) => m.FilesPlaceholderComponent,
