@@ -1,3 +1,4 @@
+// this file is used to define the routes for the app
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 
