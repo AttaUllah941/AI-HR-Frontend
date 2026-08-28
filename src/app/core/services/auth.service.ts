@@ -194,15 +194,31 @@ export class AuthService {
   }
 
   enableMfa(code: string): Observable<{ mfaEnabled: boolean }> {
-    return this.api
-      .post<{ mfaEnabled: boolean }>('/auth/mfa/enable', { code })
-      .pipe(map((res) => this.unwrap(res)));
+    return this.api.post<{ mfaEnabled: boolean }>('/auth/mfa/enable', { code }).pipe(
+      map((res) => this.unwrap(res)),
+      tap((data) => {
+        const current = this.userSignal();
+        if (current) {
+          const updated = { ...current, mfaEnabled: data.mfaEnabled };
+          localStorage.setItem(USER_KEY, JSON.stringify(updated));
+          this.userSignal.set(updated);
+        }
+      }),
+    );
   }
 
   disableMfa(password: string, code: string): Observable<{ mfaEnabled: boolean }> {
-    return this.api
-      .post<{ mfaEnabled: boolean }>('/auth/mfa/disable', { password, code })
-      .pipe(map((res) => this.unwrap(res)));
+    return this.api.post<{ mfaEnabled: boolean }>('/auth/mfa/disable', { password, code }).pipe(
+      map((res) => this.unwrap(res)),
+      tap((data) => {
+        const current = this.userSignal();
+        if (current) {
+          const updated = { ...current, mfaEnabled: data.mfaEnabled };
+          localStorage.setItem(USER_KEY, JSON.stringify(updated));
+          this.userSignal.set(updated);
+        }
+      }),
+    );
   }
 
   private unwrap<T>(res: ApiResponse<T>): T {

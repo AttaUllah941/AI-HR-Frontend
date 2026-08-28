@@ -1,3 +1,4 @@
+// this guard is used to protect the routes from unauthorized access
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';

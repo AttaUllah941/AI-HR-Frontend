@@ -6,6 +6,12 @@ import { LoadingService } from '../services/loading.service';
 import { ToastService } from '../services/toast.service';
 import { AuthService } from '../services/auth.service';
 
+/**
+ * Global loading + user-facing error toasts.
+ * 401 session clearing is handled by refreshInterceptor after a failed refresh;
+ * this interceptor only redirects when a 401 still surfaces (refresh already failed
+ * or no refresh token was available).
+ */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const loading = inject(LoadingService);
   const toast = inject(ToastService);
@@ -21,17 +27,14 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      const message =
-        (error.error && typeof error.error === 'object' && 'message' in error.error
-          ? String((error.error as { message: string }).message)
-          : null) ||
-        error.message ||
-        'Something went wrong';
+      const message = extractErrorMessage(error);
 
       const isAuthRoute = req.url.includes('/auth/');
 
       if (error.status === 401 && !isAuthRoute) {
-        auth.clearSession();
+        if (auth.isAuthenticated()) {
+          auth.clearSession();
+        }
         void router.navigate(['/auth/login']);
         if (!skipErrorToast) {
           toast.error('Session expired. Please sign in again.');
@@ -49,3 +52,33 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     }),
   );
 };
+
+function extractErrorMessage(error: HttpErrorResponse): string {
+  const body = error.error;
+  if (!body || typeof body !== 'object') {
+    return error.message || 'Something went wrong';
+  }
+
+  const fieldErrors =
+    'errors' in body &&
+    body.errors &&
+    typeof body.errors === 'object' &&
+    'fieldErrors' in (body.errors as object)
+      ? ((body.errors as { fieldErrors: Record<string, string[]> }).fieldErrors ?? {})
+      : null;
+
+  if (fieldErrors) {
+    const details = Object.values(fieldErrors)
+      .flat()
+      .filter(Boolean);
+    if (details.length > 0) {
+      return details.join('. ');
+    }
+  }
+
+  if ('message' in body && body.message) {
+    return String(body.message);
+  }
+
+  return error.message || 'Something went wrong';
+}

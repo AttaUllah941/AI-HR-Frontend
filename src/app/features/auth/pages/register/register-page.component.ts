@@ -6,6 +6,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import {
+  passwordErrorMessage,
+  passwordValidators,
+} from '../../../../core/validators/password.validators';
 
 @Component({
   selector: 'app-register-page',
@@ -22,12 +26,13 @@ export class RegisterPageComponent {
   private readonly router = inject(Router);
 
   readonly submitting = signal(false);
+  readonly passwordErrorMessage = passwordErrorMessage;
 
   readonly form = this.fb.nonNullable.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: ['', passwordValidators],
     companyName: [''],
   });
 
@@ -50,10 +55,13 @@ export class RegisterPageComponent {
       .subscribe({
         next: (data) => {
           this.submitting.set(false);
-          const hint = data.verificationToken
-            ? ` Dev verification token logged by API.`
-            : '';
-          this.toast.success(`Account created. Check your email to verify.${hint}`);
+          const canSignInNow =
+            data.user.status === 'ACTIVE' || Boolean(data.verificationToken);
+          this.toast.success(
+            canSignInNow
+              ? 'Account created. You can sign in now.'
+              : 'Account created. Check your email to verify, then sign in.',
+          );
           void this.router.navigate(['/auth/login']);
         },
         error: () => this.submitting.set(false),

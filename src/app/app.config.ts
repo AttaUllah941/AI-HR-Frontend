@@ -20,7 +20,8 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding(),
       withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
     ),
-    provideHttpClient(withInterceptors([authInterceptor, refreshInterceptor, errorInterceptor])),
+    // Order matters: refresh must wrap the HTTP call before error handles residual 401s.
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, refreshInterceptor])),
     provideAnimationsAsync(),
   ],
 };

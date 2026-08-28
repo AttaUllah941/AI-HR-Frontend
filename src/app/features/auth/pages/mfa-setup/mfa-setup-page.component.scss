@@ -49,6 +49,20 @@ header p {
   }
 }
 
+.mfa-qr {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border-radius: calc(var(--zh-radius) - 2px);
+  background: #fff;
+
+  img {
+    display: block;
+    border-radius: 4px;
+  }
+}
+
 .break {
   word-break: break-all;
   font-size: 0.75rem;
