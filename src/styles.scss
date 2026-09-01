@@ -1,6 +1,9 @@
 @use './styles/tokens';
 @use './styles/theme';
 @use './styles/material-overrides';
+@use './app/features/organization/styles/organization';
+@use './app/features/organization/styles/organization-dialog';
+@use './app/features/employees/styles/employees';
 
 *,
 *::before,

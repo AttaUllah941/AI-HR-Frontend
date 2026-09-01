@@ -1,0 +1,43 @@
+<app-organization-section-header
+  title="Org chart"
+  description="Visualize your department hierarchy and nested teams."
+  icon="hub"
+  [count]="loading() || error() ? null : tree().length"
+/>
+
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading org chart…"
+  errorTitle="Org chart unavailable"
+  (retry)="reload()"
+>
+  @if (tree().length === 0) {
+    <app-empty-state
+      title="No departments to display"
+      message="Create departments and teams to build your organization chart."
+      icon="hub"
+    />
+  } @else {
+    <mat-card class="chart-panel">
+      <header class="chart-panel__header">
+        <div class="chart-panel__icon" aria-hidden="true">
+          <mat-icon>account_tree</mat-icon>
+        </div>
+        <div>
+          <h3>{{ companyName() }}</h3>
+          <p>Department hierarchy with nested teams</p>
+        </div>
+      </header>
+
+      <div class="chart-panel__canvas" role="tree" aria-label="Organization chart">
+        <ul class="chart-roots">
+          @for (node of tree(); track node.id) {
+            <app-org-chart-node [node]="node" />
+          }
+        </ul>
+      </div>
+    </mat-card>
+  }
+</app-organization-status>
+

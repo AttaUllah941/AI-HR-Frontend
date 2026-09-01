@@ -35,18 +35,14 @@ export const routes: Routes = [
       {
         path: 'organization',
         canActivate: [permissionGuard('organization:view')],
-        loadComponent: () =>
-          import('./features/organization/organization-placeholder.component').then(
-            (m) => m.OrganizationPlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/organization/organization.routes').then((m) => m.ORGANIZATION_ROUTES),
       },
       {
         path: 'employees',
         canActivate: [permissionGuard('employees:view')],
-        loadComponent: () =>
-          import('./features/employees/employees-placeholder.component').then(
-            (m) => m.EmployeesPlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/employees/employees.routes').then((m) => m.EMPLOYEES_ROUTES),
       },
       {
         path: 'attendance',

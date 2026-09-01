@@ -1,0 +1,181 @@
+<section class="emp-page">
+  <div class="emp-action-bar">
+    <label class="emp-action-bar__search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        [formControl]="searchControl"
+        placeholder="Search employees..."
+        aria-label="Search employees"
+      />
+    </label>
+
+    <div class="emp-action-bar__actions">
+      <button
+        mat-stroked-button
+        type="button"
+        class="emp-action-btn"
+        [class.emp-action-btn--active]="filtersOpen()"
+        (click)="toggleFilters()"
+      >
+        <mat-icon aria-hidden="true">filter_list</mat-icon>
+        Filter
+      </button>
+
+      @if (canExport) {
+        <button mat-stroked-button type="button" class="emp-action-btn" (click)="exportCsv()">
+          <mat-icon aria-hidden="true">download</mat-icon>
+          Export
+        </button>
+      }
+
+      @if (canCreate) {
+        <button mat-flat-button color="primary" type="button" class="emp-add-btn" (click)="openForm()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add Employee
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (filtersOpen()) {
+    <div class="emp-filters-panel">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Status</mat-label>
+        <mat-select [formControl]="statusControl">
+          @for (opt of statusOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Department</mat-label>
+        <mat-select [formControl]="departmentControl">
+          <mat-option value="">All departments</mat-option>
+          @for (dept of departments(); track dept.id) {
+            <mat-option [value]="dept.id">{{ dept.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  }
+
+  <div class="emp-table-card">
+    @if (loading()) {
+      <div class="emp-table-state">
+        <mat-spinner diameter="32" />
+        <span>Loading employees…</span>
+      </div>
+    } @else if (error()) {
+      <div class="emp-table-state emp-table-state--error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ error() }}</p>
+        <button mat-stroked-button type="button" (click)="reload()">Try again</button>
+      </div>
+    } @else if (items().length === 0) {
+      <app-empty-state
+        title="No employees found"
+        message="Try adjusting your filters or add a new employee to get started."
+        icon="groups"
+      >
+        @if (canCreate) {
+          <button mat-flat-button color="primary" type="button" (click)="openForm()">
+            <mat-icon aria-hidden="true">add</mat-icon>
+            Add Employee
+          </button>
+        }
+      </app-empty-state>
+    } @else {
+      <div class="emp-table-wrap">
+        <table class="emp-table">
+          <thead>
+            <tr>
+              <th scope="col">Employee</th>
+              <th scope="col">Department</th>
+              <th scope="col">Position</th>
+              <th scope="col">Manager</th>
+              <th scope="col">Status</th>
+              <th scope="col">Joined</th>
+              <th scope="col" class="emp-table__actions-col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items(); track item.id) {
+              <tr class="emp-table__row" (click)="view(item)">
+                <td>
+                  <div class="emp-table__employee">
+                    <span class="emp-table__avatar" [style.background]="avatarStyle(item).background" [style.color]="avatarStyle(item).color">
+                      {{ initials(item) }}
+                    </span>
+                    <div class="emp-table__employee-text">
+                      <strong>{{ item.firstName }} {{ item.lastName }}</strong>
+                      <span>{{ item.email }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ item.department?.name ?? '—' }}</td>
+                <td>{{ item.designation?.name ?? '—' }}</td>
+                <td>{{ managerName(item) }}</td>
+                <td>
+                  <span [class]="statusClass(item)">
+                    <span class="emp-status-pill__dot" aria-hidden="true"></span>
+                    {{ statusLabel(item) }}
+                  </span>
+                </td>
+                <td>{{ formatJoined(item.joinDate) }}</td>
+                <td class="emp-table__actions-col">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="emp-table__menu-btn"
+                    aria-label="Actions for {{ item.firstName }} {{ item.lastName }}"
+                    [matMenuTriggerFor]="rowMenu"
+                    (click)="setMenuItem(item); $event.stopPropagation()"
+                  >
+                    <mat-icon>more_horiz</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <mat-menu #rowMenu="matMenu" xPosition="before">
+        @if (menuItem(); as item) {
+          <button mat-menu-item type="button" (click)="view(item)">
+            <mat-icon>visibility</mat-icon>
+            <span>View profile</span>
+          </button>
+          @if (canUpdate) {
+            <button mat-menu-item type="button" (click)="openForm(item)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit employee</span>
+            </button>
+          }
+          @if (canDelete) {
+            <button mat-menu-item type="button" (click)="remove(item)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete employee</span>
+            </button>
+          }
+        }
+      </mat-menu>
+
+      @if (totalPages() > 1) {
+        <div class="emp-table-footer">
+          <span>{{ total() }} employees · Page {{ page() }} of {{ totalPages() }}</span>
+          <div class="emp-table-footer__nav">
+            <button mat-stroked-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+              Previous
+            </button>
+            <button mat-stroked-button type="button" [disabled]="page() >= totalPages()" (click)="nextPage()">
+              Next
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</section>
