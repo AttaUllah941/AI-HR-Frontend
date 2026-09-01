@@ -1,0 +1,33 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading organization overview…"
+  errorTitle="Overview unavailable"
+  (retry)="reload()"
+>
+  <mat-card class="org-company-card">
+    <div>
+      <p class="org-company-card__eyebrow">Company</p>
+      <h2>{{ companyName() }}</h2>
+    </div>
+    <a mat-stroked-button routerLink="../chart">
+      <mat-icon aria-hidden="true">account_tree</mat-icon>
+      View org chart
+    </a>
+  </mat-card>
+
+  <div class="org-stat-grid" aria-label="Organization entity counts">
+    @for (card of cards; track card.key) {
+      <a class="org-stat-card" [routerLink]="card.route" [attr.aria-label]="card.label + ': ' + counts()[card.key]">
+        <div class="org-stat-card__icon" aria-hidden="true">
+          <mat-icon>{{ card.icon }}</mat-icon>
+        </div>
+        <div>
+          <strong>{{ counts()[card.key] }}</strong>
+          <span>{{ card.label }}</span>
+        </div>
+      </a>
+    }
+  </div>
+</app-organization-status>
+

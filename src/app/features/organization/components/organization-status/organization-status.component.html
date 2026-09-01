@@ -1,0 +1,19 @@
+@if (loading()) {
+  <div class="org-status org-status--loading" role="status" aria-live="polite" aria-busy="true">
+    <mat-progress-spinner mode="indeterminate" diameter="36" />
+    <p>{{ loadingMessage() }}</p>
+  </div>
+} @else if (error()) {
+  <mat-card class="org-status org-status--error" role="alert">
+    <mat-icon aria-hidden="true">error_outline</mat-icon>
+    <div>
+      <h3>{{ errorTitle() }}</h3>
+      <p>{{ error() }}</p>
+      @if (showRetry()) {
+        <button mat-stroked-button type="button" (click)="retry.emit()">Try again</button>
+      }
+    </div>
+  </mat-card>
+} @else {
+  <ng-content />
+}

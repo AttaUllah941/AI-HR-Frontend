@@ -1,0 +1,271 @@
+<app-page-header title="Employee Profile" subtitle="View and manage employee records." />
+
+<app-breadcrumb [items]="breadcrumbItems()" />
+
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading profile…"
+  errorTitle="Profile unavailable"
+  (retry)="reload()"
+>
+  @if (employee(); as emp) {
+    <div class="emp-detail-header">
+      <div class="emp-detail-hero">
+        <div class="emp-detail-hero__avatar" aria-hidden="true">{{ initials(emp) }}</div>
+        <div>
+          <h1>{{ emp.firstName }} {{ emp.lastName }}</h1>
+          <p>
+            <code>{{ emp.employeeCode }}</code>
+            · {{ emp.email }}
+            @if (emp.designation) {
+              · {{ emp.designation.name }}
+            }
+          </p>
+        </div>
+      </div>
+      <div>
+        <span [class]="statusClass(emp.status)">{{ emp.status.replace('_', ' ') }}</span>
+        @if (canUpdate) {
+          <button mat-stroked-button type="button" (click)="openEdit()">
+            <mat-icon>edit</mat-icon>
+            Edit profile
+          </button>
+        }
+      </div>
+    </div>
+
+    <mat-tab-group animationDuration="200ms">
+      <mat-tab label="Profile">
+        <div class="emp-tab-panel">
+          <dl class="emp-profile-grid">
+            <div class="emp-profile-grid__item"><dt>Department</dt><dd>{{ emp.department?.name ?? '—' }}</dd></div>
+            <div class="emp-profile-grid__item"><dt>Team</dt><dd>{{ emp.team?.name ?? '—' }}</dd></div>
+            <div class="emp-profile-grid__item"><dt>Branch</dt><dd>{{ emp.branch?.name ?? '—' }}</dd></div>
+            <div class="emp-profile-grid__item"><dt>Manager</dt><dd>{{ emp.manager ? emp.manager.firstName + ' ' + emp.manager.lastName : '—' }}</dd></div>
+            <div class="emp-profile-grid__item"><dt>Employment type</dt><dd>{{ emp.employmentType.replace('_', ' ') }}</dd></div>
+            <div class="emp-profile-grid__item"><dt>Join date</dt><dd>{{ formatDate(emp.joinDate) }}</dd></div>
+            <div class="emp-profile-grid__item"><dt>Phone</dt><dd>{{ emp.phone ?? '—' }}</dd></div>
+            <div class="emp-profile-grid__item"><dt>Work location</dt><dd>{{ emp.workLocation ?? '—' }}</dd></div>
+            <div class="emp-profile-grid__item"><dt>City</dt><dd>{{ emp.city ?? '—' }}</dd></div>
+            <div class="emp-profile-grid__item"><dt>Country</dt><dd>{{ emp.country ?? '—' }}</dd></div>
+            @if (emp.bio) {
+              <div class="emp-profile-grid__item" style="grid-column: 1 / -1"><dt>Bio</dt><dd>{{ emp.bio }}</dd></div>
+            }
+          </dl>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Emergency">
+        <div class="emp-tab-panel">
+          @if (canUpdate) {
+            <button mat-stroked-button type="button" (click)="openSubForm('emergency')">
+              <mat-icon>add</mat-icon> Add contact
+            </button>
+          }
+          @if (emp.emergencyContacts.length === 0) {
+            <app-empty-state title="No emergency contacts" message="Add contacts for emergencies." icon="contact_emergency" />
+          } @else {
+            <div class="emp-sub-list">
+              @for (item of emp.emergencyContacts; track item.id) {
+                <div class="emp-sub-card">
+                  <div>
+                    <p class="emp-sub-card__title">{{ item.name }} @if (item.isPrimary) { <span class="emp-status emp-status--active">Primary</span> }</p>
+                    <p class="emp-sub-card__meta">{{ item.relationship }} · {{ item.phone }} @if (item.email) { · {{ item.email }} }</p>
+                  </div>
+                  @if (canUpdate) {
+                    <div>
+                      <button mat-icon-button type="button" (click)="openSubForm('emergency', item)"><mat-icon>edit</mat-icon></button>
+                      <button mat-icon-button type="button" (click)="deleteSub('emergency', item.id, item.name)"><mat-icon>delete</mat-icon></button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Education">
+        <div class="emp-tab-panel">
+          @if (canUpdate) {
+            <button mat-stroked-button type="button" (click)="openSubForm('education')"><mat-icon>add</mat-icon> Add education</button>
+          }
+          @if (emp.education.length === 0) {
+            <app-empty-state title="No education records" message="Add academic history." icon="school" />
+          } @else {
+            <div class="emp-sub-list">
+              @for (item of emp.education; track item.id) {
+                <div class="emp-sub-card">
+                  <div>
+                    <p class="emp-sub-card__title">{{ item.institution }}</p>
+                    <p class="emp-sub-card__meta">{{ item.degree ?? '—' }} @if (item.fieldOfStudy) { · {{ item.fieldOfStudy }} }</p>
+                  </div>
+                  @if (canUpdate) {
+                    <div>
+                      <button mat-icon-button type="button" (click)="openSubForm('education', item)"><mat-icon>edit</mat-icon></button>
+                      <button mat-icon-button type="button" (click)="deleteSub('education', item.id, item.institution)"><mat-icon>delete</mat-icon></button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Experience">
+        <div class="emp-tab-panel">
+          @if (canUpdate) {
+            <button mat-stroked-button type="button" (click)="openSubForm('experience')"><mat-icon>add</mat-icon> Add experience</button>
+          }
+          @if (emp.experience.length === 0) {
+            <app-empty-state title="No experience records" message="Add prior work history." icon="work_history" />
+          } @else {
+            <div class="emp-sub-list">
+              @for (item of emp.experience; track item.id) {
+                <div class="emp-sub-card">
+                  <div>
+                    <p class="emp-sub-card__title">{{ item.title }} at {{ item.companyName }}</p>
+                    <p class="emp-sub-card__meta">@if (item.location) { {{ item.location }} · } @if (item.isCurrent) { Current }</p>
+                  </div>
+                  @if (canUpdate) {
+                    <div>
+                      <button mat-icon-button type="button" (click)="openSubForm('experience', item)"><mat-icon>edit</mat-icon></button>
+                      <button mat-icon-button type="button" (click)="deleteSub('experience', item.id, item.title)"><mat-icon>delete</mat-icon></button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Skills">
+        <div class="emp-tab-panel">
+          @if (canUpdate) {
+            <button mat-stroked-button type="button" (click)="openSubForm('skill')"><mat-icon>add</mat-icon> Add skill</button>
+          }
+          @if (emp.skills.length === 0) {
+            <app-empty-state title="No skills" message="Add skills and proficiency levels." icon="psychology" />
+          } @else {
+            <div class="emp-sub-list">
+              @for (item of emp.skills; track item.id) {
+                <div class="emp-sub-card">
+                  <div>
+                    <p class="emp-sub-card__title">{{ item.name }}</p>
+                    <p class="emp-sub-card__meta">@if (item.level) { {{ item.level }} } @if (item.years) { · {{ item.years }} yrs }</p>
+                  </div>
+                  @if (canUpdate) {
+                    <div>
+                      <button mat-icon-button type="button" (click)="openSubForm('skill', item)"><mat-icon>edit</mat-icon></button>
+                      <button mat-icon-button type="button" (click)="deleteSub('skill', item.id, item.name)"><mat-icon>delete</mat-icon></button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Certifications">
+        <div class="emp-tab-panel">
+          @if (canUpdate) {
+            <button mat-stroked-button type="button" (click)="openSubForm('certification')"><mat-icon>add</mat-icon> Add certification</button>
+          }
+          @if (emp.certifications.length === 0) {
+            <app-empty-state title="No certifications" message="Add professional certifications." icon="verified" />
+          } @else {
+            <div class="emp-sub-list">
+              @for (item of emp.certifications; track item.id) {
+                <div class="emp-sub-card">
+                  <div>
+                    <p class="emp-sub-card__title">{{ item.name }}</p>
+                    <p class="emp-sub-card__meta">@if (item.issuer) { {{ item.issuer }} } @if (item.credentialId) { · ID: {{ item.credentialId }} }</p>
+                  </div>
+                  @if (canUpdate) {
+                    <div>
+                      <button mat-icon-button type="button" (click)="openSubForm('certification', item)"><mat-icon>edit</mat-icon></button>
+                      <button mat-icon-button type="button" (click)="deleteSub('certification', item.id, item.name)"><mat-icon>delete</mat-icon></button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Documents">
+        <div class="emp-tab-panel">
+          @if (canUpdate) {
+            <button mat-stroked-button type="button" (click)="openSubForm('document')"><mat-icon>add</mat-icon> Add document</button>
+          }
+          @if (emp.documents.length === 0) {
+            <app-empty-state title="No documents" message="Attach employee documents and files." icon="description" />
+          } @else {
+            <div class="emp-sub-list">
+              @for (item of emp.documents; track item.id) {
+                <div class="emp-sub-card">
+                  <div>
+                    <p class="emp-sub-card__title">{{ item.title }}</p>
+                    <p class="emp-sub-card__meta">{{ item.category }} @if (item.fileName) { · {{ item.fileName }} }</p>
+                  </div>
+                  @if (canUpdate) {
+                    <div>
+                      <button mat-icon-button type="button" (click)="openSubForm('document', item)"><mat-icon>edit</mat-icon></button>
+                      <button mat-icon-button type="button" (click)="deleteSub('document', item.id, item.title)"><mat-icon>delete</mat-icon></button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Timeline">
+        <div class="emp-tab-panel">
+          @if (timeline().length === 0) {
+            <app-empty-state title="No timeline events" message="Employment milestones will appear here." icon="timeline" />
+          } @else {
+            <div class="emp-timeline">
+              @for (event of timeline(); track event.date + event.label) {
+                <div class="emp-timeline__item">
+                  <strong>{{ event.label }}</strong>
+                  <span>{{ formatDate(event.date) }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Activity">
+        <div class="emp-tab-panel">
+          @if (activity().length === 0) {
+            <app-empty-state title="No activity" message="Audit activity for this employee will appear here." icon="history" />
+          } @else {
+            <div class="emp-sub-list">
+              @for (item of activity(); track item.id) {
+                <div class="emp-sub-card">
+                  <div>
+                    <p class="emp-sub-card__title">{{ item.action }}</p>
+                    <p class="emp-sub-card__meta">
+                      {{ formatDateTime(item.createdAt) }}
+                      @if (item.actor) {
+                        · {{ item.actor.firstName }} {{ item.actor.lastName }}
+                      }
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</app-organization-status>
