@@ -7,11 +7,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Branch, OrganizationService } from '../../../core/services/organization.service';
+import { AttendanceService, Holiday } from '../../../core/services/attendance.service';
 import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
-  selector: 'app-branch-form-dialog',
+  selector: 'app-holiday-form-dialog',
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -23,28 +23,27 @@ import { ToastService } from '../../../core/services/toast.service';
     MatIconModule,
     MatProgressSpinnerModule,
   ],
-  templateUrl: './branch-form-dialog.component.html',
-  styleUrl: './branch-form-dialog.component.scss',
+  templateUrl: './holiday-form-dialog.component.html',
+  styleUrl: './holiday-form-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BranchFormDialogComponent {
+export class HolidayFormDialogComponent {
   private readonly fb = inject(FormBuilder);
-  private readonly org = inject(OrganizationService);
+  private readonly attendance = inject(AttendanceService);
   private readonly toast = inject(ToastService);
-  private readonly dialogRef = inject(MatDialogRef<BranchFormDialogComponent, boolean>);
-  readonly data = inject<{ branch: Branch | null }>(MAT_DIALOG_DATA);
+  private readonly dialogRef = inject(MatDialogRef<HolidayFormDialogComponent, boolean>);
+  readonly data = inject<{ holiday: Holiday | null }>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);
 
   readonly form = this.fb.nonNullable.group({
-    name: [this.data.branch?.name ?? '', [Validators.required, Validators.maxLength(150)]],
-    code: [this.data.branch?.code ?? '', [Validators.required, Validators.maxLength(50)]],
-    city: [this.data.branch?.city ?? ''],
-    country: [this.data.branch?.country ?? ''],
-    isHeadOffice: [this.data.branch?.isHeadOffice ?? false],
-    allowedIpsText: [
-      this.data.branch?.allowedIps?.map((ip) => ip.cidr).join('\n') ?? '',
+    name: [this.data.holiday?.name ?? '', [Validators.required, Validators.maxLength(200)]],
+    date: [
+      this.data.holiday?.date?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
+      Validators.required,
     ],
+    isOptional: [this.data.holiday?.isOptional ?? false],
+    description: [this.data.holiday?.description ?? ''],
   });
 
   submit(): void {
@@ -54,31 +53,25 @@ export class BranchFormDialogComponent {
     }
     this.saving.set(true);
     const raw = this.form.getRawValue();
-    const payload = {
+    const body = {
       name: raw.name,
-      code: raw.code,
-      city: raw.city,
-      country: raw.country,
-      isHeadOffice: raw.isHeadOffice,
-      allowedIps: raw.allowedIpsText
-        .split(/[\n,]+/)
-        .map((ip) => ip.trim())
-        .filter(Boolean),
+      date: raw.date,
+      isOptional: raw.isOptional,
+      description: raw.description.trim() || null,
     };
-    const request$ = this.data.branch
-      ? this.org.updateBranch(this.data.branch.id, payload)
-      : this.org.createBranch(payload);
+    const request$ = this.data.holiday
+      ? this.attendance.updateHoliday(this.data.holiday.id, body)
+      : this.attendance.createHoliday(body);
 
     request$.subscribe({
       next: () => {
-        this.toast.success(this.data.branch ? 'Branch updated' : 'Branch created');
+        this.toast.success(this.data.holiday ? 'Holiday updated' : 'Holiday created');
         this.dialogRef.close(true);
       },
-      error: () => {
+      error: (err: Error) => {
         this.saving.set(false);
-        this.toast.error('Unable to save branch');
+        this.toast.error(err.message || 'Unable to save holiday');
       },
     });
   }
 }
-

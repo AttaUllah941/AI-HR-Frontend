@@ -1,0 +1,80 @@
+<app-organization-section-header
+  title="Holidays"
+  description="Company holidays for {{ year }}."
+  icon="event"
+  [count]="loading() || error() ? null : items().length"
+>
+  @if (canUpdate) {
+    <button mat-flat-button color="primary" type="button" (click)="openForm()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Add holiday
+    </button>
+  }
+</app-organization-section-header>
+
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading holidays…"
+  errorTitle="Holidays unavailable"
+  (retry)="reload()"
+>
+  @if (items().length === 0) {
+    <app-empty-state
+      title="No holidays yet"
+      message="Add holidays for the current year to mark non-working days."
+      icon="event"
+    >
+      @if (canUpdate) {
+        <button mat-flat-button color="primary" type="button" (click)="openForm()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add holiday
+        </button>
+      }
+    </app-empty-state>
+  } @else {
+    <div class="org-entity-list" role="list" aria-label="Holidays">
+      @for (item of items(); track item.id) {
+        <mat-card class="org-entity-card" role="listitem">
+          <div class="org-entity-card__body">
+            <div class="org-entity-card__title">
+              <strong>{{ item.name }}</strong>
+              @if (item.isOptional) {
+                <span class="org-entity-card__badge">Optional</span>
+              }
+            </div>
+            <p class="org-entity-card__meta">
+              <mat-icon aria-hidden="true">event</mat-icon>
+              {{ formatDate(item.date) }}
+              @if (item.description) {
+                <span>· {{ item.description }}</span>
+              }
+            </p>
+          </div>
+          <div class="org-entity-card__actions">
+            @if (canUpdate) {
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Edit {{ item.name }}"
+                [disabled]="deletingId() === item.id"
+                (click)="openForm(item)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Delete {{ item.name }}"
+                [disabled]="deletingId() === item.id"
+                (click)="remove(item)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
+        </mat-card>
+      }
+    </div>
+  }
+</app-organization-status>

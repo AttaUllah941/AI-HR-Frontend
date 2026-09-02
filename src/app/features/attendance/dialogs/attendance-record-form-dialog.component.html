@@ -1,0 +1,97 @@
+<h2 mat-dialog-title class="att-dialog-title">
+  <mat-icon aria-hidden="true">fact_check</mat-icon>
+  {{ viewOnly ? 'View attendance' : data.record ? 'Edit attendance' : 'Add attendance' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="att-dialog-subtitle">
+    {{
+      viewOnly
+        ? 'Review attendance details for this employee.'
+        : data.record
+          ? 'Update check-in, check-out, and status.'
+          : 'Create a manual attendance record.'
+    }}
+  </p>
+
+  <form [formGroup]="form" class="att-form" id="attendance-record-form" (ngSubmit)="submit()">
+    <div class="att-form__grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Employee</mat-label>
+        <mat-select formControlName="employeeId">
+          @for (emp of employees(); track emp.id) {
+            <mat-option [value]="emp.id">
+              {{ emp.firstName }} {{ emp.lastName }} ({{ emp.employeeCode }})
+            </mat-option>
+          }
+        </mat-select>
+        @if (form.controls.employeeId.touched && form.controls.employeeId.hasError('required')) {
+          <mat-error>Employee is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date</mat-label>
+        <input matInput type="date" formControlName="date" />
+        @if (form.controls.date.touched && form.controls.date.hasError('required')) {
+          <mat-error>Date is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Check-in</mat-label>
+        <input matInput type="datetime-local" formControlName="checkInAt" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Check-out</mat-label>
+        <input matInput type="datetime-local" formControlName="checkOutAt" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          <mat-option value="">Auto / unset</mat-option>
+          @for (status of statusOptions; track status) {
+            <mat-option [value]="status">{{ statusLabel(status) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Shift</mat-label>
+        <mat-select formControlName="shiftId">
+          <mat-option value="">Default shift</mat-option>
+          @for (shift of shifts(); track shift.id) {
+            <mat-option [value]="shift.id">{{ shift.name }} ({{ shift.code }})</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="att-form__full">
+        <mat-label>Notes</mat-label>
+        <textarea matInput rows="3" formControlName="notes"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="att-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">
+    {{ viewOnly ? 'Close' : 'Cancel' }}
+  </button>
+  @if (!viewOnly) {
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      form="attendance-record-form"
+      [disabled]="form.invalid || saving()"
+    >
+      @if (saving()) {
+        <mat-spinner class="save-spinner" diameter="16" />
+      }
+      {{ saving() ? 'Saving…' : 'Save record' }}
+    </button>
+  }
+</mat-dialog-actions>

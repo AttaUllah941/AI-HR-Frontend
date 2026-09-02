@@ -1,0 +1,108 @@
+:host {
+  display: block;
+}
+
+.dashboard-clock-card {
+  margin-bottom: 1rem;
+}
+
+.dashboard-clock-card__loading,
+.dashboard-clock-card__error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 4rem;
+  color: var(--zh-muted-foreground);
+  font-size: 0.875rem;
+}
+
+.dashboard-clock-card__error {
+  flex-direction: column;
+  align-items: flex-start;
+
+  p {
+    margin: 0;
+  }
+}
+
+.att-clock-card {
+  padding: 1.25rem !important;
+  border: 1px solid var(--zh-border) !important;
+  border-radius: calc(var(--zh-radius) - 2px) !important;
+  background: var(--zh-card) !important;
+}
+
+.att-clock-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--zh-muted-foreground);
+  }
+
+  > mat-icon {
+    color: var(--zh-primary);
+  }
+}
+
+.att-clock-card__times {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+
+  span {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--zh-muted-foreground);
+  }
+
+  strong {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.95rem;
+  }
+}
+
+.att-clock-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  button mat-spinner,
+  button mat-icon {
+    margin-right: 0.35rem;
+  }
+}
+
+.att-clock-card__done {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #059669;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .att-clock-card__times {
+    grid-template-columns: 1fr;
+  }
+}

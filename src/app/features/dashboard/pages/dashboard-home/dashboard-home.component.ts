@@ -14,6 +14,7 @@ import { AttendanceTrendChartComponent } from '../../components/charts/attendanc
 import { DepartmentDonutChartComponent } from '../../components/charts/department-donut-chart.component';
 import { HiringFunnelChartComponent } from '../../components/charts/hiring-funnel-chart.component';
 import { EmployeeGrowthChartComponent } from '../../components/charts/employee-growth-chart.component';
+import { DashboardClockCardComponent } from '../../components/dashboard-clock-card/dashboard-clock-card.component';
 import {
   DashboardKpiTrend,
   DashboardService,
@@ -33,6 +34,7 @@ import {
     DepartmentDonutChartComponent,
     HiringFunnelChartComponent,
     EmployeeGrowthChartComponent,
+    DashboardClockCardComponent,
   ],
   templateUrl: './dashboard-home.component.html',
   styleUrl: './dashboard-home.component.scss',

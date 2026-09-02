@@ -409,8 +409,10 @@ export class MainLayoutComponent implements OnInit {
 
 
     if (this.auth.isAuthenticated()) {
-
-      this.auth.me().subscribe({ error: () => undefined });
+      // Refresh session so JWT permissions stay in sync with role changes (e.g. new modules).
+      this.auth.refresh().subscribe({
+        error: () => this.auth.me().subscribe({ error: () => undefined }),
+      });
 
       this.loadNotifications();
 
@@ -514,6 +516,9 @@ export class MainLayoutComponent implements OnInit {
       return false;
     }
     if (path === '/employees') {
+      return false;
+    }
+    if (path.startsWith('/attendance')) {
       return false;
     }
     return true;

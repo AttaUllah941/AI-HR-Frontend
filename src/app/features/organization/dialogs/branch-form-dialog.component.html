@@ -47,6 +47,17 @@
       <h3 class="org-form-section__title" id="branch-settings-heading">Settings</h3>
       <mat-checkbox formControlName="isHeadOffice">Mark as head office</mat-checkbox>
     </section>
+
+    <section class="org-form-section" aria-labelledby="branch-ip-heading">
+      <h3 class="org-form-section__title" id="branch-ip-heading">Web clock authorized IPs</h3>
+      <p class="org-form-section__hint">
+        Employees assigned to this branch can clock in/out only from these IP addresses or CIDR ranges (one per line).
+      </p>
+      <mat-form-field appearance="outline" class="org-form-section__full">
+        <mat-label>Allowed IPs / CIDR ranges</mat-label>
+        <textarea matInput formControlName="allowedIpsText" rows="4" placeholder="192.168.1.10&#10;10.0.0.0/8&#10;::1"></textarea>
+      </mat-form-field>
+    </section>
   </form>
 </mat-dialog-content>
 

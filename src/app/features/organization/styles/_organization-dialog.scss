@@ -55,6 +55,17 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.org-form-section__hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--zh-muted-foreground);
+  line-height: 1.45;
+}
+
+.org-form-section__full {
+  width: 100%;
+}
+
 .org-dialog-actions {
   gap: 0.5rem;
 }

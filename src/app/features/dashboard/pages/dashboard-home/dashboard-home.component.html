@@ -7,6 +7,8 @@
     <button mat-flat-button color="primary" type="button" (click)="reload()">Try again</button>
   </mat-card>
 } @else if (summary(); as data) {
+  <app-dashboard-clock-card />
+
   <section class="kpi-grid" aria-label="Key metrics">
     @for (card of data.kpis; track card.key) {
       <mat-card class="kpi-card">
