@@ -47,10 +47,8 @@ export const routes: Routes = [
       {
         path: 'attendance',
         canActivate: [permissionGuard('attendance:view')],
-        loadComponent: () =>
-          import('./features/attendance/attendance-placeholder.component').then(
-            (m) => m.AttendancePlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/attendance/attendance.routes').then((m) => m.ATTENDANCE_ROUTES),
       },
       {
         path: 'leave',

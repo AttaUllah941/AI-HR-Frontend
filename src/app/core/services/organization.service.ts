@@ -9,6 +9,28 @@ export interface OrgCompany {
   legalName: string | null;
 }
 
+export interface BranchAllowedIp {
+  id: string;
+  cidr: string;
+  label: string | null;
+}
+
+export interface BranchInput {
+  name?: string;
+  code?: string;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  postalCode?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  isHeadOffice?: boolean;
+  isActive?: boolean;
+  allowedIps?: string[];
+}
+
 export interface Branch {
   id: string;
   companyId: string;
@@ -24,6 +46,7 @@ export interface Branch {
   email: string | null;
   isHeadOffice: boolean;
   isActive: boolean;
+  allowedIps?: BranchAllowedIp[];
 }
 
 export interface Department {
@@ -98,11 +121,11 @@ export class OrganizationService {
       .pipe(map((res) => this.unwrap(res).items));
   }
 
-  createBranch(body: Partial<Branch>): Observable<Branch> {
+  createBranch(body: BranchInput): Observable<Branch> {
     return this.api.post<Branch>('/organization/branches', body).pipe(map((res) => this.unwrap(res)));
   }
 
-  updateBranch(id: string, body: Partial<Branch>): Observable<Branch> {
+  updateBranch(id: string, body: BranchInput): Observable<Branch> {
     return this.api
       .patch<Branch>(`/organization/branches/${id}`, body)
       .pipe(map((res) => this.unwrap(res)));

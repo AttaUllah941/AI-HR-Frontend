@@ -1,0 +1,180 @@
+<section class="att-page">
+  <div class="att-action-bar">
+    <label class="att-action-bar__search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        [formControl]="searchControl"
+        placeholder="Search employees..."
+        aria-label="Search attendance"
+      />
+    </label>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="att-action-bar__date">
+      <mat-label>Date</mat-label>
+      <input matInput type="date" [formControl]="dateControl" />
+    </mat-form-field>
+
+    <div class="att-action-bar__actions">
+      <button
+        mat-stroked-button
+        type="button"
+        class="att-action-btn"
+        [class.att-action-btn--active]="filtersOpen()"
+        (click)="toggleFilters()"
+      >
+        <mat-icon aria-hidden="true">filter_list</mat-icon>
+        Filter
+      </button>
+
+      @if (canCreate) {
+        <button mat-flat-button color="primary" type="button" class="att-add-btn" (click)="openForm()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add record
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (filtersOpen()) {
+    <div class="att-filters-panel">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Status</mat-label>
+        <mat-select [formControl]="statusControl">
+          @for (opt of statusOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  }
+
+  <div class="att-table-card">
+    @if (loading()) {
+      <div class="att-table-state">
+        <mat-spinner diameter="32" />
+        <span>Loading attendance…</span>
+      </div>
+    } @else if (error()) {
+      <div class="att-table-state att-table-state--error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ error() }}</p>
+        <button mat-stroked-button type="button" (click)="reload()">Try again</button>
+      </div>
+    } @else if (items().length === 0) {
+      <app-empty-state
+        title="No attendance records"
+        message="Try another date or add a manual attendance record."
+        icon="fact_check"
+      >
+        @if (canCreate) {
+          <button mat-flat-button color="primary" type="button" (click)="openForm()">
+            <mat-icon aria-hidden="true">add</mat-icon>
+            Add record
+          </button>
+        }
+      </app-empty-state>
+    } @else {
+      <div class="att-table-wrap">
+        <table class="att-table">
+          <thead>
+            <tr>
+              <th scope="col">Employee</th>
+              <th scope="col">Department</th>
+              <th scope="col">Status</th>
+              <th scope="col">Check-in</th>
+              <th scope="col">Check-out</th>
+              <th scope="col">Work hrs</th>
+              <th scope="col">Late</th>
+              <th scope="col" class="att-table__actions-col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items(); track item.id) {
+              <tr class="att-table__row">
+                <td>
+                  <div class="att-table__employee">
+                    <span
+                      class="att-table__avatar"
+                      [style.background]="avatarStyle(item).background"
+                      [style.color]="avatarStyle(item).color"
+                    >
+                      {{ initials(item) }}
+                    </span>
+                    <div class="att-table__employee-text">
+                      <strong>
+                        {{ item.employee?.firstName }} {{ item.employee?.lastName }}
+                      </strong>
+                      <span>{{ item.employee?.email ?? '—' }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ item.employee?.department?.name ?? '—' }}</td>
+                <td>
+                  <span [class]="statusClass(item.status)">
+                    <span class="att-status-pill__dot" aria-hidden="true"></span>
+                    {{ statusLabel(item.status) }}
+                  </span>
+                </td>
+                <td>{{ formatTime(item.checkInAt) }}</td>
+                <td>{{ formatTime(item.checkOutAt) }}</td>
+                <td>{{ formatHours(item.workMinutes) }}</td>
+                <td>{{ formatLate(item.lateMinutes) }}</td>
+                <td class="att-table__actions-col">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="att-table__menu-btn"
+                    aria-label="Actions"
+                    [matMenuTriggerFor]="rowMenu"
+                    (click)="setMenuItem(item)"
+                  >
+                    <mat-icon>more_horiz</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <mat-menu #rowMenu="matMenu" xPosition="before">
+        @if (menuItem(); as item) {
+          <button mat-menu-item type="button" (click)="openForm(item, true)">
+            <mat-icon>visibility</mat-icon>
+            <span>View</span>
+          </button>
+          @if (canUpdate) {
+            <button mat-menu-item type="button" (click)="openForm(item)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit</span>
+            </button>
+            <button mat-menu-item type="button" (click)="remove(item)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          }
+        }
+      </mat-menu>
+
+      @if (totalPages() > 1) {
+        <div class="att-table-footer">
+          <span>{{ total() }} records · Page {{ page() }} of {{ totalPages() }}</span>
+          <div class="att-table-footer__nav">
+            <button mat-stroked-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+              Previous
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              [disabled]="page() >= totalPages()"
+              (click)="nextPage()"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</section>

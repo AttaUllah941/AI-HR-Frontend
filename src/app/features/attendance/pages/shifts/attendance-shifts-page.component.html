@@ -1,0 +1,79 @@
+<app-organization-section-header
+  title="Shifts"
+  description="Define working hours, grace periods, and default schedules."
+  icon="schedule"
+  [count]="loading() || error() ? null : items().length"
+>
+  @if (canUpdate) {
+    <button mat-flat-button color="primary" type="button" (click)="openForm()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Add shift
+    </button>
+  }
+</app-organization-section-header>
+
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading shifts…"
+  errorTitle="Shifts unavailable"
+  (retry)="reload()"
+>
+  @if (items().length === 0) {
+    <app-empty-state
+      title="No shifts yet"
+      message="Add your first shift to establish working hours for attendance."
+      icon="schedule"
+    >
+      @if (canUpdate) {
+        <button mat-flat-button color="primary" type="button" (click)="openForm()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add shift
+        </button>
+      }
+    </app-empty-state>
+  } @else {
+    <div class="org-entity-list" role="list" aria-label="Shifts">
+      @for (item of items(); track item.id) {
+        <mat-card class="org-entity-card" role="listitem">
+          <div class="org-entity-card__body">
+            <div class="org-entity-card__title">
+              <strong>{{ item.name }}</strong>
+              <code class="org-entity-card__code">{{ item.code }}</code>
+              @if (item.isDefault) {
+                <span class="org-entity-card__badge">Default</span>
+              }
+            </div>
+            <p class="org-entity-card__meta">
+              <mat-icon aria-hidden="true">schedule</mat-icon>
+              {{ item.startTime }} – {{ item.endTime }} · Break {{ item.breakMinutes }}m · Grace
+              {{ item.graceMinutes }}m
+            </p>
+          </div>
+          <div class="org-entity-card__actions">
+            @if (canUpdate) {
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Edit {{ item.name }}"
+                [disabled]="deletingId() === item.id"
+                (click)="openForm(item)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Delete {{ item.name }}"
+                [disabled]="deletingId() === item.id"
+                (click)="remove(item)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
+        </mat-card>
+      }
+    </div>
+  }
+</app-organization-status>
