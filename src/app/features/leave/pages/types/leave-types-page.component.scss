@@ -1,0 +1,17 @@
+:host {
+  display: block;
+}
+
+.leave-type-swatch {
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.leave-type-desc {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: var(--zh-muted-foreground);
+}

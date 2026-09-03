@@ -1,0 +1,83 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading leave overview…"
+  errorTitle="Leave overview unavailable"
+  (retry)="reload()"
+>
+  <section class="leave-page" aria-label="Leave overview">
+    <div class="leave-action-bar">
+      <div>
+        <h2 class="leave-overview-heading">My leave · {{ year }}</h2>
+        <p class="leave-overview-sub">Balances and request activity for the current year</p>
+      </div>
+      @if (canCreate) {
+        <button mat-flat-button color="primary" type="button" class="leave-add-btn" (click)="openApply()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Apply leave
+        </button>
+      }
+    </div>
+
+    <div class="leave-kpi-grid">
+      @for (card of kpis(); track card.key) {
+        <mat-card class="leave-kpi-card">
+          <div class="leave-kpi-card__header">
+            <span class="leave-kpi-card__icon leave-kpi-card__icon--{{ card.tone }}">
+              <mat-icon aria-hidden="true">{{ card.icon }}</mat-icon>
+            </span>
+          </div>
+          <p class="leave-kpi-card__label">{{ card.label }}</p>
+          <strong class="leave-kpi-card__value">{{ card.value }}</strong>
+        </mat-card>
+      }
+    </div>
+
+    <div>
+      <h3 class="leave-overview-heading">My balances</h3>
+      @if ((summary()?.balances ?? []).length === 0) {
+        <app-empty-state
+          title="No balances yet"
+          message="Your leave balances will appear here once entitlements are assigned."
+          icon="account_balance_wallet"
+        />
+      } @else {
+        <div class="leave-balance-list" role="list" aria-label="My leave balances">
+          @for (balance of summary()!.balances; track balance.id) {
+            <div class="leave-balance-card" role="listitem">
+              <div class="leave-balance-card__left">
+                <span
+                  class="leave-balance-card__swatch"
+                  [style.background]="balance.leaveType?.color || '#3b82f6'"
+                  aria-hidden="true"
+                ></span>
+                <div class="leave-balance-card__meta">
+                  <strong>{{ balance.leaveType?.name || 'Leave type' }}</strong>
+                  <span>{{ balance.leaveType?.code }}</span>
+                </div>
+              </div>
+              <div class="leave-balance-card__stats">
+                <div>
+                  <span>Entitled</span>
+                  <strong>{{ balance.entitled }}</strong>
+                </div>
+                <div>
+                  <span>Used</span>
+                  <strong>{{ balance.used }}</strong>
+                </div>
+                <div>
+                  <span>Pending</span>
+                  <strong>{{ balance.pending }}</strong>
+                </div>
+                <div>
+                  <span>Available</span>
+                  <strong>{{ available(balance) }}</strong>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </section>
+</app-organization-status>

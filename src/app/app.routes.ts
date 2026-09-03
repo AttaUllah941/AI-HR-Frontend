@@ -53,10 +53,8 @@ export const routes: Routes = [
       {
         path: 'leave',
         canActivate: [permissionGuard('leave:view')],
-        loadComponent: () =>
-          import('./features/leave/leave-placeholder.component').then(
-            (m) => m.LeavePlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/leave/leave.routes').then((m) => m.LEAVE_ROUTES),
       },
       {
         path: 'payroll',
