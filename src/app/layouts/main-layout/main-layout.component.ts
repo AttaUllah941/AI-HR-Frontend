@@ -521,6 +521,9 @@ export class MainLayoutComponent implements OnInit {
     if (path.startsWith('/attendance')) {
       return false;
     }
+    if (path.startsWith('/leave')) {
+      return false;
+    }
     return true;
   }
 
