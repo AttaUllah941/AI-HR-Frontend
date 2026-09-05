@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.performance-overview-heading {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.performance-overview-sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: var(--zh-muted-foreground);
+}
+
+@media (max-width: 900px) {
+  .performance-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .performance-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

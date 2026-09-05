@@ -1,0 +1,98 @@
+<app-organization-section-header
+  title="Hiring pipeline"
+  description="Track applications across stages. Advance or reject with actions."
+  icon="view_kanban"
+>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Job</mat-label>
+    <mat-select [formControl]="jobControl">
+      <mat-option value="">All jobs</mat-option>
+      @for (job of jobs(); track job.id) {
+        <mat-option [value]="job.id">{{ job.title }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (canCreate) {
+    <button mat-flat-button color="primary" type="button" (click)="openCreateApplication()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Application
+    </button>
+  }
+</app-organization-section-header>
+
+@if (loading()) {
+  <div class="recruitment-table-card">
+    <div class="recruitment-table-state">
+      <mat-spinner diameter="32" />
+      <span>Loading pipeline…</span>
+    </div>
+  </div>
+} @else if (error()) {
+  <div class="recruitment-table-card">
+    <div class="recruitment-table-state recruitment-table-state--error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
+    </div>
+  </div>
+} @else if (columns().every((c) => c.applications.length === 0)) {
+  <app-empty-state
+    title="Pipeline is empty"
+    message="Create an application to start moving candidates through stages."
+    icon="view_kanban"
+  >
+    @if (canCreate) {
+      <button mat-flat-button color="primary" type="button" (click)="openCreateApplication()">
+        <mat-icon aria-hidden="true">add</mat-icon>
+        Create application
+      </button>
+    }
+  </app-empty-state>
+} @else {
+  <div class="recruitment-pipeline">
+    @for (column of columns(); track column.status) {
+      <section class="recruitment-pipeline-column" [attr.aria-label]="column.label || column.status">
+        <div class="recruitment-pipeline-column__header">
+          <strong>{{ column.label || statusLabel(column.status) }}</strong>
+          <span>{{ column.applications.length }}</span>
+        </div>
+        <div class="recruitment-pipeline-column__body">
+          @for (app of column.applications; track app.id) {
+            <article class="recruitment-pipeline-card">
+              <strong>{{ candidateName(app) }}</strong>
+              <span>{{ jobTitle(app) }}</span>
+              @if (canAdvance(app) || canReject(app)) {
+                <div class="recruitment-pipeline-card__actions">
+                  @if (canAdvance(app)) {
+                    <button
+                      mat-stroked-button
+                      type="button"
+                      [disabled]="actionId() === app.id"
+                      (click)="advance(app)"
+                    >
+                      Advance
+                    </button>
+                  }
+                  @if (canReject(app)) {
+                    <button
+                      mat-button
+                      type="button"
+                      color="warn"
+                      [disabled]="actionId() === app.id"
+                      (click)="reject(app)"
+                    >
+                      Reject
+                    </button>
+                  }
+                </div>
+              }
+            </article>
+          } @empty {
+            <span style="font-size: 0.75rem; color: var(--zh-muted-foreground)">No applications</span>
+          }
+        </div>
+      </section>
+    }
+  </div>
+}

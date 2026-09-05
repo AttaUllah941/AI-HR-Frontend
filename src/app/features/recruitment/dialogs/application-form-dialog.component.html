@@ -1,0 +1,51 @@
+<h2 mat-dialog-title class="recruitment-dialog-title">
+  <mat-icon aria-hidden="true">assignment_ind</mat-icon>
+  Create application
+</h2>
+
+<mat-dialog-content>
+  <p class="recruitment-dialog-subtitle">Link a candidate to an open job opening.</p>
+
+  <form [formGroup]="form" class="recruitment-form" id="application-form" (ngSubmit)="submit()">
+    <div class="recruitment-form__grid">
+      <mat-form-field appearance="outline" class="recruitment-form__full">
+        <mat-label>Job opening</mat-label>
+        <mat-select formControlName="jobOpeningId">
+          @for (job of jobs(); track job.id) {
+            <mat-option [value]="job.id">{{ job.title }} ({{ job.code }})</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="recruitment-form__full">
+        <mat-label>Candidate</mat-label>
+        <mat-select formControlName="candidateId">
+          @for (c of candidates(); track c.id) {
+            <mat-option [value]="c.id">{{ candidateLabel(c) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="recruitment-form__full">
+        <mat-label>Cover letter</mat-label>
+        <textarea matInput rows="3" formControlName="coverLetter"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="recruitment-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="application-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : 'Create application' }}
+  </button>
+</mat-dialog-actions>

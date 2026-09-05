@@ -1,0 +1,63 @@
+<h2 mat-dialog-title class="payroll-dialog-title">
+  <mat-icon aria-hidden="true">list_alt</mat-icon>
+  Entries · {{ runTitle() }}
+</h2>
+
+<mat-dialog-content>
+  <p class="payroll-dialog-subtitle">Employee payroll lines for this run.</p>
+
+  @if (loading()) {
+    <div class="payroll-table-state">
+      <mat-spinner diameter="28" />
+      <span>Loading entries…</span>
+    </div>
+  } @else if (error()) {
+    <div class="payroll-table-state payroll-table-state--error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
+    </div>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      title="No entries"
+      message="Process this run to generate payroll entries."
+      icon="list_alt"
+    />
+  } @else {
+    <div class="payroll-table-wrap">
+      <table class="payroll-table">
+        <thead>
+          <tr>
+            <th scope="col">Employee</th>
+            <th scope="col">Basic</th>
+            <th scope="col">Gross</th>
+            <th scope="col">Deductions</th>
+            <th scope="col">Tax</th>
+            <th scope="col">Net</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of items(); track entry.id) {
+            <tr class="payroll-table__row">
+              <td>
+                <div class="payroll-table__employee-text">
+                  <strong>{{ employeeName(entry) }}</strong>
+                  <span>{{ entry.employee?.employeeCode || '—' }}</span>
+                </div>
+              </td>
+              <td>{{ formatMoney(entry.basicSalary) }}</td>
+              <td>{{ formatMoney(entry.grossPay) }}</td>
+              <td>{{ formatMoney(entry.totalDeductions) }}</td>
+              <td>{{ formatMoney(entry.totalTax) }}</td>
+              <td>{{ formatMoney(entry.netPay) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="payroll-dialog-actions">
+  <button mat-button type="button" mat-dialog-close>Close</button>
+</mat-dialog-actions>

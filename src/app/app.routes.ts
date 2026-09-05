@@ -59,32 +59,26 @@ export const routes: Routes = [
       {
         path: 'payroll',
         canActivate: [permissionGuard('payroll:view')],
-        loadComponent: () =>
-          import('./features/payroll/payroll-placeholder.component').then(
-            (m) => m.PayrollPlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/payroll/payroll.routes').then((m) => m.PAYROLL_ROUTES),
       },
       {
         path: 'recruitment',
         canActivate: [permissionGuard('recruitment:view')],
-        loadComponent: () =>
-          import('./features/recruitment/recruitment-placeholder.component').then(
-            (m) => m.RecruitmentPlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/recruitment/recruitment.routes').then((m) => m.RECRUITMENT_ROUTES),
       },
       {
         path: 'performance',
         canActivate: [permissionGuard('performance:view')],
-        loadComponent: () =>
-          import('./features/performance/performance-placeholder.component').then(
-            (m) => m.PerformancePlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/performance/performance.routes').then((m) => m.PERFORMANCE_ROUTES),
       },
       {
         path: 'ai',
         canActivate: [permissionGuard('ai:view')],
-        loadComponent: () =>
-          import('./features/ai/ai-placeholder.component').then((m) => m.AiPlaceholderComponent),
+        loadChildren: () =>
+          import('./features/ai/ai.routes').then((m) => m.AI_ROUTES),
       },
       {
         path: 'reports',

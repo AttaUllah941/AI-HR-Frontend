@@ -1,0 +1,93 @@
+<h2 mat-dialog-title class="payroll-dialog-title">
+  <mat-icon aria-hidden="true">receipt_long</mat-icon>
+  Payslip · {{ periodLabel() }}
+</h2>
+
+<mat-dialog-content>
+  @if (loading()) {
+    <div class="payroll-table-state">
+      <mat-spinner diameter="28" />
+      <span>Loading payslip…</span>
+    </div>
+  } @else if (error()) {
+    <div class="payroll-table-state payroll-table-state--error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <p class="payroll-dialog-subtitle">
+      {{ employeeName() }}
+      @if (payslip().employee?.employeeCode) {
+        · {{ payslip().employee!.employeeCode }}
+      }
+    </p>
+
+    <div class="payslip-summary">
+      <div>
+        <span>Status</span>
+        <strong>
+          <span [class]="statusClass(payslip().status)">
+            <span class="payroll-status-pill__dot" aria-hidden="true"></span>
+            {{ statusLabel(payslip().status) }}
+          </span>
+        </strong>
+      </div>
+      <div>
+        <span>Basic</span>
+        <strong>{{ formatMoney(payslip().basicSalary) }}</strong>
+      </div>
+      <div>
+        <span>Allowances</span>
+        <strong>{{ formatMoney(payslip().totalAllowances) }}</strong>
+      </div>
+      <div>
+        <span>Bonuses</span>
+        <strong>{{ formatMoney(payslip().totalBonuses) }}</strong>
+      </div>
+      <div>
+        <span>Deductions</span>
+        <strong>{{ formatMoney(payslip().totalDeductions) }}</strong>
+      </div>
+      <div>
+        <span>Tax</span>
+        <strong>{{ formatMoney(payslip().totalTax) }}</strong>
+      </div>
+      <div>
+        <span>Gross</span>
+        <strong>{{ formatMoney(payslip().grossPay) }}</strong>
+      </div>
+      <div>
+        <span>Net</span>
+        <strong>{{ formatMoney(payslip().netPay) }}</strong>
+      </div>
+    </div>
+
+    @if (lines().length > 0) {
+      <h3 class="payslip-lines-heading">Breakdown</h3>
+      <div class="payroll-table-wrap">
+        <table class="payroll-table">
+          <thead>
+            <tr>
+              <th scope="col">Line</th>
+              <th scope="col">Kind</th>
+              <th scope="col">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of lines(); track line.id) {
+              <tr class="payroll-table__row">
+                <td>{{ line.label }}</td>
+                <td>{{ statusLabel(line.kind) }}</td>
+                <td>{{ formatMoney(line.amount) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="payroll-dialog-actions">
+  <button mat-button type="button" mat-dialog-close>Close</button>
+</mat-dialog-actions>

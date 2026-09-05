@@ -1,0 +1,121 @@
+<h2 mat-dialog-title class="payroll-dialog-title">
+  <mat-icon aria-hidden="true">account_tree</mat-icon>
+  {{ data.structure ? 'Edit salary structure' : 'Add salary structure' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="payroll-dialog-subtitle">
+    Assign basic salary, bank details, and component values for an employee.
+  </p>
+
+  <form [formGroup]="form" class="payroll-form" id="salary-structure-form" (ngSubmit)="submit()">
+    <div class="payroll-form__grid">
+      <mat-form-field appearance="outline" class="payroll-form__full">
+        <mat-label>Employee</mat-label>
+        <mat-select formControlName="employeeId">
+          @for (emp of employees(); track emp.id) {
+            <mat-option [value]="emp.id">
+              {{ emp.firstName }} {{ emp.lastName }} ({{ emp.employeeCode }})
+            </mat-option>
+          }
+        </mat-select>
+        @if (form.controls.employeeId.touched && form.controls.employeeId.hasError('required')) {
+          <mat-error>Employee is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Basic salary</mat-label>
+        <input matInput type="number" formControlName="basicSalary" min="0" step="0.01" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Currency</mat-label>
+        <input matInput formControlName="currency" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Effective from</mat-label>
+        <input matInput type="date" formControlName="effectiveFrom" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Effective to</mat-label>
+        <input matInput type="date" formControlName="effectiveTo" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Bank name</mat-label>
+        <input matInput formControlName="bankName" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Bank account</mat-label>
+        <input matInput formControlName="bankAccount" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="payroll-form__full">
+        <mat-label>IBAN</mat-label>
+        <input matInput formControlName="bankIban" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="payroll-form__full">
+        <mat-label>Notes</mat-label>
+        <textarea matInput rows="2" formControlName="notes"></textarea>
+      </mat-form-field>
+    </div>
+
+    <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+
+    <div class="structure-components">
+      <div class="structure-components__header">
+        <strong>Components</strong>
+        <button mat-stroked-button type="button" (click)="addComponentRow()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add row
+        </button>
+      </div>
+
+      @for (row of componentRows.controls; track $index; let i = $index) {
+        <div class="structure-components__row" [formGroup]="$any(row)">
+          <mat-form-field appearance="outline">
+            <mat-label>Component</mat-label>
+            <mat-select formControlName="componentId">
+              @for (c of components(); track c.id) {
+                <mat-option [value]="c.id">{{ c.name }} ({{ c.code }})</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Value</mat-label>
+            <input matInput type="number" formControlName="value" min="0" step="0.01" />
+          </mat-form-field>
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Remove component row"
+            (click)="removeComponentRow(i)"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="payroll-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="salary-structure-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : 'Save structure' }}
+  </button>
+</mat-dialog-actions>

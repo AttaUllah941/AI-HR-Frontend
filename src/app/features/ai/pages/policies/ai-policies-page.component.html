@@ -1,0 +1,126 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading policy drafts…"
+  errorTitle="Policies unavailable"
+  (retry)="reload()"
+>
+  <section class="ai-page" aria-label="AI policies">
+    <div class="ai-action-bar">
+      <div>
+        <h2 class="ai-page-heading">Policy drafts</h2>
+        <p class="ai-page-sub">
+          Describe a topic and Nova drafts markdown policy text you can refine with HR.
+        </p>
+      </div>
+    </div>
+
+    @if (canCreate) {
+      <mat-card class="ai-result-card">
+        <h3 class="ai-result-card__title">Generate policy</h3>
+        <form [formGroup]="form" class="ai-form" (ngSubmit)="generate()">
+          <div class="ai-form__grid">
+            <mat-form-field appearance="outline" class="ai-form__full">
+              <mat-label>Topic</mat-label>
+              <input matInput formControlName="topic" placeholder="e.g. Remote work expectations" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Audience (optional)</mat-label>
+              <input matInput formControlName="audience" placeholder="e.g. All employees" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tone</mat-label>
+              <mat-select formControlName="tone">
+                @for (t of tones; track t) {
+                  <mat-option [value]="t">{{ t }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="ai-form__full">
+              <mat-label>Additional context (optional)</mat-label>
+              <textarea matInput rows="3" formControlName="additionalContext"></textarea>
+            </mat-form-field>
+          </div>
+
+          <div class="ai-action-bar__actions">
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              class="ai-add-btn"
+              [disabled]="form.invalid || generating()"
+            >
+              @if (generating()) {
+                <mat-spinner diameter="16" />
+              } @else {
+                <mat-icon aria-hidden="true">policy</mat-icon>
+              }
+              {{ generating() ? 'Generating…' : 'Generate with Nova' }}
+            </button>
+          </div>
+        </form>
+      </mat-card>
+    }
+
+    @if (draft(); as d) {
+      <mat-card class="ai-result-card">
+        <h3 class="ai-result-card__title">
+          {{ d.topic || 'Generated policy' }}
+        </h3>
+        <pre class="ai-result-card__body">{{ d.markdown || 'No content returned.' }}</pre>
+      </mat-card>
+    }
+
+    @if (items().length === 0 && !draft()) {
+      <app-empty-state
+        title="No policy drafts"
+        message="Generate a policy from a topic to see markdown output here."
+        icon="policy"
+      />
+    } @else if (items().length) {
+      <div class="ai-table-card">
+        <div class="ai-table-wrap">
+          <table class="ai-table">
+            <thead>
+              <tr>
+                <th scope="col">Topic</th>
+                <th scope="col">Created</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="ai-table__actions-col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of items(); track item.id) {
+                <tr
+                  class="ai-table__row"
+                  style="cursor: pointer"
+                  (click)="selectGeneration(item)"
+                >
+                  <td>{{ topicPreview(item) }}</td>
+                  <td>{{ createdLabel(item.createdAt) }}</td>
+                  <td>{{ item.status }}</td>
+                  <td class="ai-table__actions-col" (click)="$event.stopPropagation()">
+                    @if (canDelete) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        class="ai-table__menu-btn"
+                        aria-label="Delete"
+                        (click)="deleteGeneration(item.id)"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  </section>
+</app-organization-status>
