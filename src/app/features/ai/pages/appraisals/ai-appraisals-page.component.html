@@ -1,0 +1,126 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading appraisal drafts…"
+  errorTitle="Appraisals unavailable"
+  (retry)="reload()"
+>
+  <section class="ai-page" aria-label="AI appraisals">
+    <div class="ai-action-bar">
+      <div>
+        <h2 class="ai-page-heading">Appraisal drafts</h2>
+        <p class="ai-page-sub">
+          Generate a Nova performance appraisal narrative from an employee profile and optional
+          review.
+        </p>
+      </div>
+      @if (canCreate) {
+        <button mat-flat-button color="primary" type="button" class="ai-add-btn" (click)="openRun()">
+          <mat-icon aria-hidden="true">rate_review</mat-icon>
+          Generate appraisal
+        </button>
+      }
+    </div>
+
+    @if (draft(); as d) {
+      <mat-card class="ai-result-card">
+        <h3 class="ai-result-card__title">Appraisal draft</h3>
+        <div class="ai-action-bar" style="margin-bottom: 0.75rem">
+          <div class="ai-score">
+            {{ d.overallRating ?? '—' }}
+            <span>rating</span>
+          </div>
+        </div>
+        @if (d.narrative) {
+          <p class="ai-result-card__body">{{ d.narrative }}</p>
+        }
+        @if (d.strengths.length) {
+          <h4 class="ai-page-heading" style="margin-top: 1rem; font-size: 0.9rem">Strengths</h4>
+          <ul>
+            @for (s of d.strengths; track s) {
+              <li>{{ s }}</li>
+            }
+          </ul>
+        }
+        @if (d.developmentAreas.length) {
+          <h4 class="ai-page-heading" style="margin-top: 0.5rem; font-size: 0.9rem">
+            Development areas
+          </h4>
+          <ul>
+            @for (a of d.developmentAreas; track a) {
+              <li>{{ a }}</li>
+            }
+          </ul>
+        }
+        @if (d.recommendedGoals.length) {
+          <h4 class="ai-page-heading" style="margin-top: 0.5rem; font-size: 0.9rem">
+            Recommended goals
+          </h4>
+          <ul>
+            @for (g of d.recommendedGoals; track g) {
+              <li>{{ g }}</li>
+            }
+          </ul>
+        }
+        @if (!d.narrative && d.rawText) {
+          <p class="ai-result-card__body">{{ d.rawText }}</p>
+        }
+      </mat-card>
+    }
+
+    @if (items().length === 0) {
+      <app-empty-state
+        title="No appraisal drafts"
+        message="Generate a draft to review Nova’s narrative and strengths."
+        icon="rate_review"
+      >
+        @if (canCreate) {
+          <button mat-flat-button color="primary" type="button" (click)="openRun()">
+            Generate appraisal
+          </button>
+        }
+      </app-empty-state>
+    } @else {
+      <div class="ai-table-card">
+        <div class="ai-table-wrap">
+          <table class="ai-table">
+            <thead>
+              <tr>
+                <th scope="col">Created</th>
+                <th scope="col">Status</th>
+                <th scope="col">Rating</th>
+                <th scope="col" class="ai-table__actions-col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of items(); track item.id) {
+                <tr
+                  class="ai-table__row"
+                  style="cursor: pointer"
+                  (click)="selectGeneration(item)"
+                >
+                  <td>{{ createdLabel(item.createdAt) }}</td>
+                  <td>{{ item.status }}</td>
+                  <td>{{ ratingFor(item) }}</td>
+                  <td class="ai-table__actions-col" (click)="$event.stopPropagation()">
+                    @if (canDelete) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        class="ai-table__menu-btn"
+                        aria-label="Delete"
+                        (click)="deleteGeneration(item.id)"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  </section>
+</app-organization-status>

@@ -1,0 +1,46 @@
+<h2 mat-dialog-title class="recruitment-dialog-title">
+  <mat-icon aria-hidden="true">attach_file</mat-icon>
+  Attach resume
+</h2>
+
+<mat-dialog-content>
+  <p class="recruitment-dialog-subtitle">
+    Store a resume URL and filename for
+    {{ data.candidate.firstName }} {{ data.candidate.lastName }}.
+  </p>
+
+  <form [formGroup]="form" class="recruitment-form" id="resume-form" (ngSubmit)="submit()">
+    <div class="recruitment-form__grid">
+      <mat-form-field appearance="outline" class="recruitment-form__full">
+        <mat-label>Resume URL</mat-label>
+        <input matInput formControlName="resumeUrl" placeholder="https://…" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Filename</mat-label>
+        <input matInput formControlName="resumeFileName" placeholder="resume.pdf" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>MIME type</mat-label>
+        <input matInput formControlName="resumeMimeType" placeholder="application/pdf" />
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="recruitment-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="resume-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : 'Attach resume' }}
+  </button>
+</mat-dialog-actions>

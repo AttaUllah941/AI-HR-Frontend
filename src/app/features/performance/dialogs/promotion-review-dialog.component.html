@@ -1,0 +1,40 @@
+<h2 mat-dialog-title class="performance-dialog-title">
+  <mat-icon aria-hidden="true">{{ approve ? 'check_circle' : 'cancel' }}</mat-icon>
+  {{ approve ? 'Approve promotion' : 'Reject promotion' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="performance-dialog-subtitle">
+    Add optional notes{{ approve ? ' and confirm the effective date' : '' }}.
+  </p>
+
+  <form [formGroup]="form" class="performance-form" id="promotion-review-form" (ngSubmit)="submit()">
+    @if (approve) {
+      <mat-form-field appearance="outline">
+        <mat-label>Effective date</mat-label>
+        <input matInput type="date" formControlName="effectiveDate" />
+      </mat-form-field>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Review notes</mat-label>
+      <textarea matInput rows="3" formControlName="reviewNotes"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="performance-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    [color]="approve ? 'primary' : 'warn'"
+    type="submit"
+    form="promotion-review-form"
+    [disabled]="saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : approve ? 'Approve' : 'Reject' }}
+  </button>
+</mat-dialog-actions>

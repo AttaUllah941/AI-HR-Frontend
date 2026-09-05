@@ -1,0 +1,133 @@
+<app-organization-section-header
+  title="Feedback"
+  description="Peer, manager, and upward feedback across the organization."
+  icon="forum"
+  [count]="loading() || error() ? null : total()"
+>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Direction</mat-label>
+    <mat-select [formControl]="directionControl">
+      @for (opt of directionOptions; track opt.value) {
+        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Type</mat-label>
+    <mat-select [formControl]="typeControl">
+      @for (opt of typeOptions; track opt.value) {
+        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (canCreate) {
+    <button mat-flat-button color="primary" type="button" (click)="openCreate()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Give feedback
+    </button>
+  }
+</app-organization-section-header>
+
+<div class="performance-table-card">
+  @if (loading()) {
+    <div class="performance-table-state">
+      <mat-spinner diameter="32" />
+      <span>Loading feedback…</span>
+    </div>
+  } @else if (error()) {
+    <div class="performance-table-state performance-table-state--error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
+    </div>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      title="No feedback"
+      message="Give feedback or adjust the filters."
+      icon="forum"
+    >
+      @if (canCreate) {
+        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Give feedback
+        </button>
+      }
+    </app-empty-state>
+  } @else {
+    <div class="performance-table-wrap">
+      <table class="performance-table">
+        <thead>
+          <tr>
+            <th scope="col">From</th>
+            <th scope="col">To</th>
+            <th scope="col">Type</th>
+            <th scope="col">Rating</th>
+            <th scope="col">Content</th>
+            <th scope="col" class="performance-table__actions-col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr class="performance-table__row">
+              <td>{{ fromLabel(item) }}</td>
+              <td>{{ toLabel(item) }}</td>
+              <td>
+                <span [class]="statusClass(item.type)">
+                  <span class="performance-status-pill__dot" aria-hidden="true"></span>
+                  {{ statusLabel(item.type) }}
+                </span>
+              </td>
+              <td>{{ item.rating ?? '—' }}</td>
+              <td>{{ excerpt(item.content) }}</td>
+              <td class="performance-table__actions-col">
+                @if (canDelete) {
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="performance-table__menu-btn"
+                    aria-label="Actions"
+                    [matMenuTriggerFor]="rowMenu"
+                    [disabled]="actionId() === item.id"
+                    (click)="setMenuItem(item)"
+                  >
+                    <mat-icon>more_horiz</mat-icon>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="performance-table-footer">
+        <span>Page {{ page() }} of {{ totalPages() }} · {{ total() }} total</span>
+        <div class="performance-table-footer__nav">
+          <button mat-stroked-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+            Previous
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="page() >= totalPages()"
+            (click)="nextPage()"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    }
+
+    <mat-menu #rowMenu="matMenu" xPosition="before">
+      @if (menuItem(); as item) {
+        <button mat-menu-item type="button" (click)="remove(item)">
+          <mat-icon>delete</mat-icon>
+          <span>Delete</span>
+        </button>
+      }
+    </mat-menu>
+  }
+</div>

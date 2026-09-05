@@ -1,0 +1,92 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading Nova recommendations…"
+  errorTitle="Recommendations unavailable"
+  (retry)="reload()"
+>
+  <section class="ai-page" aria-label="AI recommendations">
+    <div class="ai-action-bar">
+      <div>
+        <h2 class="ai-page-heading">Recommendations</h2>
+        <p class="ai-page-sub">
+          Actionable suggestions from Nova across recruitment, performance, leave, and more.
+        </p>
+      </div>
+      <div class="ai-action-bar__actions">
+        <a mat-stroked-button routerLink="/ai/overview">Overview insights</a>
+        @if (canCreate) {
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="ai-add-btn"
+            [disabled]="refreshing()"
+            (click)="refresh()"
+          >
+            <mat-icon aria-hidden="true">refresh</mat-icon>
+            {{ refreshing() ? 'Refreshing…' : 'Refresh' }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (recommendations().length === 0) {
+      <app-empty-state
+        title="No recommendations yet"
+        message="Refresh to ask Nova for prioritized workforce actions."
+        icon="lightbulb"
+      >
+        @if (canCreate) {
+          <button mat-flat-button color="primary" type="button" (click)="refresh()">
+            Refresh recommendations
+          </button>
+        }
+      </app-empty-state>
+    } @else {
+      <div class="ai-insight-grid">
+        @for (rec of recommendations(); track rec.id ?? rec.action) {
+          <mat-card class="ai-insight-card">
+            <div class="ai-action-bar" style="margin-bottom: 0.5rem">
+              <h4 class="ai-insight-card__title">{{ rec.area }}</h4>
+              <span [class]="impactClass(rec.impact)">
+                <span class="ai-status-pill__dot" aria-hidden="true"></span>
+                {{ rec.impact }}
+              </span>
+            </div>
+            <p class="ai-insight-card__detail">{{ rec.action }}</p>
+          </mat-card>
+        }
+      </div>
+    }
+
+    <div>
+      <div class="ai-action-bar">
+        <h3 class="ai-page-heading">Related insights</h3>
+        <a mat-stroked-button routerLink="/ai/overview">View overview</a>
+      </div>
+      @if (insights().length === 0) {
+        <app-empty-state
+          title="No insights"
+          message="Insights appear after Nova analyzes company activity."
+          icon="auto_awesome"
+        />
+      } @else {
+        <div class="ai-insight-grid">
+          @for (insight of insights(); track insight.id ?? insight.title) {
+            <mat-card class="ai-insight-card">
+              <div class="ai-action-bar" style="margin-bottom: 0.5rem">
+                <h4 class="ai-insight-card__title">{{ insight.title }}</h4>
+                <span [class]="severityClass(insight.severity)">
+                  <span class="ai-status-pill__dot" aria-hidden="true"></span>
+                  {{ insight.severity }}
+                </span>
+              </div>
+              <p class="ai-insight-card__detail">{{ insight.detail }}</p>
+            </mat-card>
+          }
+        </div>
+      }
+    </div>
+  </section>
+</app-organization-status>

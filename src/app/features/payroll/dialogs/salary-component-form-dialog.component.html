@@ -1,0 +1,77 @@
+<h2 mat-dialog-title class="payroll-dialog-title">
+  <mat-icon aria-hidden="true">category</mat-icon>
+  {{ data.component ? 'Edit salary component' : 'Add salary component' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="payroll-dialog-subtitle">
+    Define allowances, deductions, bonuses, or tax lines used in salary structures.
+  </p>
+
+  <form [formGroup]="form" class="payroll-form" id="salary-component-form" (ngSubmit)="submit()">
+    <div class="payroll-form__grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" />
+        @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+          <mat-error>Name is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Code</mat-label>
+        <input matInput formControlName="code" />
+        @if (form.controls.code.touched && form.controls.code.hasError('required')) {
+          <mat-error>Code is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Kind</mat-label>
+        <mat-select formControlName="kind">
+          @for (opt of kindOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Calculation</mat-label>
+        <mat-select formControlName="calcType">
+          @for (opt of calcOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Default value</mat-label>
+        <input matInput type="number" formControlName="defaultValue" min="0" step="0.01" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="payroll-form__full">
+        <mat-label>Description</mat-label>
+        <textarea matInput rows="2" formControlName="description"></textarea>
+      </mat-form-field>
+    </div>
+
+    <mat-checkbox formControlName="isTaxable">Taxable</mat-checkbox>
+    <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="payroll-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="salary-component-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : 'Save component' }}
+  </button>
+</mat-dialog-actions>

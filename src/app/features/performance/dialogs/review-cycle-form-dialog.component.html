@@ -1,0 +1,48 @@
+<h2 mat-dialog-title class="performance-dialog-title">
+  <mat-icon aria-hidden="true">event</mat-icon>
+  {{ data.cycle ? 'Edit review cycle' : 'Create review cycle' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="performance-dialog-subtitle">Define the name and date range for a review period.</p>
+
+  <form [formGroup]="form" class="performance-form" id="review-cycle-form" (ngSubmit)="submit()">
+    <div class="performance-form__grid">
+      <mat-form-field appearance="outline" class="performance-form__full">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" placeholder="e.g. H1 2026" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Year</mat-label>
+        <input matInput type="number" formControlName="year" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Start date</mat-label>
+        <input matInput type="date" formControlName="startDate" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>End date</mat-label>
+        <input matInput type="date" formControlName="endDate" />
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="performance-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="review-cycle-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : data.cycle ? 'Save changes' : 'Create cycle' }}
+  </button>
+</mat-dialog-actions>

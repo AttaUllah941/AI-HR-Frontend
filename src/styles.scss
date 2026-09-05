@@ -6,6 +6,10 @@
 @use './app/features/employees/styles/employees';
 @use './app/features/attendance/styles/attendance';
 @use './app/features/leave/styles/leave';
+@use './app/features/payroll/styles/payroll';
+@use './app/features/recruitment/styles/recruitment';
+@use './app/features/performance/styles/performance';
+@use './app/features/ai/styles/ai';
 
 *,
 *::before,

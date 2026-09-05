@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+mat-dialog-content {
+  min-width: min(32rem, 80vw);
+}
+
+.payslip-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1rem;
+  margin: 1rem 0;
+
+  span {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--zh-muted-foreground);
+    margin-bottom: 0.2rem;
+  }
+
+  strong {
+    font-size: 0.95rem;
+  }
+}
+
+.payslip-lines-heading {
+  margin: 0.5rem 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
