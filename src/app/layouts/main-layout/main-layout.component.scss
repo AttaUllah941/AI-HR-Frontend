@@ -632,6 +632,34 @@
 
 
 
+.menu-panel__header-actions {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 0.35rem;
+
+}
+
+
+
+.menu-panel__mark-all {
+
+  min-height: auto !important;
+
+  line-height: 1.2 !important;
+
+  padding: 0.15rem 0.4rem !important;
+
+  font-size: 0.75rem !important;
+
+  font-weight: 600;
+
+}
+
+
+
 .menu-panel__empty {
 
   margin: 0;
@@ -679,6 +707,28 @@
     border-radius: calc(var(--zh-radius) - 4px);
 
     background: var(--zh-muted);
+
+    cursor: pointer;
+
+    transition: background-color 0.15s ease;
+
+    &:hover {
+
+      background: color-mix(in srgb, var(--zh-primary) 8%, var(--zh-muted));
+
+    }
+
+    &.menu-panel__item--unread {
+
+      background: color-mix(in srgb, var(--zh-primary) 10%, var(--zh-muted));
+
+      strong {
+
+        font-weight: 700;
+
+      }
+
+    }
 
   }
 

@@ -1,0 +1,77 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading audit logs…"
+  errorTitle="Audit logs unavailable"
+  (retry)="reload()"
+>
+  <section class="settings-page" aria-label="Audit logs">
+    <div class="settings-action-bar">
+      <div>
+        <h2 class="settings-page-heading">Audit logs</h2>
+        <p class="settings-page-sub">{{ total() }} recorded events (company-scoped when possible).</p>
+      </div>
+      <div class="settings-action-bar__actions">
+        <button mat-stroked-button type="button" class="settings-add-btn" (click)="reload()">
+          <mat-icon aria-hidden="true">refresh</mat-icon>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Search</mat-label>
+      <input matInput [formControl]="search" placeholder="Action or entity" />
+    </mat-form-field>
+
+    @if (items().length === 0) {
+      <app-empty-state
+        title="No audit events"
+        message="Configuration and user admin actions will appear here."
+        icon="history"
+      />
+    } @else {
+      <div class="settings-table-card">
+        <div class="settings-table-wrap">
+          <table class="settings-table">
+            <thead>
+              <tr>
+                <th scope="col">Action</th>
+                <th scope="col">Actor</th>
+                <th scope="col">Entity</th>
+                <th scope="col">When</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of items(); track item.id) {
+                <tr>
+                  <td>
+                    <span class="settings-table__title">{{ item.action }}</span>
+                    @if (item.ipAddress) {
+                      <span class="settings-table__body">{{ item.ipAddress }}</span>
+                    }
+                  </td>
+                  <td>{{ actorLabel(item) }}</td>
+                  <td>
+                    @if (item.entityType) {
+                      {{ item.entityType }}
+                      @if (item.entityId) {
+                        <span class="settings-table__body">{{ item.entityId }}</span>
+                      }
+                    } @else {
+                      —
+                    }
+                  </td>
+                  <td>
+                    <span class="settings-table__title">{{ relative(item.createdAt) }}</span>
+                    <span class="settings-table__body">{{ formatDate(item.createdAt) }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  </section>
+</app-organization-status>

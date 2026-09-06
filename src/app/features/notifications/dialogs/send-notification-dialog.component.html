@@ -1,0 +1,63 @@
+<h2 mat-dialog-title>Send notification</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="notifications-form" id="send-notification-form" (ngSubmit)="submit()">
+    <div class="notifications-form__grid">
+      <mat-form-field appearance="outline" class="notifications-form__full">
+        <mat-label>Recipient user ID</mat-label>
+        <input matInput formControlName="userId" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="notifications-form__full">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="notifications-form__full">
+        <mat-label>Body</mat-label>
+        <textarea matInput rows="3" formControlName="body"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Category</mat-label>
+        <mat-select formControlName="category">
+          @for (cat of categories; track cat) {
+            <mat-option [value]="cat">{{ categoryLabel(cat) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Channels</mat-label>
+        <mat-select formControlName="channels" multiple>
+          @for (ch of channels; track ch) {
+            <mat-option [value]="ch">{{ channelLabel(ch) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="notifications-form__full">
+        <mat-label>Template code (optional)</mat-label>
+        <input matInput formControlName="templateCode" placeholder="e.g. LEAVE_APPROVED" />
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="send-notification-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner diameter="16" />
+    } @else {
+      <mat-icon aria-hidden="true">send</mat-icon>
+    }
+    {{ saving() ? 'Sending…' : 'Send' }}
+  </button>
+</mat-dialog-actions>

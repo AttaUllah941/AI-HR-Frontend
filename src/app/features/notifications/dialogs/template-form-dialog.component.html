@@ -1,0 +1,70 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit template' : 'New template' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="notifications-form" id="template-form" (ngSubmit)="submit()">
+    <div class="notifications-form__grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Code</mat-label>
+        <input matInput formControlName="code" placeholder="LEAVE_APPROVED" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Category</mat-label>
+        <mat-select formControlName="category">
+          @for (cat of categories; track cat) {
+            <mat-option [value]="cat">{{ categoryLabel(cat) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Channel</mat-label>
+        <mat-select formControlName="channel">
+          @for (ch of channels; track ch) {
+            <mat-option [value]="ch">{{ channelLabel(ch) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="notifications-form__full">
+        <mat-label>Subject (optional)</mat-label>
+        <input matInput formControlName="subject" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="notifications-form__full">
+        <mat-label>Body template</mat-label>
+        <textarea
+          matInput
+          rows="5"
+          formControlName="bodyTemplate"
+          placeholder="Supports firstName, lastName, email placeholders"
+        ></textarea>
+      </mat-form-field>
+
+      <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="template-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner diameter="16" />
+    } @else {
+      <mat-icon aria-hidden="true">save</mat-icon>
+    }
+    {{ saving() ? 'Saving…' : isEdit ? 'Save' : 'Create' }}
+  </button>
+</mat-dialog-actions>

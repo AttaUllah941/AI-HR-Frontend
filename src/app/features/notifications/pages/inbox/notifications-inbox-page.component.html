@@ -1,0 +1,154 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading notifications…"
+  errorTitle="Inbox unavailable"
+  (retry)="reload()"
+>
+  <section class="notifications-page" aria-label="Notifications inbox">
+    <div class="notifications-action-bar">
+      <div>
+        <h2 class="notifications-page-heading">Inbox</h2>
+        <p class="notifications-page-sub">
+          {{ unreadCount() }} unread · filter by category or show unread only
+        </p>
+      </div>
+      <div class="notifications-action-bar__actions">
+        @if (canManage) {
+          <button mat-stroked-button type="button" (click)="openSendDialog()">
+            <mat-icon aria-hidden="true">send</mat-icon>
+            Send
+          </button>
+        }
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="notifications-add-btn"
+          [disabled]="unreadCount() === 0"
+          (click)="markAllRead()"
+        >
+          <mat-icon aria-hidden="true">done_all</mat-icon>
+          Mark all read
+        </button>
+      </div>
+    </div>
+
+    @if (categoryChips().length) {
+      <div class="notifications-kpi-grid" aria-label="Unread by category">
+        @for (chip of categoryChips(); track chip.category) {
+          <div class="notifications-kpi-chip">
+            <span class="notifications-kpi-chip__label">{{ chip.label }}</span>
+            <span class="notifications-kpi-chip__value">{{ chip.unread }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="notifications-filters">
+      <mat-form-field appearance="outline">
+        <mat-label>Category</mat-label>
+        <mat-select [formControl]="category" (selectionChange)="applyFilters()">
+          <mat-option value="">All categories</mat-option>
+          @for (cat of categories; track cat) {
+            <mat-option [value]="cat">{{ categoryLabel(cat) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-checkbox [formControl]="unreadOnly" (change)="applyFilters()">
+        Unread only
+      </mat-checkbox>
+
+      <button mat-button type="button" (click)="reload()">
+        <mat-icon aria-hidden="true">refresh</mat-icon>
+        Refresh
+      </button>
+    </div>
+
+    @if (items().length === 0) {
+      <app-empty-state
+        title="No notifications"
+        message="You're all caught up. New alerts will appear here."
+        icon="notifications_none"
+      />
+    } @else {
+      <div class="notifications-table-card">
+        <div class="notifications-table-wrap">
+          <table class="notifications-table">
+            <thead>
+              <tr>
+                <th scope="col">Notification</th>
+                <th scope="col">Category</th>
+                <th scope="col">Channel</th>
+                <th scope="col">Status</th>
+                <th scope="col">When</th>
+                <th scope="col" class="notifications-table__actions-col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of items(); track item.id) {
+                <tr
+                  class="notifications-table__row"
+                  [class.notifications-table__row--unread]="!isRead(item)"
+                >
+                  <td>
+                    <span class="notifications-table__title">{{ item.title }}</span>
+                    <span class="notifications-table__body">{{ item.body }}</span>
+                  </td>
+                  <td>{{ categoryLabel(item.category) }}</td>
+                  <td>{{ channelLabel(item.channel) }}</td>
+                  <td>
+                    <span [class]="statusClass(item.status)">
+                      <span class="notifications-status-pill__dot" aria-hidden="true"></span>
+                      {{ isRead(item) ? 'Read' : statusLabel(item.status) }}
+                    </span>
+                  </td>
+                  <td>{{ relativeTime(item.createdAt) }}</td>
+                  <td class="notifications-table__actions-col">
+                    @if (!isRead(item)) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        class="notifications-table__menu-btn"
+                        matTooltip="Mark as read"
+                        aria-label="Mark as read"
+                        (click)="markRead(item)"
+                      >
+                        <mat-icon>mark_email_read</mat-icon>
+                      </button>
+                    }
+                    <button
+                      mat-icon-button
+                      type="button"
+                      class="notifications-table__menu-btn"
+                      matTooltip="Delete"
+                      aria-label="Delete"
+                      (click)="deleteItem(item)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="notifications-pagination">
+          <span>Page {{ page() }} of {{ totalPages() }} · {{ total() }} total</span>
+          <button mat-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+            Previous
+          </button>
+          <button
+            mat-button
+            type="button"
+            [disabled]="page() >= totalPages()"
+            (click)="nextPage()"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    }
+  </section>
+</app-organization-status>

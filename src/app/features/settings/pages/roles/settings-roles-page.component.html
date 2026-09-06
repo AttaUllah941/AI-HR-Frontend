@@ -1,0 +1,86 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading roles…"
+  errorTitle="Roles unavailable"
+  (retry)="reload()"
+>
+  <section class="settings-page" aria-label="Roles and permissions">
+    <div class="settings-action-bar">
+      <div>
+        <h2 class="settings-page-heading">Roles &amp; permissions</h2>
+        <p class="settings-page-sub">Review the RBAC matrix. Only Super Admin can edit grants.</p>
+      </div>
+      @if (canManage && selectedRole() && selectedRole()!.code !== 'SUPER_ADMIN') {
+        <div class="settings-action-bar__actions">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="settings-add-btn"
+            [disabled]="saving()"
+            (click)="save()"
+          >
+            @if (saving()) {
+              <mat-spinner diameter="16" />
+            } @else {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
+            {{ saving() ? 'Saving…' : 'Save permissions' }}
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (roles().length === 0) {
+      <app-empty-state title="No roles" message="Roles will appear after seeding." icon="admin_panel_settings" />
+    } @else {
+      <div class="settings-role-layout">
+        <div class="settings-role-list">
+          @for (role of roles(); track role.id) {
+            <button
+              type="button"
+              class="settings-role-item"
+              [class.settings-role-item--active]="role.id === selectedRoleId()"
+              (click)="selectRole(role)"
+            >
+              <strong>{{ role.name }}</strong>
+              <span class="settings-table__body"
+                >{{ role.code }} · {{ role.userCount }} users ·
+                {{ role.permissions.length }} permissions</span
+              >
+            </button>
+          }
+        </div>
+
+        <div class="settings-panel-card">
+          @if (selectedRole(); as role) {
+            <h3 class="settings-page-heading">{{ role.name }}</h3>
+            <p class="settings-page-sub">{{ role.description || 'System role' }}</p>
+            @if (role.code === 'SUPER_ADMIN') {
+              <p class="settings-page-sub">Super Admin permissions are locked.</p>
+            }
+            <div class="settings-perm-modules">
+              @for (mod of permissionModules(); track mod.module) {
+                <div class="settings-perm-module">
+                  <h4 class="settings-perm-module__title">{{ mod.module }}</h4>
+                  <div class="settings-perm-grid">
+                    @for (perm of mod.items; track perm.id) {
+                      <mat-checkbox
+                        [checked]="isChecked(perm.code)"
+                        [disabled]="!canManage || role.code === 'SUPER_ADMIN'"
+                        (change)="toggle(perm.code, $event.checked)"
+                      >
+                        {{ perm.action | lowercase }}
+                      </mat-checkbox>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </section>
+</app-organization-status>

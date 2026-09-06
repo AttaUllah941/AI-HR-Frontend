@@ -1,0 +1,71 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading recruitment report…"
+  errorTitle="Recruitment report unavailable"
+  (retry)="reload()"
+>
+  <section class="reports-page" aria-label="Recruitment report">
+    <div class="reports-action-bar">
+      <div>
+        <h2 class="reports-heading">Recruitment</h2>
+        <p class="reports-sub">Jobs, applications, interviews, and offers by status.</p>
+      </div>
+      <div class="reports-action-bar__actions">
+        <button mat-stroked-button type="button" (click)="reload()">
+          <mat-icon aria-hidden="true">refresh</mat-icon>
+          Refresh
+        </button>
+        @if (canExport) {
+          <button
+            mat-flat-button
+            color="primary"
+            class="reports-add-btn"
+            type="button"
+            [matMenuTriggerFor]="exportMenu"
+            [disabled]="exporting()"
+          >
+            <mat-icon aria-hidden="true">download</mat-icon>
+            Export
+          </button>
+          <mat-menu #exportMenu="matMenu">
+            <button mat-menu-item type="button" (click)="exportReport('CSV')">CSV</button>
+            <button mat-menu-item type="button" (click)="exportReport('PDF')">PDF</button>
+            <button mat-menu-item type="button" (click)="exportReport('JSON')">JSON</button>
+          </mat-menu>
+        }
+      </div>
+    </div>
+
+    @if (report(); as r) {
+      @if (isEmpty(r)) {
+        <app-empty-state
+          title="No recruitment data"
+          message="Open jobs and applications will appear here once hiring starts."
+          icon="work"
+        />
+      } @else {
+        <div class="reports-chart-grid">
+          <mat-card class="reports-chart-card">
+            <app-reports-bar-chart [points]="r.charts.jobsByStatus" title="Jobs by status" />
+          </mat-card>
+          <mat-card class="reports-chart-card">
+            <app-reports-bar-chart
+              [points]="r.charts.applicationsByStatus"
+              title="Applications by status"
+            />
+          </mat-card>
+          <mat-card class="reports-chart-card">
+            <app-reports-bar-chart
+              [points]="r.charts.interviewsByStatus"
+              title="Interviews by status"
+            />
+          </mat-card>
+          <mat-card class="reports-chart-card">
+            <app-reports-bar-chart [points]="r.charts.offersByStatus" title="Offers by status" />
+          </mat-card>
+        </div>
+      }
+    }
+  </section>
+</app-organization-status>

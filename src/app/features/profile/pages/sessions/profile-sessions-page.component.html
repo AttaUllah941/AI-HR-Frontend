@@ -1,0 +1,101 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading sessions…"
+  errorTitle="Sessions unavailable"
+  (retry)="reload()"
+>
+  <section class="profile-page" aria-label="Active sessions">
+    <div class="profile-action-bar">
+      <div>
+        <h2 class="profile-page-heading">Sessions</h2>
+        <p class="profile-page-sub">Review signed-in devices and revoke access when needed.</p>
+      </div>
+      <div class="profile-action-bar__actions">
+        <button
+          mat-stroked-button
+          type="button"
+          class="profile-add-btn"
+          [disabled]="revokingOthers() || items().length === 0"
+          (click)="revokeOthers()"
+        >
+          @if (revokingOthers()) {
+            <mat-spinner diameter="16" />
+          } @else {
+            <mat-icon aria-hidden="true">logout</mat-icon>
+          }
+          {{ revokingOthers() ? 'Revoking…' : 'Revoke other sessions' }}
+        </button>
+      </div>
+    </div>
+
+    @if (items().length === 0) {
+      <app-empty-state
+        title="No sessions"
+        message="Session history will appear here once you are signed in."
+        icon="devices"
+      />
+    } @else {
+      <div class="profile-table-card">
+        <div class="profile-table-wrap">
+          <table class="profile-table">
+            <thead>
+              <tr>
+                <th scope="col">Device</th>
+                <th scope="col">IP</th>
+                <th scope="col">Status</th>
+                <th scope="col">Created</th>
+                <th scope="col">Expires</th>
+                <th scope="col" class="profile-table__actions-col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of items(); track item.id) {
+                <tr class="profile-table__row">
+                  <td>
+                    <span class="profile-table__title">{{ item.deviceLabel || 'Unknown device' }}</span>
+                    @if (item.current) {
+                      <span class="profile-table__body">This device</span>
+                    }
+                  </td>
+                  <td>{{ item.ipAddress || '—' }}</td>
+                  <td>
+                    <span
+                      class="profile-status-pill"
+                      [class.profile-status-pill--success]="statusTone(item.status) === 'success'"
+                      [class.profile-status-pill--pending]="statusTone(item.status) === 'pending'"
+                      [class.profile-status-pill--info]="statusTone(item.status) === 'info'"
+                      [class.profile-status-pill--error]="statusTone(item.status) === 'error'"
+                    >
+                      <span class="profile-status-pill__dot" aria-hidden="true"></span>
+                      {{ item.status }}
+                      @if (item.current) {
+                        · Current
+                      }
+                    </span>
+                  </td>
+                  <td>{{ formatDate(item.createdAt) }}</td>
+                  <td>{{ formatDate(item.expiresAt) }}</td>
+                  <td class="profile-table__actions-col">
+                    @if (!item.current && item.active) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        class="profile-table__menu-btn"
+                        matTooltip="Revoke session"
+                        aria-label="Revoke session"
+                        (click)="revokeSession(item)"
+                      >
+                        <mat-icon>block</mat-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  </section>
+</app-organization-status>

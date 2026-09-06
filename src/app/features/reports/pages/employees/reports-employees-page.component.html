@@ -1,0 +1,105 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading employees report…"
+  errorTitle="Employees report unavailable"
+  (retry)="reload()"
+>
+  <section class="reports-page" aria-label="Employees report">
+    <div class="reports-action-bar">
+      <div>
+        <h2 class="reports-heading">Employees</h2>
+        <p class="reports-sub">Headcount by status, department, and recent trend.</p>
+      </div>
+      <div class="reports-action-bar__actions">
+        <button mat-stroked-button type="button" (click)="reload()">
+          <mat-icon aria-hidden="true">refresh</mat-icon>
+          Refresh
+        </button>
+        @if (canExport) {
+          <button
+            mat-flat-button
+            color="primary"
+            class="reports-add-btn"
+            type="button"
+            [matMenuTriggerFor]="exportMenu"
+            [disabled]="exporting()"
+          >
+            <mat-icon aria-hidden="true">download</mat-icon>
+            Export
+          </button>
+          <mat-menu #exportMenu="matMenu">
+            <button mat-menu-item type="button" (click)="exportReport('CSV')">CSV</button>
+            <button mat-menu-item type="button" (click)="exportReport('PDF')">PDF</button>
+            <button mat-menu-item type="button" (click)="exportReport('JSON')">JSON</button>
+          </mat-menu>
+        }
+      </div>
+    </div>
+
+    @if (report(); as r) {
+      <div class="reports-kpi-grid">
+        <mat-card class="reports-kpi-card">
+          <p class="reports-kpi-card__label">Total employees</p>
+          <strong class="reports-kpi-card__value">{{ formatNumber(r.totals.employees) }}</strong>
+        </mat-card>
+        <mat-card class="reports-kpi-card">
+          <p class="reports-kpi-card__label">Active</p>
+          <strong class="reports-kpi-card__value">{{ formatNumber(r.totals.active) }}</strong>
+        </mat-card>
+      </div>
+
+      @if (isEmpty(r)) {
+        <app-empty-state
+          title="No employee data"
+          message="Add employees to see workforce analytics."
+          icon="groups"
+        />
+      } @else {
+        <div class="reports-chart-grid">
+          <mat-card class="reports-chart-card">
+            <app-reports-bar-chart [points]="r.charts.byStatus" title="By status" />
+          </mat-card>
+          <mat-card class="reports-chart-card">
+            <app-reports-bar-chart
+              [points]="r.charts.byEmploymentType"
+              title="By employment type"
+            />
+          </mat-card>
+          <mat-card class="reports-chart-card">
+            <app-reports-bar-chart [points]="r.charts.byDepartment" title="By department" />
+          </mat-card>
+          <mat-card class="reports-chart-card">
+            <app-reports-bar-chart
+              [points]="r.charts.activeHeadcount"
+              title="Active headcount trend"
+            />
+          </mat-card>
+        </div>
+
+        @if (r.byDepartment.length > 0) {
+          <div class="reports-table-card">
+            <div class="reports-table-wrap">
+              <table class="reports-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Department</th>
+                    <th scope="col">Employees</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of r.byDepartment; track row.departmentId ?? row.departmentName) {
+                    <tr class="reports-table__row">
+                      <td>{{ row.departmentName }}</td>
+                      <td>{{ formatNumber(row.count) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      }
+    }
+  </section>
+</app-organization-status>
