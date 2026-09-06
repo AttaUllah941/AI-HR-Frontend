@@ -248,7 +248,21 @@
 
               <strong>Notifications</strong>
 
-              <a routerLink="/notifications">View all</a>
+              <div class="menu-panel__header-actions">
+
+                @if (notificationCount() > 0) {
+
+                  <button mat-button type="button" class="menu-panel__mark-all" (click)="markAllNotificationsRead()">
+
+                    Mark all read
+
+                  </button>
+
+                }
+
+                <a routerLink="/notifications">View all</a>
+
+              </div>
 
             </div>
 
@@ -262,7 +276,21 @@
 
                 @for (item of notifications(); track item.id) {
 
-                  <li>
+                  <li
+
+                    class="menu-panel__item"
+
+                    [class.menu-panel__item--unread]="!item.read"
+
+                    role="button"
+
+                    tabindex="0"
+
+                    (click)="onNotificationClick(item)"
+
+                    (keydown.enter)="onNotificationClick(item)"
+
+                  >
 
                     <strong>{{ item.title }}</strong>
 

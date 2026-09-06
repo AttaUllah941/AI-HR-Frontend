@@ -1,0 +1,115 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading profile…"
+  errorTitle="Profile unavailable"
+  (retry)="reload()"
+>
+  @if (profileData(); as data) {
+    <section class="profile-page" aria-label="Profile overview">
+      <div class="profile-action-bar">
+        <div>
+          <h2 class="profile-page-heading">Personal information</h2>
+          <p class="profile-page-sub">Update your name, phone, and avatar URL.</p>
+        </div>
+        <div class="profile-action-bar__actions">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="profile-add-btn"
+            [disabled]="form.invalid || saving()"
+            (click)="save()"
+          >
+            @if (saving()) {
+              <mat-spinner diameter="16" />
+            } @else {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
+            {{ saving() ? 'Saving…' : 'Save changes' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="profile-meta-grid">
+        <div class="profile-meta-chip">
+          <span class="profile-meta-chip__label">Email</span>
+          <span class="profile-meta-chip__value">{{ data.email }}</span>
+        </div>
+        <div class="profile-meta-chip">
+          <span class="profile-meta-chip__label">Status</span>
+          <span class="profile-meta-chip__value">
+            <span
+              class="profile-status-pill"
+              [class.profile-status-pill--success]="data.status === 'ACTIVE'"
+              [class.profile-status-pill--pending]="data.status !== 'ACTIVE'"
+            >
+              <span class="profile-status-pill__dot" aria-hidden="true"></span>
+              {{ data.status }}
+            </span>
+          </span>
+        </div>
+        <div class="profile-meta-chip">
+          <span class="profile-meta-chip__label">Last login</span>
+          <span class="profile-meta-chip__value">{{ formatDate(data.lastLoginAt) }}</span>
+        </div>
+        <div class="profile-meta-chip">
+          <span class="profile-meta-chip__label">Email verified</span>
+          <span class="profile-meta-chip__value">{{ formatDate(data.emailVerifiedAt) }}</span>
+        </div>
+        <div class="profile-meta-chip">
+          <span class="profile-meta-chip__label">Roles</span>
+          <span class="profile-meta-chip__value">
+            <span class="profile-roles">
+              @for (role of data.roles; track role) {
+                <span class="profile-role-chip">{{ role }}</span>
+              } @empty {
+                —
+              }
+            </span>
+          </span>
+        </div>
+        @if (data.employee) {
+          <div class="profile-meta-chip">
+            <span class="profile-meta-chip__label">Employee</span>
+            <span class="profile-meta-chip__value">
+              {{ data.employee.employeeCode }}
+              @if (data.employee.department?.name) {
+                · {{ data.employee.department?.name }}
+              }
+              @if (data.employee.designation?.name) {
+                · {{ data.employee.designation?.name }}
+              }
+            </span>
+          </div>
+        }
+      </div>
+
+      <div class="profile-panel-card">
+        <form [formGroup]="form" class="profile-form" (ngSubmit)="save()">
+          <div class="profile-form__grid">
+            <mat-form-field appearance="outline">
+              <mat-label>First name</mat-label>
+              <input matInput formControlName="firstName" autocomplete="given-name" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Last name</mat-label>
+              <input matInput formControlName="lastName" autocomplete="family-name" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Phone</mat-label>
+              <input matInput formControlName="phone" autocomplete="tel" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="profile-form__full">
+              <mat-label>Avatar URL</mat-label>
+              <input matInput formControlName="avatarUrl" placeholder="https://…" />
+            </mat-form-field>
+          </div>
+        </form>
+      </div>
+    </section>
+  }
+</app-organization-status>

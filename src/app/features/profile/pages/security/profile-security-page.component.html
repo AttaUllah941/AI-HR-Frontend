@@ -1,0 +1,113 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading security…"
+  errorTitle="Security unavailable"
+  (retry)="reload()"
+>
+  @if (profileData(); as data) {
+    <section class="profile-page" aria-label="Security settings">
+      <div class="profile-action-bar">
+        <div>
+          <h2 class="profile-page-heading">Security</h2>
+          <p class="profile-page-sub">Password, MFA status, and account protection.</p>
+        </div>
+      </div>
+
+      <div class="profile-meta-grid">
+        <div class="profile-meta-chip">
+          <span class="profile-meta-chip__label">Password last changed</span>
+          <span class="profile-meta-chip__value">{{ formatDate(data.passwordChangedAt) }}</span>
+        </div>
+        <div class="profile-meta-chip">
+          <span class="profile-meta-chip__label">Multi-factor authentication</span>
+          <span class="profile-meta-chip__value">
+            <span
+              class="profile-status-pill"
+              [class.profile-status-pill--success]="data.mfaEnabled"
+              [class.profile-status-pill--pending]="!data.mfaEnabled"
+            >
+              <span class="profile-status-pill__dot" aria-hidden="true"></span>
+              {{ data.mfaEnabled ? 'Enabled' : 'Not enabled' }}
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <div class="profile-security-card">
+        <div>
+          <h3 class="profile-security-card__title">Two-factor authentication</h3>
+          <p class="profile-security-card__desc">
+            Manage authenticator setup on the dedicated MFA page. Enabling MFA adds a second step
+            when signing in.
+          </p>
+        </div>
+        <a mat-stroked-button routerLink="/mfa-setup" class="profile-add-btn">
+          <mat-icon aria-hidden="true">phonelink_lock</mat-icon>
+          {{ data.mfaEnabled ? 'Manage MFA' : 'Set up MFA' }}
+        </a>
+      </div>
+
+      <div class="profile-panel-card">
+        <h3 class="profile-page-heading">Change password</h3>
+        <p class="profile-page-sub">
+          Use at least 8 characters with uppercase, lowercase, and a number. Other sessions will be
+          revoked.
+        </p>
+        <form [formGroup]="form" class="profile-form" (ngSubmit)="changePassword()">
+          <div class="profile-form__grid">
+            <mat-form-field appearance="outline" class="profile-form__full">
+              <mat-label>Current password</mat-label>
+              <input
+                matInput
+                type="password"
+                formControlName="currentPassword"
+                autocomplete="current-password"
+              />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>New password</mat-label>
+              <input
+                matInput
+                type="password"
+                formControlName="newPassword"
+                autocomplete="new-password"
+              />
+              @if (form.controls.newPassword.touched && form.controls.newPassword.invalid) {
+                <mat-error>Must include upper, lower, and a number (min 8).</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Confirm new password</mat-label>
+              <input
+                matInput
+                type="password"
+                formControlName="confirmPassword"
+                autocomplete="new-password"
+              />
+            </mat-form-field>
+          </div>
+
+          <div class="profile-action-bar__actions">
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              class="profile-add-btn"
+              [disabled]="form.invalid || saving()"
+            >
+              @if (saving()) {
+                <mat-spinner diameter="16" />
+              } @else {
+                <mat-icon aria-hidden="true">lock</mat-icon>
+              }
+              {{ saving() ? 'Updating…' : 'Update password' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  }
+</app-organization-status>

@@ -1,0 +1,70 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading preferences…"
+  errorTitle="Preferences unavailable"
+  (retry)="reload()"
+>
+  <section class="notifications-page" aria-label="Notification preferences">
+    <div class="notifications-action-bar">
+      <div>
+        <h2 class="notifications-page-heading">Delivery preferences</h2>
+        <p class="notifications-page-sub">
+          Choose which channels deliver each notification category.
+        </p>
+      </div>
+      <div class="notifications-action-bar__actions">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="notifications-add-btn"
+          [disabled]="saving() || preferences.length === 0"
+          (click)="save()"
+        >
+          @if (saving()) {
+            <mat-spinner diameter="16" />
+          } @else {
+            <mat-icon aria-hidden="true">save</mat-icon>
+          }
+          {{ saving() ? 'Saving…' : 'Save preferences' }}
+        </button>
+      </div>
+    </div>
+
+    @if (preferences.length === 0) {
+      <app-empty-state
+        title="No preferences"
+        message="Category preferences will appear once the notifications service is available."
+        icon="tune"
+      />
+    } @else {
+      <form [formGroup]="form" class="notifications-prefs-grid">
+        <div class="notifications-prefs-header" aria-hidden="true">
+          <span>Category</span>
+          <span>In-app</span>
+          <span>Email</span>
+          <span>Push</span>
+        </div>
+        <div formArrayName="preferences">
+          @for (group of preferences.controls; track group.get('category')?.value; let i = $index) {
+            <div class="notifications-pref-row" [formGroupName]="i">
+              <span class="notifications-pref-row__category">
+                {{ categoryLabel(group.get('category')?.value) }}
+              </span>
+              <label class="notifications-pref-row__toggle">
+                <mat-checkbox formControlName="inAppEnabled">In-app</mat-checkbox>
+              </label>
+              <label class="notifications-pref-row__toggle">
+                <mat-checkbox formControlName="emailEnabled">Email</mat-checkbox>
+              </label>
+              <label class="notifications-pref-row__toggle">
+                <mat-checkbox formControlName="pushEnabled">Push</mat-checkbox>
+              </label>
+            </div>
+          }
+        </div>
+      </form>
+    }
+  </section>
+</app-organization-status>

@@ -1,0 +1,81 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading preferences…"
+  errorTitle="Preferences unavailable"
+  (retry)="reload()"
+>
+  <section class="profile-page" aria-label="User preferences">
+    <div class="profile-action-bar">
+      <div>
+        <h2 class="profile-page-heading">Preferences</h2>
+        <p class="profile-page-sub">Theme, locale, timezone, and date/time display options.</p>
+      </div>
+      <div class="profile-action-bar__actions">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="profile-add-btn"
+          [disabled]="form.invalid || saving()"
+          (click)="save()"
+        >
+          @if (saving()) {
+            <mat-spinner diameter="16" />
+          } @else {
+            <mat-icon aria-hidden="true">save</mat-icon>
+          }
+          {{ saving() ? 'Saving…' : 'Save preferences' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="profile-panel-card">
+      <form [formGroup]="form" class="profile-form" (ngSubmit)="save()">
+        <div class="profile-form__grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Theme</mat-label>
+            <mat-select formControlName="theme">
+              @for (theme of themes; track theme) {
+                <mat-option [value]="theme">{{ theme }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Locale</mat-label>
+            <input matInput formControlName="locale" placeholder="en-US" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Timezone</mat-label>
+            <input matInput formControlName="timezone" placeholder="UTC" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Date format</mat-label>
+            <input matInput formControlName="dateFormat" placeholder="DD MMM YYYY" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Time format</mat-label>
+            <mat-select formControlName="timeFormat">
+              @for (fmt of timeFormats; track fmt) {
+                <mat-option [value]="fmt">{{ fmt }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Week starts on</mat-label>
+            <mat-select formControlName="weekStartsOn">
+              @for (opt of weekStartsOnOptions; track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </form>
+    </div>
+  </section>
+</app-organization-status>

@@ -83,41 +83,33 @@ export const routes: Routes = [
       {
         path: 'reports',
         canActivate: [permissionGuard('reports:view')],
-        loadComponent: () =>
-          import('./features/reports/reports-placeholder.component').then(
-            (m) => m.ReportsPlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/reports/reports.routes').then((m) => m.REPORTS_ROUTES),
       },
       {
         path: 'notifications',
         canActivate: [permissionGuard('notifications:view')],
-        loadComponent: () =>
-          import('./features/notifications/notifications-placeholder.component').then(
-            (m) => m.NotificationsPlaceholderComponent,
+        loadChildren: () =>
+          import('./features/notifications/notifications.routes').then(
+            (m) => m.NOTIFICATIONS_ROUTES,
           ),
       },
       {
         path: 'profile',
-        loadComponent: () =>
-          import('./features/profile/profile-placeholder.component').then(
-            (m) => m.ProfilePlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/profile/profile.routes').then((m) => m.PROFILE_ROUTES),
       },
       {
         path: 'settings',
         canActivate: [permissionGuard('settings:view')],
-        loadComponent: () =>
-          import('./features/settings/settings-placeholder.component').then(
-            (m) => m.SettingsPlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/settings/settings.routes').then((m) => m.SETTINGS_ROUTES),
       },
       {
         path: 'files',
         canActivate: [permissionGuard('files:view')],
-        loadComponent: () =>
-          import('./features/files/files-placeholder.component').then(
-            (m) => m.FilesPlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/files/files.routes').then((m) => m.FILES_ROUTES),
       },
     ],
   },

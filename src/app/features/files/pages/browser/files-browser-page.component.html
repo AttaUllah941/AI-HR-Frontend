@@ -1,0 +1,112 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading files…"
+  errorTitle="Files unavailable"
+  (retry)="reload()"
+>
+  <section class="files-page" [attr.aria-label]="heading()">
+    <div class="files-action-bar">
+      <div>
+        <h2 class="files-page-heading">{{ heading() }}</h2>
+        <p class="files-page-sub">{{ subtitle() }} · {{ total() }} files</p>
+      </div>
+      <div class="files-action-bar__actions">
+        <button mat-stroked-button type="button" class="files-add-btn" (click)="reload()">
+          <mat-icon aria-hidden="true">refresh</mat-icon>
+          Refresh
+        </button>
+        @if (canCreate) {
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="files-add-btn"
+            (click)="openUpload()"
+          >
+            <mat-icon aria-hidden="true">upload_file</mat-icon>
+            Upload
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="files-action-bar">
+      <mat-form-field appearance="outline">
+        <mat-label>Search</mat-label>
+        <input matInput [formControl]="search" placeholder="Name or title" />
+      </mat-form-field>
+      @if (!lockedCategory()) {
+        <mat-form-field appearance="outline">
+          <mat-label>Category</mat-label>
+          <mat-select [formControl]="category">
+            <mat-option value="">All</mat-option>
+            @for (cat of categories; track cat) {
+              <mat-option [value]="cat">{{ cat }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+    </div>
+
+    @if (items().length === 0) {
+      <app-empty-state
+        title="No files yet"
+        message="Upload documents and resumes to get started."
+        icon="folder_open"
+      />
+    } @else {
+      <div class="files-table-card">
+        <div class="files-table-wrap">
+          <table class="files-table">
+            <thead>
+              <tr>
+                <th scope="col">File</th>
+                <th scope="col">Category</th>
+                <th scope="col">Linked</th>
+                <th scope="col">Size</th>
+                <th scope="col">Uploaded</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (file of items(); track file.id) {
+                <tr>
+                  <td>
+                    <span class="files-table__title">{{ file.title || file.originalName }}</span>
+                    <span class="files-table__body">{{ file.mimeType }}</span>
+                  </td>
+                  <td><span class="files-badge">{{ file.category }}</span></td>
+                  <td>
+                    @if (file.employee) {
+                      {{ file.employee.firstName }} {{ file.employee.lastName }}
+                      <span class="files-table__body">{{ file.employee.employeeCode }}</span>
+                    } @else if (file.candidate) {
+                      {{ file.candidate.firstName }} {{ file.candidate.lastName }}
+                      <span class="files-table__body">{{ file.candidate.email }}</span>
+                    } @else {
+                      —
+                    }
+                  </td>
+                  <td>{{ formatBytes(file.sizeBytes) }}</td>
+                  <td>{{ formatDate(file.createdAt) }}</td>
+                  <td>
+                    @if (file.previewable) {
+                      <button mat-button type="button" (click)="preview(file)">Preview</button>
+                    }
+                    <button mat-button type="button" (click)="download(file)">Download</button>
+                    @if (canDelete) {
+                      <button mat-button color="warn" type="button" (click)="remove(file)">
+                        Delete
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  </section>
+</app-organization-status>

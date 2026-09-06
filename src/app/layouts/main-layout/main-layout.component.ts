@@ -37,12 +37,14 @@ import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../core/services/auth.service';
 
 import {
-
   DashboardNotificationItem,
-
   DashboardService,
-
 } from '../../core/services/dashboard.service';
+
+import {
+  NotificationFeedItem,
+  NotificationsService,
+} from '../../core/services/notifications.service';
 
 import { ToastService } from '../../core/services/toast.service';
 
@@ -196,6 +198,8 @@ export class MainLayoutComponent implements OnInit {
 
   private readonly dashboard = inject(DashboardService);
 
+  private readonly notificationsApi = inject(NotificationsService);
+
   private readonly toast = inject(ToastService);
 
   private readonly router = inject(Router);
@@ -212,7 +216,7 @@ export class MainLayoutComponent implements OnInit {
 
   readonly breadcrumbs = signal<BreadcrumbItem[]>([{ label: 'Home', route: '/dashboard' }]);
 
-  readonly notifications = signal<DashboardNotificationItem[]>([]);
+  readonly notifications = signal<Array<DashboardNotificationItem | NotificationFeedItem>>([]);
 
   readonly notificationCount = signal(0);
 
@@ -320,9 +324,16 @@ export class MainLayoutComponent implements OnInit {
 
     { label: 'Documents', route: '/files', icon: 'description', permissions: ['files:view'] },
 
-    { label: 'Policies', route: '/policies', icon: 'policy', permissions: ['settings:view'] },
+    { label: 'Policies', route: '/ai/policies', icon: 'policy', permissions: ['ai:view'] },
 
     { label: 'Reports', route: '/reports', icon: 'analytics', permissions: ['reports:view'] },
+
+    {
+      label: 'Notifications',
+      route: '/notifications',
+      icon: 'notifications',
+      permissions: ['notifications:view'],
+    },
 
     {
 
@@ -485,27 +496,55 @@ export class MainLayoutComponent implements OnInit {
 
 
   private loadNotifications(): void {
-
-    this.dashboard.getNotifications().subscribe({
-
+    this.notificationsApi.getFeed(8).subscribe({
       next: (data) => {
-
         this.notifications.set(data.items);
-
         this.notificationCount.set(data.unreadCount);
-
       },
-
       error: () => {
-
-        this.notifications.set([]);
-
-        this.notificationCount.set(0);
-
+        this.dashboard.getNotifications().subscribe({
+          next: (data) => {
+            this.notifications.set(data.items);
+            this.notificationCount.set(data.unreadCount);
+          },
+          error: () => {
+            this.notifications.set([]);
+            this.notificationCount.set(0);
+          },
+        });
       },
-
     });
+  }
 
+  onNotificationClick(item: DashboardNotificationItem | NotificationFeedItem): void {
+    if (!item.read) {
+      this.notificationsApi.markRead(item.id).subscribe({
+        next: () => {
+          this.notifications.update((list) =>
+            list.map((n) => (n.id === item.id ? { ...n, read: true } : n)),
+          );
+          this.notificationCount.update((count) => Math.max(0, count - 1));
+        },
+        error: () => undefined,
+      });
+    }
+    void this.router.navigate(['/notifications']);
+  }
+
+  markAllNotificationsRead(): void {
+    if (!this.notificationCount()) {
+      return;
+    }
+    this.notificationsApi.markAllRead().subscribe({
+      next: () => {
+        this.notifications.update((list) => list.map((n) => ({ ...n, read: true })));
+        this.notificationCount.set(0);
+        this.toast.success('All notifications marked read.');
+      },
+      error: () => {
+        this.toast.error('Unable to mark notifications as read.');
+      },
+    });
   }
 
 

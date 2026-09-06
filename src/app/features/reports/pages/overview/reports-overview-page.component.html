@@ -1,0 +1,133 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading reports overview…"
+  errorTitle="Reports overview unavailable"
+  (retry)="reload()"
+>
+  <section class="reports-page" aria-label="Reports overview">
+    <div class="reports-action-bar">
+      <div>
+        <h2 class="reports-heading">Overview</h2>
+        <p class="reports-sub">
+          Cross-module KPIs and recent exports
+          @if (summary(); as s) {
+            · generated {{ s.generatedAt | date: 'medium' }}
+          }
+        </p>
+      </div>
+      <div class="reports-action-bar__actions">
+        <button mat-stroked-button type="button" (click)="reload()">
+          <mat-icon aria-hidden="true">refresh</mat-icon>
+          Refresh
+        </button>
+        @if (canExport) {
+          <button
+            mat-flat-button
+            color="primary"
+            class="reports-add-btn"
+            type="button"
+            [matMenuTriggerFor]="exportMenu"
+            [disabled]="exporting()"
+          >
+            <mat-icon aria-hidden="true">download</mat-icon>
+            Export
+          </button>
+          <mat-menu #exportMenu="matMenu">
+            <button mat-menu-item type="button" (click)="exportOverview('CSV')">CSV</button>
+            <button mat-menu-item type="button" (click)="exportOverview('PDF')">PDF</button>
+            <button mat-menu-item type="button" (click)="exportOverview('JSON')">JSON</button>
+          </mat-menu>
+        }
+      </div>
+    </div>
+
+    <div class="reports-kpi-grid">
+      @for (card of kpis(); track card.key) {
+        <mat-card class="reports-kpi-card">
+          <div class="reports-kpi-card__header">
+            <span class="reports-kpi-card__icon reports-kpi-card__icon--{{ card.tone }}">
+              <mat-icon aria-hidden="true">{{ card.icon }}</mat-icon>
+            </span>
+          </div>
+          <p class="reports-kpi-card__label">{{ card.label }}</p>
+          <strong class="reports-kpi-card__value">{{ formatNumber(card.value) }}</strong>
+        </mat-card>
+      }
+    </div>
+
+    @if (summary(); as s) {
+      <div class="reports-chart-grid">
+        <mat-card class="reports-chart-card">
+          <app-reports-bar-chart
+            [points]="s.charts.attendanceByStatus"
+            title="Attendance by status"
+          />
+        </mat-card>
+        <mat-card class="reports-chart-card">
+          <app-reports-bar-chart [points]="s.charts.leaveByStatus" title="Leave by status" />
+        </mat-card>
+        <mat-card class="reports-chart-card">
+          <app-reports-bar-chart [points]="s.charts.jobsByStatus" title="Jobs by status" />
+        </mat-card>
+      </div>
+
+      <div>
+        <div class="reports-action-bar">
+          <h3 class="reports-heading">Modules</h3>
+        </div>
+        <div class="reports-module-grid">
+          @for (mod of s.modules; track mod.key) {
+            <a class="reports-module-link" [routerLink]="['/reports', mod.path]">
+              <mat-icon aria-hidden="true">{{ moduleIcons[mod.key] || 'insights' }}</mat-icon>
+              {{ mod.label }}
+            </a>
+          }
+        </div>
+      </div>
+
+      <div>
+        <div class="reports-action-bar">
+          <h3 class="reports-heading">Recent exports</h3>
+        </div>
+        @if (s.recentExports.length === 0) {
+          <app-empty-state
+            title="No exports yet"
+            message="Export a report to see history here."
+            icon="download"
+          />
+        } @else {
+          <div class="reports-table-card">
+            <div class="reports-table-wrap">
+              <table class="reports-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Report</th>
+                    <th scope="col">Format</th>
+                    <th scope="col">File</th>
+                    <th scope="col">When</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of s.recentExports; track row.id) {
+                    <tr class="reports-table__row">
+                      <td>{{ reportTypeLabel(row.reportType) }}</td>
+                      <td>
+                        <span [class]="statusClass('info')">
+                          <span class="reports-status-pill__dot" aria-hidden="true"></span>
+                          {{ row.format }}
+                        </span>
+                      </td>
+                      <td>{{ row.fileName || '—' }}</td>
+                      <td>{{ row.createdAt | date: 'short' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+</app-organization-status>

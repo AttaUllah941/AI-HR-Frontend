@@ -1,0 +1,108 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading system settings…"
+  errorTitle="System settings unavailable"
+  (retry)="reload()"
+>
+  <section class="settings-page" aria-label="System and integrations">
+    <div class="settings-action-bar">
+      <div>
+        <h2 class="settings-page-heading">System configuration</h2>
+        <p class="settings-page-sub">Workspace defaults and feature toggles.</p>
+      </div>
+      @if (canUpdate) {
+        <div class="settings-action-bar__actions">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="settings-add-btn"
+            [disabled]="savingSystem()"
+            (click)="saveSystem()"
+          >
+            @if (savingSystem()) {
+              <mat-spinner diameter="16" />
+            } @else {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
+            Save system
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="settings-panel-card">
+      <form [formGroup]="systemForm" class="settings-form">
+        <div class="settings-form__grid">
+          <div class="settings-form__full">
+            <mat-checkbox formControlName="maintenanceMode">Maintenance mode</mat-checkbox>
+          </div>
+          <div class="settings-form__full">
+            <mat-checkbox formControlName="allowSelfRegistration"
+              >Allow self-registration</mat-checkbox
+            >
+          </div>
+          <mat-form-field appearance="outline">
+            <mat-label>Default timezone</mat-label>
+            <input matInput formControlName="defaultTimezone" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Default locale</mat-label>
+            <input matInput formControlName="defaultLocale" />
+          </mat-form-field>
+        </div>
+      </form>
+    </div>
+
+    <div class="settings-action-bar">
+      <div>
+        <h2 class="settings-page-heading">Integrations</h2>
+        <p class="settings-page-sub">External connectors (metadata only for now).</p>
+      </div>
+      @if (canUpdate) {
+        <div class="settings-action-bar__actions">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="settings-add-btn"
+            [disabled]="savingIntegrations()"
+            (click)="saveIntegrations()"
+          >
+            @if (savingIntegrations()) {
+              <mat-spinner diameter="16" />
+            } @else {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
+            Save integrations
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="settings-panel-card">
+      <form [formGroup]="integrationsForm" class="settings-form">
+        <div class="settings-form__grid">
+          <mat-form-field appearance="outline" class="settings-form__full">
+            <mat-label>Slack webhook URL</mat-label>
+            <input matInput formControlName="slackWebhookUrl" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Google Workspace domain</mat-label>
+            <input matInput formControlName="googleWorkspaceDomain" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Microsoft tenant ID</mat-label>
+            <input matInput formControlName="microsoftTenantId" />
+          </mat-form-field>
+          <div class="settings-form__full">
+            <mat-checkbox formControlName="webhookSigningSecretSet"
+              >Webhook signing secret configured</mat-checkbox
+            >
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</app-organization-status>
