@@ -59,6 +59,13 @@ export const SETTINGS_ROUTES: Routes = [
           ),
       },
       {
+        path: 'security',
+        loadComponent: () =>
+          import('./pages/security/settings-security-page.component').then(
+            (m) => m.SettingsSecurityPageComponent,
+          ),
+      },
+      {
         path: 'audit',
         loadComponent: () =>
           import('./pages/audit/settings-audit-page.component').then(

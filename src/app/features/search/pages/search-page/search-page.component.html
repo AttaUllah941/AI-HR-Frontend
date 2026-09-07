@@ -1,0 +1,161 @@
+<app-page-header
+  title="Search"
+  subtitle="Global search with filters, sorting, bookmarks, and recent queries"
+/>
+
+<section class="search-page" aria-label="Global search">
+  <form class="search-page__form" [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="search-page__q">
+      <mat-label>Search</mat-label>
+      <input matInput formControlName="q" placeholder="Employees, files, jobs…" />
+      <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Sort by</mat-label>
+      <mat-select formControlName="sortBy">
+        <mat-option value="relevance">Relevance</mat-option>
+        <mat-option value="title">Title</mat-option>
+        <mat-option value="updatedAt">Updated</mat-option>
+        <mat-option value="type">Type</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Direction</mat-label>
+      <mat-select formControlName="sortDir">
+        <mat-option value="desc">Desc</mat-option>
+        <mat-option value="asc">Asc</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" type="submit">Search</button>
+  </form>
+
+  <div class="search-page__filters">
+    <div class="search-page__types">
+      @for (opt of typeOptions; track opt.value) {
+        <mat-checkbox
+          [checked]="isTypeChecked(opt.value)"
+          (change)="toggleType(opt.value, $event.checked)"
+        >
+          {{ opt.label }}
+        </mat-checkbox>
+      }
+    </div>
+    <div class="search-page__extra" [formGroup]="form">
+      <mat-form-field appearance="outline">
+        <mat-label>Employee status</mat-label>
+        <input matInput formControlName="status" placeholder="ACTIVE, DRAFT…" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>File category</mat-label>
+        <input matInput formControlName="category" placeholder="RESUME, POLICY…" />
+      </mat-form-field>
+      <button mat-stroked-button type="button" (click)="applyQueryToUrl()">Apply filters</button>
+    </div>
+  </div>
+
+  <div class="search-page__layout">
+    <aside class="search-page__side">
+      <div class="search-panel">
+        <div class="search-panel__head">
+          <h3>Recent</h3>
+          @if (recent().length) {
+            <button mat-button type="button" (click)="clearRecent()">Clear</button>
+          }
+        </div>
+        @if (recent().length === 0) {
+          <p class="search-muted">No recent searches.</p>
+        } @else {
+          <ul class="search-list">
+            @for (item of recent(); track item.id) {
+              <li>
+                <button type="button" class="search-list__btn" (click)="useRecent(item)">
+                  <mat-icon aria-hidden="true">history</mat-icon>
+                  <span>
+                    <strong>{{ item.query }}</strong>
+                    <small>{{ item.resultCount }} results</small>
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="search-panel">
+        <div class="search-panel__head">
+          <h3>Bookmarks</h3>
+        </div>
+        @if (bookmarks().length === 0) {
+          <p class="search-muted">Bookmark results to reopen them quickly.</p>
+        } @else {
+          <ul class="search-list">
+            @for (bm of bookmarks(); track bm.id) {
+              <li class="search-list__row">
+                <a [routerLink]="bm.route" class="search-list__btn">
+                  <mat-icon aria-hidden="true">{{ bm.icon || 'bookmark' }}</mat-icon>
+                  <span>
+                    <strong>{{ bm.title }}</strong>
+                    <small>{{ bm.route }}</small>
+                  </span>
+                </a>
+                <button mat-icon-button type="button" (click)="removeBookmark(bm.id)" aria-label="Remove bookmark">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </aside>
+
+    <div class="search-page__results">
+      <app-organization-status
+        [loading]="loading()"
+        [error]="error()"
+        loadingMessage="Searching…"
+        errorTitle="Search unavailable"
+        (retry)="runSearch()"
+      >
+        @if (!form.controls.q.value.trim()) {
+          <app-empty-state
+            title="Start typing to search"
+            message="Use Ctrl/⌘ K from anywhere, or search here with filters and sorting."
+            icon="travel_explore"
+          />
+        } @else if (result(); as res) {
+          <p class="search-muted">
+            {{ res.pagination.total }} results for “{{ res.query }}”
+          </p>
+          @if (res.items.length === 0) {
+            <app-empty-state
+              title="No matches"
+              message="Try different keywords or clear type filters."
+              icon="search_off"
+            />
+          } @else {
+            <ul class="search-results">
+              @for (hit of res.items; track hit.type + hit.id) {
+                <li class="search-result">
+                  <a [routerLink]="hit.route" class="search-result__main">
+                    <mat-icon aria-hidden="true">{{ hit.icon }}</mat-icon>
+                    <span>
+                      <strong>{{ hit.title }}</strong>
+                      <small>{{ hit.subtitle }}</small>
+                    </span>
+                    <span class="search-badge">{{ hit.type }}</span>
+                  </a>
+                  <button mat-icon-button type="button" (click)="bookmarkHit(hit)" aria-label="Bookmark">
+                    <mat-icon>bookmark_border</mat-icon>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        }
+      </app-organization-status>
+    </div>
+  </div>
+</section>

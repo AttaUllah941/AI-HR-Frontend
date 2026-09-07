@@ -1,0 +1,76 @@
+<h2 mat-dialog-title>Search</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline" class="palette-q">
+    <mat-label>Jump to anything</mat-label>
+    <input
+      matInput
+      [formControl]="query"
+      placeholder="Type at least 2 characters…"
+      autocomplete="off"
+    />
+    <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+  </mat-form-field>
+
+  @if (loading()) {
+    <p class="palette-muted">Searching…</p>
+  }
+
+  @if (hits().length) {
+    <h3 class="palette-heading">Results</h3>
+    <ul class="palette-list">
+      @for (hit of hits(); track hit.type + hit.id) {
+        <li>
+          <button type="button" class="palette-item" (click)="openHit(hit)">
+            <mat-icon aria-hidden="true">{{ hit.icon }}</mat-icon>
+            <span>
+              <strong>{{ hit.title }}</strong>
+              <small>{{ hit.subtitle }}</small>
+            </span>
+            <em>{{ hit.type }}</em>
+          </button>
+        </li>
+      }
+    </ul>
+  } @else if (!query.value.trim()) {
+    @if (recent().length) {
+      <h3 class="palette-heading">Recent</h3>
+      <ul class="palette-list">
+        @for (item of recent(); track item.id) {
+          <li>
+            <button type="button" class="palette-item" (click)="go('/search', item.query)">
+              <mat-icon aria-hidden="true">history</mat-icon>
+              <span>
+                <strong>{{ item.query }}</strong>
+                <small>{{ item.resultCount }} results</small>
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+    @if (bookmarks().length) {
+      <h3 class="palette-heading">Bookmarks</h3>
+      <ul class="palette-list">
+        @for (bm of bookmarks(); track bm.id) {
+          <li>
+            <button type="button" class="palette-item" (click)="go(bm.route)">
+              <mat-icon aria-hidden="true">{{ bm.icon || 'bookmark' }}</mat-icon>
+              <span>
+                <strong>{{ bm.title }}</strong>
+                <small>{{ bm.route }}</small>
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Close</button>
+  <button mat-flat-button color="primary" type="button" (click)="openFullSearch()">
+    Open full search
+  </button>
+</mat-dialog-actions>
