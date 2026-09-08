@@ -1,0 +1,79 @@
+<app-page-header title="Performance" subtitle="Scores, goals, and AI-assisted talent signals" />
+
+@if (loading()) {
+  <p class="muted">Loading performance…</p>
+} @else {
+  <section class="kpi-grid" aria-label="Performance summary">
+    @for (card of kpiCards(); track card.label) {
+      <article class="kpi-card" [attr.data-tone]="card.tone">
+        <p>{{ card.label }}</p>
+        <strong>{{ card.value }}</strong>
+        <small>{{ card.delta }}</small>
+      </article>
+    }
+  </section>
+
+  <section class="content-grid">
+    <article class="panel">
+      <header class="panel__header">
+        <div>
+          <h2>Top Performers · {{ cycleLabel() }}</h2>
+          <p>Highest review scores this cycle</p>
+        </div>
+      </header>
+
+      @if (topPerformers().length === 0) {
+        <app-empty-state
+          title="No reviews yet"
+          message="Add performance reviews for the active cycle to populate this list."
+          icon="emoji_events"
+        />
+      } @else {
+        <ul class="performers">
+          @for (item of topPerformers(); track item.id) {
+            <li>
+              <span class="avatar" aria-hidden="true">{{ item.employee.initials }}</span>
+              <div class="performers__meta">
+                <strong>{{ item.employee.firstName }} {{ item.employee.lastName }}</strong>
+                <small>· {{ item.employee.position || 'Team member' }}</small>
+                <small>
+                  {{ item.goalCount }} goals · {{ item.goalsCompletePercent }} % complete
+                </small>
+              </div>
+              <div class="score-box">
+                <strong>{{ item.score | number: '1.1-1' }}</strong>
+                <span>Score</span>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+
+    <article class="panel">
+      <header class="panel__header">
+        <div>
+          <h2>AI Suggestions</h2>
+          <p>Recommended actions from performance signals</p>
+        </div>
+      </header>
+
+      @if (insights().length === 0) {
+        <app-empty-state
+          title="No suggestions"
+          message="Insights will appear here as review data accumulates."
+          icon="auto_awesome"
+        />
+      } @else {
+        <ul class="insights">
+          @for (insight of insights(); track insight.id) {
+            <li>
+              <mat-icon aria-hidden="true">lightbulb</mat-icon>
+              <p>{{ insight.body }}</p>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+  </section>
+}

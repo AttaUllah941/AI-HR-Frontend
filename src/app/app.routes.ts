@@ -32,52 +32,38 @@ export const routes: Routes = [
       },
       {
         path: 'organization',
-        loadComponent: () =>
-          import('./features/organization/organization-placeholder.component').then(
-            (m) => m.OrganizationPlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/organization/organization.routes').then((m) => m.ORGANIZATION_ROUTES),
       },
       {
         path: 'employees',
-        loadComponent: () =>
-          import('./features/employees/employees-placeholder.component').then(
-            (m) => m.EmployeesPlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/employees/employees.routes').then((m) => m.EMPLOYEES_ROUTES),
       },
       {
         path: 'attendance',
-        loadComponent: () =>
-          import('./features/attendance/attendance-placeholder.component').then(
-            (m) => m.AttendancePlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/attendance/attendance.routes').then((m) => m.ATTENDANCE_ROUTES),
       },
       {
         path: 'leave',
-        loadComponent: () =>
-          import('./features/leave/leave-placeholder.component').then(
-            (m) => m.LeavePlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/leave/leave.routes').then((m) => m.LEAVE_ROUTES),
       },
       {
         path: 'payroll',
-        loadComponent: () =>
-          import('./features/payroll/payroll-placeholder.component').then(
-            (m) => m.PayrollPlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/payroll/payroll.routes').then((m) => m.PAYROLL_ROUTES),
       },
       {
         path: 'recruitment',
-        loadComponent: () =>
-          import('./features/recruitment/recruitment-placeholder.component').then(
-            (m) => m.RecruitmentPlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/recruitment/recruitment.routes').then((m) => m.RECRUITMENT_ROUTES),
       },
       {
         path: 'performance',
-        loadComponent: () =>
-          import('./features/performance/performance-placeholder.component').then(
-            (m) => m.PerformancePlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/performance/performance.routes').then((m) => m.PERFORMANCE_ROUTES),
       },
       {
         path: 'ai',
@@ -117,6 +103,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/files/files-placeholder.component').then(
             (m) => m.FilesPlaceholderComponent,
+          ),
+      },
+      {
+        path: 'policies',
+        loadComponent: () =>
+          import('./features/policies/policies-placeholder.component').then(
+            (m) => m.PoliciesPlaceholderComponent,
           ),
       },
     ],

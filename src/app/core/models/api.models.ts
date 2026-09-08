@@ -28,6 +28,7 @@ export interface AuthUser {
   lastName: string;
   roles: string[];
   permissions: string[];
+  companyId?: string | null;
   avatarUrl?: string | null;
   status?: string;
   mfaEnabled?: boolean;

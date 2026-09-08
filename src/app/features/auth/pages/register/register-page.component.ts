@@ -27,7 +27,7 @@ export class RegisterPageComponent {
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d).+$/)]],
     companyName: [''],
   });
 
@@ -50,10 +50,11 @@ export class RegisterPageComponent {
       .subscribe({
         next: (data) => {
           this.submitting.set(false);
-          const hint = data.verificationToken
-            ? ` Dev verification token logged by API.`
-            : '';
-          this.toast.success(`Account created. Check your email to verify.${hint}`);
+          this.toast.success(
+            data.verificationToken
+              ? 'Account created. Verify your email (dev token returned by API), then sign in.'
+              : 'Account created. Check your email to verify, then sign in.',
+          );
           void this.router.navigate(['/auth/login']);
         },
         error: () => this.submitting.set(false),

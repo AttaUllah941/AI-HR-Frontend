@@ -1,0 +1,140 @@
+<app-page-header title="Attendance" subtitle="Daily presence, check-ins, and team calendar">
+  @if (canCreate()) {
+    <button mat-flat-button color="primary" type="button" (click)="toggleCheckIn()">
+      <mat-icon>login</mat-icon>
+      Record check-in
+    </button>
+  }
+</app-page-header>
+
+@if (loading()) {
+  <p class="muted">Loading attendance…</p>
+} @else {
+  <section class="kpi-grid" aria-label="Attendance summary">
+    @for (card of kpiCards(); track card.label) {
+      <article class="kpi-card" [attr.data-tone]="card.tone">
+        <p>{{ card.label }}</p>
+        <strong>{{ card.value.toLocaleString() }}</strong>
+      </article>
+    }
+  </section>
+
+  @if (showCheckIn()) {
+    <section class="panel">
+      <header class="panel__header">
+        <div>
+          <h2>Record check-in</h2>
+          <p>Mark today’s attendance for an employee</p>
+        </div>
+      </header>
+      <form class="checkin-form" [formGroup]="checkInForm" (ngSubmit)="submitCheckIn()">
+        <mat-form-field appearance="outline">
+          <mat-label>Employee</mat-label>
+          <mat-select formControlName="employeeId">
+            @for (employee of employees(); track employee.id) {
+              <mat-option [value]="employee.id">
+                {{ employee.firstName }} {{ employee.lastName }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            @for (option of statusOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Location label</mat-label>
+          <input matInput formControlName="locationLabel" placeholder="HQ — 4th floor" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Check-in time</mat-label>
+          <input matInput type="time" formControlName="checkInAt" />
+        </mat-form-field>
+        <div class="checkin-form__actions">
+          <button mat-stroked-button type="button" (click)="toggleCheckIn()">Cancel</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+            {{ saving() ? 'Saving…' : 'Save' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  <section class="content-grid">
+    <article class="panel">
+      <header class="panel__header panel__header--row">
+        <div>
+          <h2>Team Calendar — {{ monthLabel() }}</h2>
+          <p>Presence markers for the selected month</p>
+        </div>
+        <div class="month-nav">
+          <button mat-icon-button type="button" aria-label="Previous month" (click)="shiftMonth(-1)">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button mat-icon-button type="button" aria-label="Next month" (click)="shiftMonth(1)">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </header>
+
+      <div class="calendar" role="grid" aria-label="Attendance calendar">
+        <div class="calendar__weekdays">
+          @for (label of ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; track label) {
+            <span>{{ label }}</span>
+          }
+        </div>
+        <div class="calendar__grid">
+          @for (cell of calendarCells(); track $index) {
+            <div
+              class="calendar__cell"
+              [class.is-empty]="!cell.day"
+              [class.is-today]="cell.isToday"
+              [attr.data-dominant]="cell.meta?.dominant || null"
+            >
+              @if (cell.day) {
+                <span class="calendar__day">{{ cell.day }}</span>
+                @if (cell.meta) {
+                  <span class="calendar__dot" aria-hidden="true"></span>
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </article>
+
+    <article class="panel">
+      <header class="panel__header">
+        <div>
+          <h2>Recent check-ins</h2>
+          <p>Latest arrivals for today</p>
+        </div>
+      </header>
+
+      @if (checkIns().length === 0) {
+        <app-empty-state
+          title="No check-ins yet"
+          message="Record a check-in to populate today’s activity feed."
+          icon="schedule"
+        />
+      } @else {
+        <ul class="checkins">
+          @for (item of checkIns(); track item.id) {
+            <li>
+              <span class="avatar" aria-hidden="true">{{ item.employee.initials }}</span>
+              <div class="checkins__meta">
+                <strong>{{ item.employee.firstName }} {{ item.employee.lastName }}</strong>
+                <small>{{ item.locationLabel || 'No location' }}</small>
+              </div>
+              <time>{{ formatCheckIn(item.checkInAt) }}</time>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+  </section>
+}

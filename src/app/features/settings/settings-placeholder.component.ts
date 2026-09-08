@@ -6,7 +6,6 @@ import { FeaturePlaceholderComponent } from '../../shared/components/feature-pla
   standalone: true,
   imports: [FeaturePlaceholderComponent],
   templateUrl: './settings-placeholder.component.html',
-  styleUrl: './settings-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsPlaceholderComponent {}

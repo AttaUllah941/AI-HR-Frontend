@@ -26,7 +26,14 @@ export class ResetPasswordPageComponent {
   readonly token = signal(this.route.snapshot.queryParamMap.get('token') ?? '');
 
   readonly form = this.fb.nonNullable.group({
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d).+$/),
+      ],
+    ],
     confirmPassword: ['', [Validators.required, Validators.minLength(8)]],
   });
 

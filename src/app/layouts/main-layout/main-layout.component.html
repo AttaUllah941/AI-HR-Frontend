@@ -3,13 +3,13 @@
   [class.main-layout--collapsed]="sidebarCollapsed()"
   [class.main-layout--mobile-open]="mobileOpen()"
 >
-  <aside class="sidebar" [attr.aria-label]="'Primary navigation'">
+  <aside class="sidebar" aria-label="Primary navigation">
     <div class="sidebar__brand">
       <div class="sidebar__logo" aria-hidden="true">Z</div>
       @if (!sidebarCollapsed()) {
         <div class="sidebar__brand-text">
           <strong>{{ appName }}</strong>
-          <span>Enterprise HR</span>
+          <span>AI Workspace</span>
         </div>
       }
     </div>
@@ -25,11 +25,44 @@
         >
           <mat-icon>{{ item.icon }}</mat-icon>
           @if (!sidebarCollapsed()) {
-            <span>{{ item.label }}</span>
+            <span class="sidebar__label">{{ item.label }}</span>
+            @if (item.badge) {
+              <span class="sidebar__badge">{{ item.badge }}</span>
+            }
           }
         </a>
       }
     </nav>
+
+    <div class="sidebar__footer">
+      <a
+        class="sidebar__user"
+        routerLink="/profile"
+        [matTooltip]="sidebarCollapsed() ? displayName() : ''"
+        matTooltipPosition="right"
+        (click)="closeMobile()"
+      >
+        <span class="sidebar__avatar" aria-hidden="true">{{ initials() }}</span>
+        @if (!sidebarCollapsed()) {
+          <span class="sidebar__user-text">
+            <strong>{{ displayName() }}</strong>
+            <span>{{ roleLabel() }}</span>
+          </span>
+        }
+      </a>
+      @if (!sidebarCollapsed()) {
+        <button
+          mat-icon-button
+          type="button"
+          class="sidebar__logout"
+          aria-label="Sign out"
+          matTooltip="Sign out"
+          (click)="logout()"
+        >
+          <mat-icon>logout</mat-icon>
+        </button>
+      }
+    </div>
   </aside>
 
   @if (mobileOpen()) {
@@ -55,22 +88,28 @@
           aria-label="Toggle sidebar"
           (click)="toggleSidebar()"
         >
-          <mat-icon>menu_open</mat-icon>
+          <mat-icon>{{ sidebarCollapsed() ? 'menu' : 'menu_open' }}</mat-icon>
         </button>
         <div class="topbar__search" role="search">
           <mat-icon aria-hidden="true">search</mat-icon>
-          <input type="search" placeholder="Search employees, docs, policies." aria-label="Global search" />
+          <input
+            #globalSearch
+            type="search"
+            placeholder="Search employees, docs, policies…"
+            aria-label="Global search"
+          />
+          <kbd class="topbar__kbd">⌘K</kbd>
         </div>
       </div>
 
       <div class="topbar__right">
+        <span class="topbar__company" [matTooltip]="companyName">{{ companyName }}</span>
         <button mat-icon-button type="button" aria-label="Notifications" routerLink="/notifications">
           <mat-icon>notifications</mat-icon>
         </button>
-        <button mat-icon-button type="button" aria-label="Profile" routerLink="/profile">
-          <mat-icon>account_circle</mat-icon>
-        </button>
-        <button mat-stroked-button type="button" (click)="logout()">Sign out</button>
+        <a class="topbar__profile" routerLink="/profile" [attr.aria-label]="'Profile ' + displayName()">
+          <span class="topbar__avatar">{{ initials() }}</span>
+        </a>
       </div>
     </header>
 

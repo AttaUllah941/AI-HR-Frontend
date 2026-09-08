@@ -1,28 +1,115 @@
-<app-page-header
-  title="Dashboard"
-  subtitle="Signed in — KPI widgets and charts arrive in Phase 3"
-/>
+<section class="dash-hero">
+  <p class="dash-hero__greeting">{{ greeting() }}</p>
+  <h1 class="dash-hero__title">{{ firstName() }} <span aria-hidden="true">👋</span></h1>
+</section>
 
-<div class="kpi-grid">
-  @for (card of cards; track card.title) {
-    <mat-card class="kpi-card">
-      <div class="kpi-card__icon" [style.background]="card.tone">
-        <mat-icon>{{ card.icon }}</mat-icon>
+<section class="kpi-grid" aria-label="Workforce overview">
+  @for (kpi of kpis; track kpi.label) {
+    <article class="kpi-card">
+      <div class="kpi-card__top">
+        <span class="kpi-card__delta" [class]="'kpi-card__delta--' + kpi.deltaTone">{{ kpi.delta }}</span>
       </div>
-      <div>
-        <p class="kpi-card__label">{{ card.title }}</p>
-        <strong>{{ card.value }}</strong>
-      </div>
-    </mat-card>
+      <p class="kpi-card__label">{{ kpi.label }}</p>
+      <strong class="kpi-card__value">{{ kpi.value }}</strong>
+      @if (kpi.hint) {
+        <span class="kpi-card__hint">{{ kpi.hint }}</span>
+      }
+    </article>
   }
-</div>
+</section>
 
-<mat-card class="phase-note">
-  <h3>Authentication ready</h3>
-  <p>
-    JWT sessions, refresh tokens, RBAC claims, and MFA flows are live. Enable two-factor
-    authentication from
-    <a routerLink="/mfa-setup">MFA setup</a>
-    when you are ready.
-  </p>
-</mat-card>
+<section class="insights panel">
+  <header class="panel__header">
+    <div>
+      <h2>AI Insights for this week</h2>
+    </div>
+    <span class="live-pill">
+      <span class="live-pill__dot" aria-hidden="true"></span>
+      Live
+    </span>
+  </header>
+  <ul class="insights__list">
+    @for (item of insights; track item) {
+      <li>{{ item }}</li>
+    }
+  </ul>
+  <a class="insights__cta" routerLink="/ai">
+    Ask Zenith for details
+    <mat-icon>arrow_forward</mat-icon>
+  </a>
+</section>
+
+<section class="charts-grid">
+  <article class="panel">
+    <header class="panel__header">
+      <div>
+        <h2>Attendance Trend</h2>
+        <p>Last 7 days</p>
+      </div>
+    </header>
+    <div class="bar-chart" role="img" aria-label="Attendance trend for the last 7 days">
+      @for (point of attendanceTrend; track point.label) {
+        <div class="bar-chart__col">
+          <div class="bar-chart__bar" [style.height.%]="point.height" [attr.title]="point.value"></div>
+          <span>{{ point.label }}</span>
+        </div>
+      }
+    </div>
+  </article>
+
+  <article class="panel">
+    <header class="panel__header">
+      <div>
+        <h2>Department Distribution</h2>
+        <p>1,284 employees</p>
+      </div>
+    </header>
+    <ul class="dept-list">
+      @for (dept of departments; track dept.name) {
+        <li>
+          <div class="dept-list__meta">
+            <span>{{ dept.name }}</span>
+            <strong>{{ dept.count }}</strong>
+          </div>
+          <div class="dept-list__track" aria-hidden="true">
+            <span [style.width.%]="dept.pct"></span>
+          </div>
+        </li>
+      }
+    </ul>
+  </article>
+
+  <article class="panel">
+    <header class="panel__header">
+      <div>
+        <h2>Hiring Funnel</h2>
+        <p>Q4 pipeline</p>
+      </div>
+    </header>
+    <div class="bar-chart bar-chart--funnel" role="img" aria-label="Hiring funnel for Q4">
+      @for (point of hiringFunnel; track point.label) {
+        <div class="bar-chart__col">
+          <div class="bar-chart__bar" [style.height.%]="point.height" [attr.title]="point.value"></div>
+          <span>{{ point.label }}</span>
+        </div>
+      }
+    </div>
+  </article>
+
+  <article class="panel">
+    <header class="panel__header">
+      <div>
+        <h2>Employee Growth</h2>
+        <p>YTD</p>
+      </div>
+    </header>
+    <div class="bar-chart" role="img" aria-label="Employee growth year to date">
+      @for (point of employeeGrowth; track point.label) {
+        <div class="bar-chart__col">
+          <div class="bar-chart__bar bar-chart__bar--growth" [style.height.%]="point.height" [attr.title]="point.value"></div>
+          <span>{{ point.label }}</span>
+        </div>
+      }
+    </div>
+  </article>
+</section>

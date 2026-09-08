@@ -6,7 +6,6 @@ import { FeaturePlaceholderComponent } from '../../shared/components/feature-pla
   standalone: true,
   imports: [FeaturePlaceholderComponent],
   templateUrl: './files-placeholder.component.html',
-  styleUrl: './files-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilesPlaceholderComponent {}

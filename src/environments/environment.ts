@@ -3,4 +3,5 @@ export const environment = {
   apiBaseUrl: '/api/v1',
   appName: 'Zenith HR',
   appFullName: 'Zenith Enterprise AI HR Management Platform',
+  companyName: 'Zenith Enterprises',
 };

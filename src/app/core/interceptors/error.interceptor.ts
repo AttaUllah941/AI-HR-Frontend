@@ -28,13 +28,18 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         error.message ||
         'Something went wrong';
 
-      const isAuthRoute = req.url.includes('/auth/');
+      const isAuthRoute = /\/auth\//.test(req.url);
+      const isRefreshFailure = /\/auth\/refresh$/.test(req.url);
 
-      if (error.status === 401 && !isAuthRoute) {
-        auth.clearSession();
-        void router.navigate(['/auth/login']);
-        if (!skipErrorToast) {
-          toast.error('Session expired. Please sign in again.');
+      // Let refreshInterceptor handle recoverable 401s; only force login after refresh fails
+      // or when there is no session left to recover.
+      if (error.status === 401 && (!isAuthRoute || isRefreshFailure)) {
+        if (!auth.getRefreshToken() || isRefreshFailure) {
+          auth.clearSession();
+          void router.navigate(['/auth/login']);
+          if (!skipErrorToast) {
+            toast.error('Session expired. Please sign in again.');
+          }
         }
       } else if (error.status >= 400 && !skipErrorToast) {
         toast.error(message);

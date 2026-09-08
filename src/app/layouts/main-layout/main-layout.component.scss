@@ -64,7 +64,7 @@
 .sidebar__nav {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
   padding: 0.75rem 0.5rem;
   overflow-y: auto;
   flex: 1;
@@ -73,15 +73,18 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.65rem 0.75rem;
+    padding: 0.6rem 0.75rem;
     border-radius: calc(var(--zh-radius) - 4px);
     color: color-mix(in oklab, var(--zh-sidebar-foreground) 75%, transparent);
-    transition: background 0.15s ease, color 0.15s ease;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
 
     mat-icon {
       font-size: 1.25rem;
       width: 1.25rem;
       height: 1.25rem;
+      flex-shrink: 0;
     }
 
     &:hover,
@@ -94,6 +97,90 @@
       box-shadow: inset 3px 0 0 var(--zh-sidebar-primary);
     }
   }
+}
+
+.sidebar__label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.sidebar__badge {
+  flex-shrink: 0;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--zh-primary) 35%, transparent);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.sidebar__footer {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 0.5rem;
+  border-top: 1px solid var(--zh-sidebar-border);
+}
+
+.sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  flex: 1;
+  padding: 0.45rem 0.5rem;
+  border-radius: calc(var(--zh-radius) - 4px);
+  color: inherit;
+
+  &:hover {
+    background: var(--zh-sidebar-accent);
+  }
+}
+
+.sidebar__avatar,
+.topbar__avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: color-mix(in oklab, var(--zh-primary) 55%, var(--zh-secondary));
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.sidebar__user-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  span {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.sidebar__logout {
+  color: color-mix(in oklab, var(--zh-sidebar-foreground) 70%, transparent) !important;
 }
 
 .main-layout__content {
@@ -122,7 +209,7 @@
 .topbar__right {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.5rem;
 }
 
 .topbar__search {
@@ -132,7 +219,7 @@
   min-width: 16rem;
   max-width: 28rem;
   width: 100%;
-  padding: 0.45rem 0.75rem;
+  padding: 0.4rem 0.65rem;
   border: 1px solid var(--zh-border);
   border-radius: calc(var(--zh-radius) - 2px);
   background: var(--zh-card);
@@ -153,6 +240,39 @@
   }
 }
 
+.topbar__kbd {
+  flex-shrink: 0;
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 0.35rem;
+  background: var(--zh-muted);
+  color: var(--zh-muted-foreground);
+  font-family: var(--zh-font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.topbar__company {
+  max-width: 10rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 999px;
+  background: var(--zh-card);
+  color: var(--zh-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar__profile {
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+}
+
 .topbar__menu-mobile {
   display: none;
 }
@@ -164,6 +284,22 @@
 
 .sidebar-backdrop {
   display: none;
+}
+
+.main-layout--collapsed {
+  .sidebar__nav a {
+    justify-content: center;
+    padding-inline: 0.65rem;
+  }
+
+  .sidebar__footer {
+    justify-content: center;
+  }
+
+  .sidebar__user {
+    justify-content: center;
+    padding-inline: 0.35rem;
+  }
 }
 
 @media (max-width: 960px) {
@@ -198,11 +334,19 @@
   .topbar__search {
     min-width: 0;
   }
+
+  .topbar__company {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {
   .topbar__search input::placeholder {
     color: transparent;
+  }
+
+  .topbar__kbd {
+    display: none;
   }
 
   .page-content {

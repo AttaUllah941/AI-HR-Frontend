@@ -15,6 +15,13 @@ export class ApiService {
     });
   }
 
+  getText(path: string, params?: Record<string, string | number | boolean | undefined>): Observable<string> {
+    return this.http.get(`${this.baseUrl}${path}`, {
+      params: this.toParams(params),
+      responseType: 'text',
+    });
+  }
+
   post<T>(path: string, body?: unknown): Observable<ApiResponse<T>> {
     return this.http.post<ApiResponse<T>>(`${this.baseUrl}${path}`, body ?? {});
   }

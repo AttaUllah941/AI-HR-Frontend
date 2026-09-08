@@ -6,7 +6,6 @@ import { FeaturePlaceholderComponent } from '../../shared/components/feature-pla
   standalone: true,
   imports: [FeaturePlaceholderComponent],
   templateUrl: './ai-placeholder.component.html',
-  styleUrl: './ai-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AiPlaceholderComponent {}

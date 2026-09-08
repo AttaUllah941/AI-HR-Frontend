@@ -7,7 +7,6 @@ import { PageHeaderComponent } from '../page-header/page-header.component';
   standalone: true,
   imports: [EmptyStateComponent, PageHeaderComponent],
   templateUrl: './feature-placeholder.component.html',
-  styleUrl: './feature-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FeaturePlaceholderComponent {
