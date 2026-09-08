@@ -1,0 +1,153 @@
+<app-page-header
+  [title]="summary()?.label || 'Payroll'"
+  [subtitle]="
+    summary()
+      ? summary()!.employeeCount.toLocaleString() + ' employees · ' + statusLabel()
+      : 'Salary runs, deductions, and net pay'
+  "
+>
+  <div class="header-actions">
+    <button mat-icon-button type="button" aria-label="Previous month" (click)="shiftMonth(-1)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <button mat-icon-button type="button" aria-label="Next month" (click)="shiftMonth(1)">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    @if (canExport()) {
+      <button mat-stroked-button type="button" (click)="exportCsv()">
+        <mat-icon>download</mat-icon>
+        Export
+      </button>
+    }
+    @if (canRun()) {
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        [disabled]="running() || summary()?.status === 'COMPLETED'"
+        (click)="runPayroll()"
+      >
+        <mat-icon>payments</mat-icon>
+        {{ running() ? 'Running…' : summary()?.status === 'COMPLETED' ? 'Processed' : 'Run Payroll' }}
+      </button>
+    }
+  </div>
+</app-page-header>
+
+@if (loading()) {
+  <p class="muted">Loading payroll…</p>
+} @else {
+  <section class="hero-total" aria-label="Payroll total">
+    <p>Total net payroll</p>
+    <strong>{{ summary()?.totalNet || 0 | currency: (summary()?.currency || 'USD') : 'symbol' : '1.0-0' }}</strong>
+  </section>
+
+  <section class="kpi-grid" aria-label="Payroll breakdown">
+    @for (card of kpiCards(); track card.label) {
+      <article class="kpi-card" [attr.data-tone]="card.tone">
+        <p>{{ card.label }}</p>
+        <strong>{{ card.value | currency: (summary()?.currency || 'USD') : 'symbol' : '1.0-0' }}</strong>
+      </article>
+    }
+  </section>
+
+  <section class="panel">
+    <header class="panel__header panel__header--row">
+      <div>
+        <h2>Salary List</h2>
+        <p>Employee base, bonus, deductions, and net pay</p>
+      </div>
+      <button mat-stroked-button type="button" (click)="toggleFilters()">
+        <mat-icon>filter_list</mat-icon>
+        Filter
+      </button>
+    </header>
+
+    @if (showFilters()) {
+      <div class="filters">
+        <mat-form-field appearance="outline">
+          <mat-label>Search</mat-label>
+          <input
+            matInput
+            [value]="search()"
+            (input)="search.set($any($event.target).value)"
+            placeholder="Name or email"
+          />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Department</mat-label>
+          <mat-select [value]="departmentId()" (selectionChange)="departmentId.set($event.value)">
+            <mat-option value="">All departments</mat-option>
+            @for (dept of departments(); track dept.id) {
+              <mat-option [value]="dept.id">{{ dept.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <div class="filters__actions">
+          <button mat-stroked-button type="button" (click)="clearFilters()">Clear</button>
+          <button mat-flat-button color="primary" type="button" (click)="applyFilters()">Apply</button>
+        </div>
+      </div>
+    }
+
+    @if (entries().length === 0) {
+      <app-empty-state
+        title="No salary entries"
+        message="Seed or create payroll entries for this period to populate the salary list."
+        icon="payments"
+      />
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Department</th>
+              <th>Base</th>
+              <th>Bonus</th>
+              <th>Deductions</th>
+              <th>Net Pay</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of entries(); track entry.id) {
+              <tr>
+                <td>
+                  <div class="employee-cell">
+                    <span class="avatar" aria-hidden="true">{{ entry.employee.initials }}</span>
+                    <div>
+                      <strong>{{ entry.employee.firstName }} {{ entry.employee.lastName }}</strong>
+                      <small>{{ entry.employee.position || '—' }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ entry.employee.department?.name || '—' }}</td>
+                <td>{{ entry.baseSalary | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
+                <td class="positive">+{{ entry.bonus | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
+                <td class="negative">-{{ entry.deductions | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
+                <td class="net">{{ entry.netPay | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="pager">
+        <span>Page {{ page() }} of {{ totalPages() }} · {{ total() }} entries</span>
+        <div>
+          <button mat-stroked-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+            Previous
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="page() >= totalPages()"
+            (click)="nextPage()"
+          >
+            Next
+          </button>
+        </div>
+      </footer>
+    }
+  </section>
+}

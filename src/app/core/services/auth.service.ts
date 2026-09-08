@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, finalize, map, shareReplay, tap, throwError } from 'rxjs';
 import { ApiService } from './api.service';
 import {
   ApiResponse,
@@ -25,6 +25,7 @@ export class AuthService {
 
   private readonly userSignal = signal<AuthUser | null>(this.readUser());
   private readonly accessTokenSignal = signal<string | null>(this.readAccessToken());
+  private refreshInFlight$: Observable<AuthSessionData> | null = null;
 
   readonly user = this.userSignal.asReadonly();
   readonly accessToken = this.accessTokenSignal.asReadonly();
@@ -54,7 +55,7 @@ export class AuthService {
     localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
-    localStorage.removeItem(MFA_TOKEN_KEY);
+    this.clearMfaChallengeToken();
     this.accessTokenSignal.set(tokens.accessToken);
     this.userSignal.set(user);
   }
@@ -63,7 +64,8 @@ export class AuthService {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(MFA_TOKEN_KEY);
+    this.clearMfaChallengeToken();
+    this.refreshInFlight$ = null;
     this.accessTokenSignal.set(null);
     this.userSignal.set(null);
   }
@@ -78,6 +80,7 @@ export class AuthService {
 
   clearMfaChallengeToken(): void {
     sessionStorage.removeItem(MFA_TOKEN_KEY);
+    localStorage.removeItem(MFA_TOKEN_KEY);
   }
 
   register(payload: {
@@ -115,47 +118,51 @@ export class AuthService {
   verifyMfa(code: string): Observable<AuthSessionData> {
     const mfaToken = this.getMfaChallengeToken();
     if (!mfaToken) {
-      throw new Error('Missing MFA challenge token');
+      return throwError(() => new Error('Missing MFA challenge token'));
     }
 
-    return this.api
-      .post<AuthSessionData>('/auth/mfa/verify', { mfaToken, code })
-      .pipe(
-        map((res) => this.unwrap(res)),
-        tap((data) => {
-          this.setSession(data.user, {
-            accessToken: data.accessToken,
-            refreshToken: data.refreshToken,
-          });
-          this.clearMfaChallengeToken();
-        }),
-      );
+    return this.api.post<AuthSessionData>('/auth/mfa/verify', { mfaToken, code }).pipe(
+      map((res) => this.unwrap(res)),
+      tap((data) => {
+        this.setSession(data.user, {
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        });
+      }),
+    );
   }
 
   refresh(): Observable<AuthSessionData> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      throw new Error('Missing refresh token');
+    if (this.refreshInFlight$) {
+      return this.refreshInFlight$;
     }
 
-    return this.api
-      .post<AuthSessionData>('/auth/refresh', { refreshToken })
-      .pipe(
-        map((res) => this.unwrap(res)),
-        tap((data) => {
-          this.setSession(data.user, {
-            accessToken: data.accessToken,
-            refreshToken: data.refreshToken,
-          });
-        }),
-      );
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      return throwError(() => new Error('Missing refresh token'));
+    }
+
+    this.refreshInFlight$ = this.api.post<AuthSessionData>('/auth/refresh', { refreshToken }).pipe(
+      map((res) => this.unwrap(res)),
+      tap((data) => {
+        this.setSession(data.user, {
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        });
+      }),
+      finalize(() => {
+        this.refreshInFlight$ = null;
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+
+    return this.refreshInFlight$;
   }
 
   logout(): void {
     const refreshToken = this.getRefreshToken();
     this.api.post('/auth/logout', { refreshToken }).subscribe({
       error: () => undefined,
-      complete: () => undefined,
     });
     this.clearSession();
     void this.router.navigate(['/auth/login']);

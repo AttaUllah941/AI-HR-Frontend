@@ -1,0 +1,306 @@
+<app-page-header
+  title="Organization"
+  subtitle="Company profile, departments & teams, and work locations"
+/>
+
+@if (loading()) {
+  <p class="org-status">Loading organization…</p>
+} @else {
+  <nav class="org-tabs" aria-label="Organization sections">
+    <button type="button" [class.is-active]="tab() === 'overview'" (click)="setTab('overview')">Overview</button>
+    <button type="button" [class.is-active]="tab() === 'company'" (click)="setTab('company')">Company</button>
+    <button type="button" [class.is-active]="tab() === 'departments'" (click)="setTab('departments')">
+      Departments &amp; Teams
+    </button>
+    <button type="button" [class.is-active]="tab() === 'locations'" (click)="setTab('locations')">Locations</button>
+  </nav>
+
+  @if (tab() === 'overview') {
+    <section class="settings-grid" aria-label="Organization areas">
+      <button type="button" class="settings-card" (click)="setTab('company')">
+        <mat-icon>apartment</mat-icon>
+        <div>
+          <strong>Company</strong>
+          <p>Name, logo, address, legal info</p>
+        </div>
+      </button>
+      <button type="button" class="settings-card" (click)="setTab('departments')">
+        <mat-icon>account_tree</mat-icon>
+        <div>
+          <strong>Departments &amp; Teams</strong>
+          <p>Manage org structure and reporting · {{ deptTotal() }} active</p>
+        </div>
+      </button>
+      <button type="button" class="settings-card" (click)="setTab('locations')">
+        <mat-icon>location_on</mat-icon>
+        <div>
+          <strong>Locations</strong>
+          <p>Offices and remote sites · {{ locTotal() }} active</p>
+        </div>
+      </button>
+    </section>
+
+    @if (company(); as c) {
+      <article class="panel summary-panel">
+        <h2>{{ c.name }}</h2>
+        <p>
+          {{ c.legalName || 'No legal name set' }}
+          @if (c.city || c.country) {
+            · {{ placeLabel(c.city, c.country) }}
+          }
+        </p>
+        <dl class="summary-meta">
+          <div>
+            <dt>Email</dt>
+            <dd>{{ c.email || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Timezone</dt>
+            <dd>{{ c.timezone }}</dd>
+          </div>
+          <div>
+            <dt>Locale</dt>
+            <dd>{{ c.locale }}</dd>
+          </div>
+        </dl>
+      </article>
+    }
+  }
+
+  @if (tab() === 'company') {
+    <section class="panel">
+      <header class="panel__header">
+        <div>
+          <h2>Company profile</h2>
+          <p>Legal identity and contact details for your organization</p>
+        </div>
+      </header>
+
+      <form class="org-form" [formGroup]="companyForm" (ngSubmit)="saveCompany()">
+        <div class="org-form__grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Company name</mat-label>
+            <input matInput formControlName="name" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Legal name</mat-label>
+            <input matInput formControlName="legalName" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="phone" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="span-2">
+            <mat-label>Website</mat-label>
+            <input matInput formControlName="website" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="span-2">
+            <mat-label>Address line 1</mat-label>
+            <input matInput formControlName="addressLine1" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="span-2">
+            <mat-label>Address line 2</mat-label>
+            <input matInput formControlName="addressLine2" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>City</mat-label>
+            <input matInput formControlName="city" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>State / Province</mat-label>
+            <input matInput formControlName="state" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Country</mat-label>
+            <input matInput formControlName="country" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Postal code</mat-label>
+            <input matInput formControlName="postalCode" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Timezone</mat-label>
+            <input matInput formControlName="timezone" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Locale</mat-label>
+            <input matInput formControlName="locale" />
+          </mat-form-field>
+        </div>
+
+        @if (canManage()) {
+          <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+            {{ saving() ? 'Saving…' : 'Save company' }}
+          </button>
+        }
+      </form>
+    </section>
+  }
+
+  @if (tab() === 'departments') {
+    <section class="panel">
+      <header class="panel__header">
+        <div>
+          <h2>Departments &amp; Teams</h2>
+          <p>Manage org structure used across employees and reporting</p>
+        </div>
+        <div class="panel__search">
+          <mat-icon>search</mat-icon>
+          <input
+            type="search"
+            placeholder="Filter departments"
+            [value]="deptSearch()"
+            (input)="onDeptSearch($any($event.target).value)"
+          />
+        </div>
+      </header>
+
+      @if (canManage()) {
+        <form class="inline-form" [formGroup]="departmentForm" (ngSubmit)="createDepartment()">
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Code</mat-label>
+            <input matInput formControlName="code" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="grow">
+            <mat-label>Description</mat-label>
+            <input matInput formControlName="description" />
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit" [disabled]="saving()">Add</button>
+        </form>
+      }
+
+      @if (departments().length === 0) {
+        <app-empty-state
+          title="No departments yet"
+          message="Create Engineering, Sales, and other teams to mirror your org chart."
+          icon="account_tree"
+        />
+      } @else {
+        <div class="data-table" role="table">
+          <div class="data-table__head" role="row">
+            <span role="columnheader">Department</span>
+            <span role="columnheader">Code</span>
+            <span role="columnheader">Status</span>
+            <span role="columnheader"></span>
+          </div>
+          @for (dept of departments(); track dept.id) {
+            <div class="data-table__row" role="row">
+              <div role="cell">
+                <strong>{{ dept.name }}</strong>
+                @if (dept.description) {
+                  <small>{{ dept.description }}</small>
+                }
+              </div>
+              <span role="cell">{{ dept.code || '—' }}</span>
+              <span role="cell">
+                <span class="status-pill" [class.is-active]="dept.isActive">
+                  {{ dept.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </span>
+              <span role="cell" class="data-table__actions">
+                @if (canManage()) {
+                  <button mat-icon-button type="button" aria-label="Remove department" (click)="removeDepartment(dept)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  @if (tab() === 'locations') {
+    <section class="panel">
+      <header class="panel__header">
+        <div>
+          <h2>Locations</h2>
+          <p>Headquarters, offices, and remote sites</p>
+        </div>
+        <div class="panel__search">
+          <mat-icon>search</mat-icon>
+          <input
+            type="search"
+            placeholder="Filter locations"
+            [value]="locSearch()"
+            (input)="onLocSearch($any($event.target).value)"
+          />
+        </div>
+      </header>
+
+      @if (canManage()) {
+        <form class="inline-form" [formGroup]="locationForm" (ngSubmit)="createLocation()">
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Code</mat-label>
+            <input matInput formControlName="code" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>City</mat-label>
+            <input matInput formControlName="city" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Country</mat-label>
+            <input matInput formControlName="country" />
+          </mat-form-field>
+          <mat-checkbox formControlName="isHeadquarters">Headquarters</mat-checkbox>
+          <button mat-flat-button color="primary" type="submit" [disabled]="saving()">Add</button>
+        </form>
+      }
+
+      @if (locations().length === 0) {
+        <app-empty-state
+          title="No locations yet"
+          message="Add offices or remote hubs so attendance and payroll can target sites."
+          icon="location_on"
+        />
+      } @else {
+        <div class="data-table" role="table">
+          <div class="data-table__head" role="row">
+            <span role="columnheader">Location</span>
+            <span role="columnheader">Place</span>
+            <span role="columnheader">Flags</span>
+            <span role="columnheader"></span>
+          </div>
+          @for (loc of locations(); track loc.id) {
+            <div class="data-table__row" role="row">
+              <div role="cell">
+                <strong>{{ loc.name }}</strong>
+                @if (loc.code) {
+                  <small>{{ loc.code }}</small>
+                }
+              </div>
+              <span role="cell">{{ placeLabel(loc.city, loc.country) || '—' }}</span>
+              <span role="cell">
+                @if (loc.isHeadquarters) {
+                  <span class="status-pill is-active">HQ</span>
+                } @else {
+                  <span class="status-pill">Site</span>
+                }
+              </span>
+              <span role="cell" class="data-table__actions">
+                @if (canManage()) {
+                  <button mat-icon-button type="button" aria-label="Remove location" (click)="removeLocation(loc)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+}
