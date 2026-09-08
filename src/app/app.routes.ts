@@ -100,6 +100,11 @@ export const routes: Routes = [
           import('./features/profile/profile.routes').then((m) => m.PROFILE_ROUTES),
       },
       {
+        path: 'search',
+        loadChildren: () =>
+          import('./features/search/search.routes').then((m) => m.SEARCH_ROUTES),
+      },
+      {
         path: 'settings',
         canActivate: [permissionGuard('settings:view')],
         loadChildren: () =>

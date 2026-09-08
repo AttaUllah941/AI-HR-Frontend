@@ -4,6 +4,8 @@ import {
 
   Component,
 
+  HostListener,
+
   OnInit,
 
   computed,
@@ -34,6 +36,8 @@ import { MatBadgeModule } from '@angular/material/badge';
 
 import { MatDividerModule } from '@angular/material/divider';
 
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+
 import { AuthService } from '../../core/services/auth.service';
 
 import {
@@ -59,6 +63,8 @@ import {
 } from '../../shared/components/breadcrumb/breadcrumb.component';
 
 import { environment } from '../../../environments/environment';
+
+
 
 
 
@@ -120,6 +126,8 @@ const ROUTE_LABELS: Record<string, string> = {
 
   profile: 'Profile',
 
+  search: 'Search',
+
   settings: 'Settings',
 
   files: 'Files',
@@ -178,6 +186,8 @@ const ROLE_LABELS: Record<string, string> = {
 
     MatDividerModule,
 
+    MatDialogModule,
+
     LoadingOverlayComponent,
 
     BreadcrumbComponent,
@@ -203,6 +213,12 @@ export class MainLayoutComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
   private readonly router = inject(Router);
+
+  private readonly dialog = inject(MatDialog);
+
+  private pendingNavKey: string | null = null;
+
+  private pendingNavTimer: ReturnType<typeof setTimeout> | null = null;
 
 
 
@@ -455,13 +471,167 @@ export class MainLayoutComponent implements OnInit {
 
     const query = this.searchQuery().trim();
 
-    if (!query) {
+    this.openCommandPalette(query);
+
+  }
+
+
+
+  openCommandPalette(initialQuery = ''): void {
+
+    void import('../../features/search/dialogs/command-palette-dialog.component').then(
+
+      ({ CommandPaletteDialogComponent }) => {
+
+        this.dialog.open(CommandPaletteDialogComponent, {
+
+          width: '36rem',
+
+          data: { initialQuery },
+
+          autoFocus: true,
+
+        });
+
+      },
+
+    );
+
+  }
+
+
+
+  openShortcutsHelp(): void {
+
+    void import('../../features/search/dialogs/shortcuts-help-dialog.component').then(
+
+      ({ ShortcutsHelpDialogComponent }) => {
+
+        this.dialog.open(ShortcutsHelpDialogComponent, { width: '28rem' });
+
+      },
+
+    );
+
+  }
+
+
+
+  @HostListener('document:keydown', ['$event'])
+
+  onGlobalKeydown(event: KeyboardEvent): void {
+
+    const target = event.target as HTMLElement | null;
+
+    const tag = target?.tagName?.toLowerCase();
+
+    const typing =
+
+      tag === 'input' ||
+
+      tag === 'textarea' ||
+
+      tag === 'select' ||
+
+      target?.isContentEditable;
+
+
+
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+
+      event.preventDefault();
+
+      this.openCommandPalette(this.searchQuery());
 
       return;
 
     }
 
-    this.toast.info('Global search arrives in a later phase. Query saved locally for now.');
+
+
+    if ((event.ctrlKey || event.metaKey) && event.key === '/') {
+
+      event.preventDefault();
+
+      this.openShortcutsHelp();
+
+      return;
+
+    }
+
+
+
+    if (typing || event.ctrlKey || event.metaKey || event.altKey) {
+
+      return;
+
+    }
+
+
+
+    const key = event.key.toLowerCase();
+
+    if (this.pendingNavKey === 'g') {
+
+      this.pendingNavKey = null;
+
+      if (this.pendingNavTimer) {
+
+        clearTimeout(this.pendingNavTimer);
+
+        this.pendingNavTimer = null;
+
+      }
+
+      const routes: Record<string, string> = {
+
+        d: '/dashboard',
+
+        e: '/employees',
+
+        f: '/files',
+
+        p: '/profile',
+
+        s: '/search',
+
+      };
+
+      const route = routes[key];
+
+      if (route) {
+
+        event.preventDefault();
+
+        void this.router.navigateByUrl(route);
+
+      }
+
+      return;
+
+    }
+
+
+
+    if (key === 'g') {
+
+      this.pendingNavKey = 'g';
+
+      if (this.pendingNavTimer) {
+
+        clearTimeout(this.pendingNavTimer);
+
+      }
+
+      this.pendingNavTimer = setTimeout(() => {
+
+        this.pendingNavKey = null;
+
+        this.pendingNavTimer = null;
+
+      }, 800);
+
+    }
 
   }
 

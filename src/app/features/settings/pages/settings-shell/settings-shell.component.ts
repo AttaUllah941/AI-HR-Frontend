@@ -37,6 +37,7 @@ export class SettingsShellComponent {
     { label: 'Email', route: 'email', icon: 'mail' },
     { label: 'Storage', route: 'storage', icon: 'cloud' },
     { label: 'System', route: 'system', icon: 'tune' },
+    { label: 'Security', route: 'security', icon: 'security' },
     { label: 'Audit', route: 'audit', icon: 'history' },
   ];
 
