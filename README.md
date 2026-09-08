@@ -1,34 +1,19 @@
 # Zenith HR — Frontend
 
-Angular 21 standalone application implementing the Zenith / Nova HR Lovable UX.
+Angular SPA for the Zenith Enterprise AI HR platform.
 
 ## Scripts
 
 | Command | Description |
-|---|---|
-| `npm start` | Dev server at `http://localhost:4200` |
+|---------|-------------|
+| `npm start` | Dev server |
 | `npm run build` | Production build |
-| `npm test` | Unit tests (Vitest) |
+| `npm run test:ci` | Vitest unit tests (CI) |
 
-## Architecture
+## Production
 
-```
-src/app/
-  core/           guards, interceptors, services, models
-  shared/         reusable UI components
-  layouts/        auth + main application shell
-  features/       lazy-loaded feature modules
-src/styles/       design tokens + Material theme overrides
-src/environments/ API base URL and app metadata
-```
+The production Docker image builds the SPA and serves it with nginx (`Dockerfile`, `nginx.conf`). When used from the backend compose stack, `/api/` is proxied to the API container.
 
-## Theme
+See the backend guide: [`AI-HR-Backend/docs/PRODUCTION.md`](../../AI-HR-Backend/docs/PRODUCTION.md) (path relative from monorepo layout).
 
-Tokens are sourced from the Lovable UX (`oklch` palette, `--radius: 0.875rem`, Inter, dark sidebar). Angular Material is themed/overridden to match — not used with stock defaults.
-
-## Phase 2 notes
-
-- Real JWT login/register/forgot/reset/verify/MFA against the API
-- Demo admin after seed: `admin@zenith.local` / `Password123!`
-- MFA challenge: `/auth/mfa` · MFA setup (authenticated): `/mfa-setup`
-- Access token refresh is handled by `refreshInterceptor`
+Production `environment.ts` uses `apiBaseUrl: '/api/v1'` (same-origin).
