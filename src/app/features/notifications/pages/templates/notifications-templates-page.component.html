@@ -1,0 +1,123 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading templates…"
+  errorTitle="Templates unavailable"
+  (retry)="reload()"
+>
+  <section class="notifications-page" aria-label="Notification templates">
+    <div class="notifications-action-bar">
+      <div>
+        <h2 class="notifications-page-heading">Templates</h2>
+        <p class="notifications-page-sub">
+          Reusable subject/body templates for managed notification sends.
+        </p>
+      </div>
+      @if (canManage) {
+        <div class="notifications-action-bar__actions">
+          <button mat-stroked-button type="button" (click)="openSend()">
+            <mat-icon aria-hidden="true">send</mat-icon>
+            Send test
+          </button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="notifications-add-btn"
+            (click)="openCreate()"
+          >
+            <mat-icon aria-hidden="true">add</mat-icon>
+            New template
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (!canManage) {
+      <app-empty-state
+        title="Manage permission required"
+        message="Template management needs the notifications:manage permission."
+        icon="lock"
+      />
+    } @else if (items().length === 0) {
+      <app-empty-state
+        title="No templates yet"
+        message="Create a template to reuse titles and bodies when sending notifications."
+        icon="description"
+      />
+    } @else {
+      <div class="notifications-table-card">
+        <div class="notifications-table-wrap">
+          <table class="notifications-table">
+            <thead>
+              <tr>
+                <th scope="col">Code</th>
+                <th scope="col">Name</th>
+                <th scope="col">Category</th>
+                <th scope="col">Channel</th>
+                <th scope="col">Active</th>
+                <th scope="col">Created</th>
+                <th scope="col" class="notifications-table__actions-col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of items(); track item.id) {
+                <tr class="notifications-table__row">
+                  <td>
+                    <code>{{ item.code }}</code>
+                  </td>
+                  <td>{{ item.name }}</td>
+                  <td>{{ categoryLabel(item.category) }}</td>
+                  <td>{{ channelLabel(item.channel) }}</td>
+                  <td>
+                    <span
+                      class="notifications-status-pill"
+                      [class.notifications-status-pill--success]="item.isActive"
+                      [class.notifications-status-pill--pending]="!item.isActive"
+                    >
+                      <span class="notifications-status-pill__dot" aria-hidden="true"></span>
+                      {{ item.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td>{{ createdLabel(item.createdAt) }}</td>
+                  <td class="notifications-table__actions-col">
+                    <button
+                      mat-icon-button
+                      type="button"
+                      class="notifications-table__menu-btn"
+                      matTooltip="Send with template"
+                      aria-label="Send with template"
+                      (click)="openSend(item)"
+                    >
+                      <mat-icon>send</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      type="button"
+                      class="notifications-table__menu-btn"
+                      matTooltip="Edit"
+                      aria-label="Edit template"
+                      (click)="openEdit(item)"
+                    >
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      type="button"
+                      class="notifications-table__menu-btn"
+                      matTooltip="Delete"
+                      aria-label="Delete template"
+                      (click)="deleteTemplate(item)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  </section>
+</app-organization-status>

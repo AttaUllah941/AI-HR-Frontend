@@ -1,0 +1,83 @@
+<app-organization-section-header
+  title="Departments"
+  description="Organize teams into departments and define reporting hierarchy."
+  icon="account_tree"
+  [count]="loading() || error() ? null : items().length"
+>
+  @if (canCreate) {
+    <button mat-flat-button color="primary" type="button" (click)="openForm()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Add department
+    </button>
+  }
+</app-organization-section-header>
+
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading departments…"
+  errorTitle="Departments unavailable"
+  (retry)="reload()"
+>
+  @if (items().length === 0) {
+    <app-empty-state
+      title="No departments yet"
+      message="Create departments to group teams and build your org structure."
+      icon="account_tree"
+    >
+      @if (canCreate) {
+        <button mat-flat-button color="primary" type="button" (click)="openForm()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add department
+        </button>
+      }
+    </app-empty-state>
+  } @else {
+    <div class="org-entity-list" role="list" aria-label="Departments">
+      @for (item of items(); track item.id) {
+        <mat-card class="org-entity-card" role="listitem">
+          <div class="org-entity-card__body">
+            <div class="org-entity-card__title">
+              <strong>{{ item.name }}</strong>
+              <code class="org-entity-card__code">{{ item.code }}</code>
+            </div>
+            <p class="org-entity-card__meta">
+              <span>{{ item.branch?.name || 'Company-wide' }}</span>
+              @if (item.parent) {
+                <span aria-hidden="true">·</span>
+                <span>Parent: {{ item.parent.name }}</span>
+              }
+              <span aria-hidden="true">·</span>
+              <span>{{ item.teamCount ?? 0 }} teams</span>
+            </p>
+          </div>
+          <div class="org-entity-card__actions">
+            @if (canUpdate) {
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Edit {{ item.name }}"
+                [disabled]="deletingId() === item.id"
+                (click)="openForm(item)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+            @if (canDelete) {
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Delete {{ item.name }}"
+                [disabled]="deletingId() === item.id"
+                (click)="remove(item)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
+        </mat-card>
+      }
+    </div>
+  }
+</app-organization-status>
+

@@ -1,0 +1,68 @@
+<h2 mat-dialog-title class="att-dialog-title">
+  <mat-icon aria-hidden="true">schedule</mat-icon>
+  {{ data.shift ? 'Edit shift' : 'Add shift' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="att-dialog-subtitle">
+    {{ data.shift ? 'Update shift hours and settings.' : 'Define a working shift for your company.' }}
+  </p>
+
+  <form [formGroup]="form" class="att-form" id="shift-form" (ngSubmit)="submit()">
+    <div class="att-form__grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" />
+        @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+          <mat-error>Name is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Code</mat-label>
+        <input matInput formControlName="code" />
+        @if (form.controls.code.touched && form.controls.code.hasError('required')) {
+          <mat-error>Code is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Start time</mat-label>
+        <input matInput type="time" formControlName="startTime" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>End time</mat-label>
+        <input matInput type="time" formControlName="endTime" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Break minutes</mat-label>
+        <input matInput type="number" formControlName="breakMinutes" min="0" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Grace minutes</mat-label>
+        <input matInput type="number" formControlName="graceMinutes" min="0" />
+      </mat-form-field>
+    </div>
+
+    <mat-checkbox formControlName="isDefault">Mark as default shift</mat-checkbox>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="att-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="shift-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : 'Save shift' }}
+  </button>
+</mat-dialog-actions>

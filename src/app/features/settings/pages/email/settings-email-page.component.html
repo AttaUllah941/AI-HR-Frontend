@@ -1,0 +1,72 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading email settings…"
+  errorTitle="Email settings unavailable"
+  (retry)="reload()"
+>
+  <section class="settings-page" aria-label="Email settings">
+    <div class="settings-action-bar">
+      <div>
+        <h2 class="settings-page-heading">Email settings</h2>
+        <p class="settings-page-sub">
+          Provider configuration for outbound mail.
+          @if (apiKeySet()) {
+            <span class="settings-badge settings-badge--ok">API key set</span>
+          } @else {
+            <span class="settings-badge settings-badge--warn">API key not set</span>
+          }
+        </p>
+      </div>
+      @if (canUpdate) {
+        <div class="settings-action-bar__actions">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="settings-add-btn"
+            [disabled]="form.invalid || saving()"
+            (click)="save()"
+          >
+            @if (saving()) {
+              <mat-spinner diameter="16" />
+            } @else {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
+            {{ saving() ? 'Saving…' : 'Save email' }}
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="settings-panel-card">
+      <form [formGroup]="form" class="settings-form" (ngSubmit)="save()">
+        <div class="settings-form__grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Provider</mat-label>
+            <mat-select formControlName="emailProvider">
+              <mat-option value="console">console (dev)</mat-option>
+              <mat-option value="smtp">smtp</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>From address</mat-label>
+            <input matInput formControlName="emailFrom" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="settings-form__full">
+            <mat-label>SMTP URL</mat-label>
+            <input matInput formControlName="emailSmtpUrl" placeholder="smtps://user:pass@host:465" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="settings-form__full">
+            <mat-label>API key (optional)</mat-label>
+            <input matInput formControlName="emailApiKey" type="password" autocomplete="off" />
+            <mat-hint>Stored as a flag only — runtime keys still come from environment</mat-hint>
+          </mat-form-field>
+          <div class="settings-form__full">
+            <mat-checkbox formControlName="clearApiKey">Clear API key flag</mat-checkbox>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</app-organization-status>

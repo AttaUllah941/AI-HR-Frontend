@@ -1,0 +1,54 @@
+<h2 mat-dialog-title class="ai-dialog-title">
+  <mat-icon aria-hidden="true">rate_review</mat-icon>
+  Generate appraisal with Nova
+</h2>
+
+<mat-dialog-content>
+  <p class="ai-dialog-subtitle">
+    Pick an employee and optionally link a performance review. Nova drafts a narrative and strengths.
+  </p>
+
+  <form [formGroup]="form" class="ai-form" id="appraisal-form" (ngSubmit)="submit()">
+    <div class="ai-form__grid">
+      <mat-form-field appearance="outline" class="ai-form__full">
+        <mat-label>Employee</mat-label>
+        <mat-select formControlName="employeeId">
+          @for (emp of employees(); track emp.id) {
+            <mat-option [value]="emp.id">{{ employeeLabel(emp) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="ai-form__full">
+        <mat-label>Review (optional)</mat-label>
+        <mat-select formControlName="reviewId">
+          <mat-option value="">None</mat-option>
+          @for (review of reviews(); track review.id) {
+            <mat-option [value]="review.id">{{ reviewLabel(review) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="ai-form__full">
+        <mat-label>Period label (optional)</mat-label>
+        <input matInput formControlName="periodLabel" placeholder="e.g. H1 2026" />
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="ai-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="appraisal-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner diameter="16" />
+    }
+    {{ saving() ? 'Generating…' : 'Generate draft' }}
+  </button>
+</mat-dialog-actions>

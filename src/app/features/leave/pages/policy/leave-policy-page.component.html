@@ -1,0 +1,47 @@
+<app-organization-section-header
+  title="Leave policy"
+  description="Company-wide rules for leave calculation and notice periods."
+  icon="policy"
+/>
+
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading leave policy…"
+  errorTitle="Leave policy unavailable"
+  (retry)="reload()"
+>
+  <mat-card class="leave-policy-card">
+    <form [formGroup]="form" class="leave-form" (ngSubmit)="save()">
+      <mat-checkbox formControlName="allowNegativeBalance">
+        Allow negative leave balance
+      </mat-checkbox>
+      <mat-checkbox formControlName="countWeekends">Count weekends as leave days</mat-checkbox>
+      <mat-checkbox formControlName="countHolidays">Count holidays as leave days</mat-checkbox>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Minimum notice days</mat-label>
+        <input matInput type="number" formControlName="minNoticeDays" min="0" max="90" />
+        @if (form.controls.minNoticeDays.touched && form.controls.minNoticeDays.invalid) {
+          <mat-error>Enter a value between 0 and 90</mat-error>
+        }
+      </mat-form-field>
+
+      @if (canUpdate) {
+        <div class="leave-policy-actions">
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="form.invalid || saving() || form.pristine"
+          >
+            @if (saving()) {
+              <mat-spinner class="save-spinner" diameter="16" />
+            }
+            {{ saving() ? 'Saving…' : 'Save policy' }}
+          </button>
+        </div>
+      }
+    </form>
+  </mat-card>
+</app-organization-status>

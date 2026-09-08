@@ -1,0 +1,69 @@
+<h2 mat-dialog-title class="recruitment-dialog-title">
+  <mat-icon aria-hidden="true">handshake</mat-icon>
+  {{ data.offer ? 'Edit offer' : 'Create offer' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="recruitment-dialog-subtitle">Set compensation and key offer details.</p>
+
+  <form [formGroup]="form" class="recruitment-form" id="offer-form" (ngSubmit)="submit()">
+    <div class="recruitment-form__grid">
+      @if (!isEdit) {
+        <mat-form-field appearance="outline" class="recruitment-form__full">
+          <mat-label>Application</mat-label>
+          <mat-select formControlName="applicationId">
+            @for (app of applications(); track app.id) {
+              <mat-option [value]="app.id">{{ applicationLabel(app) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      <mat-form-field appearance="outline" class="recruitment-form__full">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Salary</mat-label>
+        <input matInput type="number" min="0" formControlName="salary" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Currency</mat-label>
+        <input matInput formControlName="currency" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Start date</mat-label>
+        <input matInput type="date" formControlName="startDate" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Expires</mat-label>
+        <input matInput type="date" formControlName="expiresAt" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="recruitment-form__full">
+        <mat-label>Notes</mat-label>
+        <textarea matInput rows="3" formControlName="notes"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="recruitment-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="offer-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : data.offer ? 'Save changes' : 'Create offer' }}
+  </button>
+</mat-dialog-actions>

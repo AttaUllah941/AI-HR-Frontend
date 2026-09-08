@@ -1,0 +1,137 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading today’s attendance…"
+  errorTitle="Attendance unavailable"
+  (retry)="reload()"
+>
+  <section class="att-today" aria-label="Today overview">
+    <div class="att-kpi-grid">
+      @for (card of kpis(); track card.key) {
+        <mat-card class="att-kpi-card">
+          <div class="att-kpi-card__header">
+            <span class="att-kpi-card__icon att-kpi-card__icon--{{ card.tone }}">
+              <mat-icon aria-hidden="true">{{ card.icon }}</mat-icon>
+            </span>
+          </div>
+          <p class="att-kpi-card__label">{{ card.label }}</p>
+          <strong class="att-kpi-card__value">{{ card.value }}</strong>
+        </mat-card>
+      }
+    </div>
+
+    <div class="att-today__grid">
+      <mat-card class="att-clock-card">
+        <div class="att-clock-card__header">
+          <div>
+            <h2>My clock</h2>
+            <p>Track your check-in and check-out for today</p>
+          </div>
+          <mat-icon aria-hidden="true">punch_clock</mat-icon>
+        </div>
+
+        @if (myToday(); as today) {
+          <div class="att-clock-card__times">
+            <div>
+              <span>Check-in</span>
+              <strong>{{ formatTime(today.record?.checkInAt) }}</strong>
+            </div>
+            <div>
+              <span>Check-out</span>
+              <strong>{{ formatTime(today.record?.checkOutAt) }}</strong>
+            </div>
+            <div>
+              <span>Status</span>
+              <strong>{{ today.record?.status?.replace(/_/g, ' ') || 'Not started' }}</strong>
+            </div>
+          </div>
+
+          <div class="att-clock-card__actions">
+            @if (!canClock) {
+              <p class="att-clock-card__hint">You don’t have permission to clock in or out.</p>
+            } @else if (clockState() === 'clock-in') {
+              <button
+                mat-flat-button
+                color="primary"
+                type="button"
+                [disabled]="clocking()"
+                (click)="clockIn()"
+              >
+                @if (clocking()) {
+                  <mat-spinner diameter="16" />
+                } @else {
+                  <mat-icon aria-hidden="true">login</mat-icon>
+                }
+                Clock in
+              </button>
+            } @else if (clockState() === 'clock-out') {
+              <button
+                mat-flat-button
+                color="primary"
+                type="button"
+                [disabled]="clocking()"
+                (click)="clockOut()"
+              >
+                @if (clocking()) {
+                  <mat-spinner diameter="16" />
+                } @else {
+                  <mat-icon aria-hidden="true">logout</mat-icon>
+                }
+                Clock out
+              </button>
+            } @else {
+              <div class="att-clock-card__done">
+                <mat-icon aria-hidden="true">task_alt</mat-icon>
+                <span>Day completed — you’re clocked out</span>
+              </div>
+            }
+          </div>
+        } @else {
+          <app-empty-state
+            title="No clock data"
+            message="We couldn’t load your personal attendance for today."
+            icon="schedule"
+          />
+        }
+      </mat-card>
+
+      <mat-card class="att-shift-card">
+        <div class="att-shift-card__header">
+          <h2>Today’s shift</h2>
+          <mat-icon aria-hidden="true">schedule</mat-icon>
+        </div>
+
+        @if (myToday()?.shift; as shift) {
+          <dl class="att-shift-card__meta">
+            <div>
+              <dt>Name</dt>
+              <dd>{{ shift.name }}</dd>
+            </div>
+            <div>
+              <dt>Code</dt>
+              <dd><code>{{ shift.code }}</code></dd>
+            </div>
+            <div>
+              <dt>Hours</dt>
+              <dd>{{ shift.startTime }} – {{ shift.endTime }}</dd>
+            </div>
+            <div>
+              <dt>Break</dt>
+              <dd>{{ shift.breakMinutes }} min</dd>
+            </div>
+            <div>
+              <dt>Grace</dt>
+              <dd>{{ shift.graceMinutes }} min</dd>
+            </div>
+          </dl>
+        } @else {
+          <app-empty-state
+            title="No default shift"
+            message="Set a default shift under Shifts to see today’s schedule here."
+            icon="schedule"
+          />
+        }
+      </mat-card>
+    </div>
+  </section>
+</app-organization-status>

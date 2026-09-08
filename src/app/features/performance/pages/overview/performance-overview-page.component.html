@@ -1,0 +1,149 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading performance overview…"
+  errorTitle="Performance overview unavailable"
+  (retry)="reload()"
+>
+  <section class="performance-page" aria-label="Performance overview">
+    <div class="performance-action-bar">
+      <div>
+        <h2 class="performance-overview-heading">
+          {{ isEmployeeView() ? 'My performance' : 'Performance overview' }} · {{ year }}
+        </h2>
+        <p class="performance-overview-sub">
+          {{
+            isEmployeeView()
+              ? 'Your goals, reviews, and feedback for the current year'
+              : 'Goals, reviews, promotions, and ratings across the company'
+          }}
+        </p>
+      </div>
+      @if (canCreate && !isEmployeeView()) {
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="performance-add-btn"
+          (click)="openCreateGoal()"
+        >
+          <mat-icon aria-hidden="true">add</mat-icon>
+          New goal
+        </button>
+      }
+    </div>
+
+    <div class="performance-kpi-grid" style="grid-template-columns: repeat(4, minmax(0, 1fr))">
+      @for (card of kpis(); track card.key) {
+        <mat-card class="performance-kpi-card">
+          <div class="performance-kpi-card__header">
+            <span class="performance-kpi-card__icon performance-kpi-card__icon--{{ card.tone }}">
+              <mat-icon aria-hidden="true">{{ card.icon }}</mat-icon>
+            </span>
+          </div>
+          <p class="performance-kpi-card__label">{{ card.label }}</p>
+          <strong class="performance-kpi-card__value">{{ card.value }}</strong>
+        </mat-card>
+      }
+    </div>
+
+    <div>
+      <div class="performance-action-bar">
+        <h3 class="performance-overview-heading">Recent goals</h3>
+        <a mat-stroked-button routerLink="/performance/goals">View all</a>
+      </div>
+      @if (recentGoals().length === 0) {
+        <app-empty-state
+          title="No goals yet"
+          message="Create goals to track employee objectives."
+          icon="flag"
+        >
+          @if (canCreate) {
+            <button mat-flat-button color="primary" type="button" (click)="openCreateGoal()">
+              <mat-icon aria-hidden="true">add</mat-icon>
+              New goal
+            </button>
+          }
+        </app-empty-state>
+      } @else {
+        <div class="performance-table-card">
+          <div class="performance-table-wrap">
+            <table class="performance-table">
+              <thead>
+                <tr>
+                  <th scope="col">Goal</th>
+                  @if (!isEmployeeView()) {
+                    <th scope="col">Employee</th>
+                  }
+                  <th scope="col">Progress</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (goal of recentGoals(); track goal.id) {
+                  <tr class="performance-table__row">
+                    <td>
+                      <strong>{{ goal.title }}</strong>
+                    </td>
+                    @if (!isEmployeeView()) {
+                      <td>{{ employeeLabel(goal.employee) }}</td>
+                    }
+                    <td>{{ goal.progress }}%</td>
+                    <td>
+                      <span [class]="statusClass(goal.status)">
+                        <span class="performance-status-pill__dot" aria-hidden="true"></span>
+                        {{ statusLabel(goal.status) }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div>
+      <div class="performance-action-bar">
+        <h3 class="performance-overview-heading">Recent reviews</h3>
+        <a mat-stroked-button routerLink="/performance/reviews">View all</a>
+      </div>
+      @if (recentReviews().length === 0) {
+        <app-empty-state
+          title="No reviews yet"
+          message="Reviews will appear here once cycles are underway."
+          icon="rate_review"
+        />
+      } @else {
+        <div class="performance-table-card">
+          <div class="performance-table-wrap">
+            <table class="performance-table">
+              <thead>
+                <tr>
+                  <th scope="col">Employee</th>
+                  <th scope="col">Overall</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (review of recentReviews(); track review.id) {
+                  <tr class="performance-table__row">
+                    <td>{{ employeeLabel(review.employee) }}</td>
+                    <td>{{ review.overallRating ?? '—' }}</td>
+                    <td>
+                      <span [class]="statusClass(review.status)">
+                        <span class="performance-status-pill__dot" aria-hidden="true"></span>
+                        {{ statusLabel(review.status) }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+</app-organization-status>

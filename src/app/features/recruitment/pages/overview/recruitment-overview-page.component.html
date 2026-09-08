@@ -1,0 +1,74 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading recruitment overview…"
+  errorTitle="Recruitment overview unavailable"
+  (retry)="reload()"
+>
+  <section class="recruitment-page" aria-label="Recruitment overview">
+    <div class="recruitment-action-bar">
+      <div>
+        <h2 class="recruitment-overview-heading">Recruitment overview</h2>
+        <p class="recruitment-overview-sub">
+          Open roles, talent pipeline, interviews, and offers at a glance
+        </p>
+      </div>
+      @if (canCreate) {
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="recruitment-add-btn"
+          (click)="openCreateJob()"
+        >
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Create job
+        </button>
+      }
+    </div>
+
+    <div class="recruitment-kpi-grid">
+      @for (card of kpis(); track card.key) {
+        <mat-card class="recruitment-kpi-card">
+          <div class="recruitment-kpi-card__header">
+            <span class="recruitment-kpi-card__icon recruitment-kpi-card__icon--{{ card.tone }}">
+              <mat-icon aria-hidden="true">{{ card.icon }}</mat-icon>
+            </span>
+          </div>
+          <p class="recruitment-kpi-card__label">{{ card.label }}</p>
+          <strong class="recruitment-kpi-card__value">{{ card.value }}</strong>
+        </mat-card>
+      }
+    </div>
+
+    <div>
+      <h3 class="recruitment-overview-heading">Quick links</h3>
+      <div class="recruitment-quick-links">
+        @for (link of quickLinks; track link.route) {
+          <a class="recruitment-quick-link" [routerLink]="link.route">
+            <mat-icon aria-hidden="true">{{ link.icon }}</mat-icon>
+            <span>
+              <strong>{{ link.label }}</strong>
+              <span>{{ link.description }}</span>
+            </span>
+          </a>
+        }
+      </div>
+    </div>
+
+    @if ((summary()?.openJobs ?? 0) === 0 && (summary()?.candidates ?? 0) === 0) {
+      <app-empty-state
+        title="No hiring activity yet"
+        message="Create a job opening to start building your talent pipeline."
+        icon="work"
+      >
+        @if (canCreate) {
+          <button mat-flat-button color="primary" type="button" (click)="openCreateJob()">
+            <mat-icon aria-hidden="true">add</mat-icon>
+            Create job
+          </button>
+        }
+      </app-empty-state>
+    }
+  </section>
+</app-organization-status>

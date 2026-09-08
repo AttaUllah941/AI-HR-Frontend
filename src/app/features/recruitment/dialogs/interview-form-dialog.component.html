@@ -1,0 +1,73 @@
+<h2 mat-dialog-title class="recruitment-dialog-title">
+  <mat-icon aria-hidden="true">event</mat-icon>
+  {{ data.interview ? 'Edit interview' : 'Schedule interview' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="recruitment-dialog-subtitle">Set the time, type, and interviewer.</p>
+
+  <form [formGroup]="form" class="recruitment-form" id="interview-form" (ngSubmit)="submit()">
+    <div class="recruitment-form__grid">
+      @if (!isEdit) {
+        <mat-form-field appearance="outline" class="recruitment-form__full">
+          <mat-label>Application</mat-label>
+          <mat-select formControlName="applicationId">
+            @for (app of applications(); track app.id) {
+              <mat-option [value]="app.id">{{ applicationLabel(app) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      <mat-form-field appearance="outline">
+        <mat-label>Type</mat-label>
+        <mat-select formControlName="type">
+          @for (type of interviewTypes; track type) {
+            <mat-option [value]="type">{{ typeLabel(type) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Duration (minutes)</mat-label>
+        <input matInput type="number" min="15" max="480" formControlName="durationMinutes" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="recruitment-form__full">
+        <mat-label>Scheduled at</mat-label>
+        <input matInput type="datetime-local" formControlName="scheduledAt" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="recruitment-form__full">
+        <mat-label>Location / link</mat-label>
+        <input matInput formControlName="locationOrLink" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="recruitment-form__full">
+        <mat-label>Interviewer</mat-label>
+        <mat-select formControlName="interviewerId">
+          <mat-option value="">None</mat-option>
+          @for (e of employees(); track e.id) {
+            <mat-option [value]="e.id">{{ employeeLabel(e) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="recruitment-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="interview-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : data.interview ? 'Save changes' : 'Schedule' }}
+  </button>
+</mat-dialog-actions>

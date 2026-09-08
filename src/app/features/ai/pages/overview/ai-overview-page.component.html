@@ -1,0 +1,80 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading Nova overview…"
+  errorTitle="AI overview unavailable"
+  (retry)="reload()"
+>
+  <section class="ai-page" aria-label="Nova overview">
+    <div class="ai-action-bar">
+      <div>
+        <h2 class="ai-overview-heading">Nova overview</h2>
+        <p class="ai-overview-sub">
+          Usage, insights, and quick access to your HR assistant — no API keys required in the UI.
+        </p>
+      </div>
+      <div class="ai-action-bar__actions">
+        @if (status(); as st) {
+          <span class="ai-provider-badge" title="Provider name only — keys stay on the server">
+            <mat-icon aria-hidden="true">cloud</mat-icon>
+            {{ providerLabel() }}
+            @if (st.model) {
+              · {{ st.model }}
+            }
+          </span>
+        }
+        <a mat-flat-button color="primary" class="ai-add-btn" routerLink="/ai/assistant">
+          <mat-icon aria-hidden="true">chat</mat-icon>
+          Chat with Nova
+        </a>
+      </div>
+    </div>
+
+    <div class="ai-kpi-grid">
+      @for (card of kpis(); track card.key) {
+        <mat-card class="ai-kpi-card">
+          <div class="ai-kpi-card__header">
+            <span class="ai-kpi-card__icon ai-kpi-card__icon--{{ card.tone }}">
+              <mat-icon aria-hidden="true">{{ card.icon }}</mat-icon>
+            </span>
+          </div>
+          <p class="ai-kpi-card__label">{{ card.label }}</p>
+          <strong class="ai-kpi-card__value">{{ card.value }}</strong>
+        </mat-card>
+      }
+    </div>
+
+    <div>
+      <div class="ai-action-bar">
+        <h3 class="ai-overview-heading">Recent insights</h3>
+        <a mat-stroked-button routerLink="/ai/recommendations">Recommendations</a>
+      </div>
+      @if (insights().length === 0) {
+        <app-empty-state
+          title="No insights yet"
+          message="Nova will surface workforce insights once AI usage begins."
+          icon="auto_awesome"
+        >
+          @if (canCreate) {
+            <a mat-flat-button color="primary" routerLink="/ai/assistant">Ask Nova</a>
+          }
+        </app-empty-state>
+      } @else {
+        <div class="ai-insight-grid">
+          @for (insight of insights(); track insight.id ?? insight.title) {
+            <mat-card class="ai-insight-card">
+              <div class="ai-action-bar" style="margin-bottom: 0.5rem">
+                <h4 class="ai-insight-card__title">{{ insight.title }}</h4>
+                <span [class]="severityClass(insight.severity)">
+                  <span class="ai-status-pill__dot" aria-hidden="true"></span>
+                  {{ insight.severity }}
+                </span>
+              </div>
+              <p class="ai-insight-card__detail">{{ insight.detail }}</p>
+            </mat-card>
+          }
+        </div>
+      }
+    </div>
+  </section>
+</app-organization-status>

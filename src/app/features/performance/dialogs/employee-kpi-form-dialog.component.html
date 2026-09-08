@@ -1,0 +1,83 @@
+<h2 mat-dialog-title class="performance-dialog-title">
+  <mat-icon aria-hidden="true">assignment_ind</mat-icon>
+  {{ isEdit ? 'Update employee KPI' : 'Assign KPI' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="performance-dialog-subtitle">
+    Set target and actual values for an employee KPI assignment.
+  </p>
+
+  <form [formGroup]="form" class="performance-form" id="employee-kpi-form" (ngSubmit)="submit()">
+    <div class="performance-form__grid">
+      <mat-form-field appearance="outline" class="performance-form__full">
+        <mat-label>Employee</mat-label>
+        <mat-select formControlName="employeeId">
+          @for (emp of employees(); track emp.id) {
+            <mat-option [value]="emp.id">{{ employeeLabel(emp) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="performance-form__full">
+        <mat-label>KPI</mat-label>
+        <mat-select formControlName="kpiId">
+          @for (kpi of kpis(); track kpi.id) {
+            <mat-option [value]="kpi.id">{{ kpi.name }} ({{ kpi.code }})</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Year</mat-label>
+        <input matInput type="number" formControlName="year" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Quarter</mat-label>
+        <mat-select formControlName="quarter">
+          <mat-option [value]="null">Full year</mat-option>
+          @for (q of quarters; track q) {
+            <mat-option [value]="q">Q{{ q }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Target</mat-label>
+        <input matInput type="number" formControlName="targetValue" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Actual</mat-label>
+        <input matInput type="number" formControlName="actualValue" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Score</mat-label>
+        <input matInput type="number" formControlName="score" min="0" max="100" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="performance-form__full">
+        <mat-label>Notes</mat-label>
+        <textarea matInput rows="2" formControlName="notes"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="performance-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="employee-kpi-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : 'Save' }}
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,125 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading Nova chats…"
+  errorTitle="Assistant unavailable"
+  (retry)="reloadConversations()"
+>
+  <section class="ai-page" aria-label="Nova assistant">
+    <div class="ai-action-bar">
+      <div>
+        <h2 class="ai-page-heading">Chat with Nova</h2>
+        <p class="ai-page-sub">
+          Ask about leave, attendance, payroll, recruitment, or performance. Start a chat by sending
+          a message.
+        </p>
+      </div>
+      @if (canCreate) {
+        <button mat-stroked-button type="button" (click)="startNewChat()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          New chat
+        </button>
+      }
+    </div>
+
+    <div class="ai-chat">
+      <aside class="ai-chat-sidebar" aria-label="Conversations">
+        <div class="ai-chat-sidebar__header">
+          <h3>Conversations</h3>
+        </div>
+        <div class="ai-chat-sidebar__list">
+          @if (conversations().length === 0) {
+            <app-empty-state
+              title="No chats yet"
+              message="Send a message to create your first conversation with Nova."
+              icon="chat"
+            />
+          } @else {
+            @for (conv of conversations(); track conv.id) {
+              <button
+                type="button"
+                class="ai-chat-conv"
+                [class.ai-chat-conv--active]="activeId() === conv.id"
+                (click)="selectConversation(conv.id)"
+              >
+                <span class="ai-chat-conv__title">{{ conversationTitle(conv) }}</span>
+                @if (canDelete) {
+                  <mat-icon
+                    class="ai-chat-conv__delete"
+                    aria-label="Delete conversation"
+                    (click)="deleteConversation($event, conv.id)"
+                    >delete</mat-icon
+                  >
+                }
+              </button>
+            }
+          }
+        </div>
+      </aside>
+
+      <div class="ai-chat-main">
+        <div class="ai-chat-main__header">
+          <h3>{{ activeId() ? 'Conversation' : 'New conversation' }}</h3>
+          <p>Nova · Zenith HR assistant</p>
+        </div>
+
+        <div class="ai-chat-thread" #threadEl>
+          @if (loadingThread()) {
+            <div class="ai-chat-empty">
+              <mat-spinner diameter="28" />
+              <p>Loading messages…</p>
+            </div>
+          } @else if (messages().length === 0) {
+            <div class="ai-chat-empty">
+              <mat-icon aria-hidden="true">auto_awesome</mat-icon>
+              <strong>Hi, I am Nova</strong>
+              <p>
+                Your Zenith HR assistant. Ask a question below — a new conversation is created when
+                you send your first message.
+              </p>
+            </div>
+          } @else {
+            @for (msg of messages(); track msg.id) {
+              <div [class]="bubbleClass(msg.role)">
+                <span class="ai-chat-bubble__meta">{{ roleLabel(msg.role) }}</span>
+                {{ msg.content }}
+              </div>
+            }
+            @if (sending()) {
+              <div class="ai-chat-bubble ai-chat-bubble--assistant">
+                <span class="ai-chat-bubble__meta">Nova</span>
+                Thinking…
+              </div>
+            }
+          }
+        </div>
+
+        <div class="ai-chat-composer">
+          <textarea
+            rows="2"
+            [ngModel]="draft()"
+            (ngModelChange)="draft.set($event)"
+            (keydown)="onComposerKeydown($event)"
+            [disabled]="!canCreate || sending()"
+            placeholder="{{ canCreate ? 'Message Nova…' : 'You need ai:create to chat' }}"
+            aria-label="Message Nova"
+          ></textarea>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            [disabled]="!canCreate || sending() || !draft().trim()"
+            (click)="send()"
+          >
+            @if (sending()) {
+              <mat-spinner diameter="16" />
+            } @else {
+              <mat-icon aria-hidden="true">send</mat-icon>
+            }
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</app-organization-status>

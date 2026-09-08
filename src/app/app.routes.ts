@@ -1,6 +1,7 @@
 // this file is used to define the routes for the app
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { permissionGuard } from './core/guards/permission.guard';
 
 export const routes: Routes = [
   {
@@ -20,6 +21,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
+        canActivate: [permissionGuard('dashboard:view')],
         loadChildren: () =>
           import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
       },
@@ -32,85 +34,87 @@ export const routes: Routes = [
       },
       {
         path: 'organization',
+        canActivate: [permissionGuard('organization:view')],
         loadChildren: () =>
           import('./features/organization/organization.routes').then((m) => m.ORGANIZATION_ROUTES),
       },
       {
         path: 'employees',
+        canActivate: [permissionGuard('employees:view')],
         loadChildren: () =>
           import('./features/employees/employees.routes').then((m) => m.EMPLOYEES_ROUTES),
       },
       {
         path: 'attendance',
+        canActivate: [permissionGuard('attendance:view')],
         loadChildren: () =>
           import('./features/attendance/attendance.routes').then((m) => m.ATTENDANCE_ROUTES),
       },
       {
         path: 'leave',
+        canActivate: [permissionGuard('leave:view')],
         loadChildren: () =>
           import('./features/leave/leave.routes').then((m) => m.LEAVE_ROUTES),
       },
       {
         path: 'payroll',
+        canActivate: [permissionGuard('payroll:view')],
         loadChildren: () =>
           import('./features/payroll/payroll.routes').then((m) => m.PAYROLL_ROUTES),
       },
       {
         path: 'recruitment',
+        canActivate: [permissionGuard('recruitment:view')],
         loadChildren: () =>
           import('./features/recruitment/recruitment.routes').then((m) => m.RECRUITMENT_ROUTES),
       },
       {
         path: 'performance',
+        canActivate: [permissionGuard('performance:view')],
         loadChildren: () =>
           import('./features/performance/performance.routes').then((m) => m.PERFORMANCE_ROUTES),
       },
       {
         path: 'ai',
-        loadComponent: () =>
-          import('./features/ai/ai-placeholder.component').then((m) => m.AiPlaceholderComponent),
+        canActivate: [permissionGuard('ai:view')],
+        loadChildren: () =>
+          import('./features/ai/ai.routes').then((m) => m.AI_ROUTES),
       },
       {
         path: 'reports',
-        loadComponent: () =>
-          import('./features/reports/reports-placeholder.component').then(
-            (m) => m.ReportsPlaceholderComponent,
-          ),
+        canActivate: [permissionGuard('reports:view')],
+        loadChildren: () =>
+          import('./features/reports/reports.routes').then((m) => m.REPORTS_ROUTES),
       },
       {
         path: 'notifications',
-        loadComponent: () =>
-          import('./features/notifications/notifications-placeholder.component').then(
-            (m) => m.NotificationsPlaceholderComponent,
+        canActivate: [permissionGuard('notifications:view')],
+        loadChildren: () =>
+          import('./features/notifications/notifications.routes').then(
+            (m) => m.NOTIFICATIONS_ROUTES,
           ),
       },
       {
         path: 'profile',
-        loadComponent: () =>
-          import('./features/profile/profile-placeholder.component').then(
-            (m) => m.ProfilePlaceholderComponent,
-          ),
+        loadChildren: () =>
+          import('./features/profile/profile.routes').then((m) => m.PROFILE_ROUTES),
+      },
+      {
+        path: 'search',
+        loadChildren: () =>
+          import('./features/search/search.routes').then((m) => m.SEARCH_ROUTES),
       },
       {
         path: 'settings',
-        loadComponent: () =>
-          import('./features/settings/settings-placeholder.component').then(
-            (m) => m.SettingsPlaceholderComponent,
-          ),
+        canActivate: [permissionGuard('settings:view')],
+        loadChildren: () =>
+          import('./features/settings/settings.routes').then((m) => m.SETTINGS_ROUTES),
       },
       {
         path: 'files',
-        loadComponent: () =>
-          import('./features/files/files-placeholder.component').then(
-            (m) => m.FilesPlaceholderComponent,
-          ),
-      },
-      {
-        path: 'policies',
-        loadComponent: () =>
-          import('./features/policies/policies-placeholder.component').then(
-            (m) => m.PoliciesPlaceholderComponent,
-          ),
+        canActivate: [permissionGuard('files:view')],
+        loadChildren: () =>
+          import('./features/files/files.routes').then((m) => m.FILES_ROUTES),
       },
     ],
   },

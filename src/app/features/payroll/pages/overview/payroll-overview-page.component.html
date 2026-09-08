@@ -1,0 +1,144 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading payroll overview…"
+  errorTitle="Payroll overview unavailable"
+  (retry)="reload()"
+>
+  <section class="payroll-page" aria-label="Payroll overview">
+    <div class="payroll-action-bar">
+      <div>
+        <h2 class="payroll-overview-heading">
+          {{ isEmployeeView() ? 'My payroll' : 'Payroll overview' }} · {{ year }}
+        </h2>
+        <p class="payroll-overview-sub">
+          {{
+            isEmployeeView()
+              ? 'Your payslips and year-to-date earnings'
+              : 'Runs, payouts, and payroll headcount for the current year'
+          }}
+        </p>
+      </div>
+      @if (canCreate && !isEmployeeView()) {
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="payroll-add-btn"
+          (click)="openCreateRun()"
+        >
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Create run
+        </button>
+      }
+    </div>
+
+    <div class="payroll-kpi-grid" [class.payroll-kpi-grid--4]="!isEmployeeView()">
+      @for (card of kpis(); track card.key) {
+        <mat-card class="payroll-kpi-card">
+          <div class="payroll-kpi-card__header">
+            <span class="payroll-kpi-card__icon payroll-kpi-card__icon--{{ card.tone }}">
+              <mat-icon aria-hidden="true">{{ card.icon }}</mat-icon>
+            </span>
+          </div>
+          <p class="payroll-kpi-card__label">{{ card.label }}</p>
+          <strong class="payroll-kpi-card__value">{{ card.value }}</strong>
+        </mat-card>
+      }
+    </div>
+
+    @if (!isEmployeeView()) {
+      <div>
+        <div class="payroll-action-bar">
+          <h3 class="payroll-overview-heading">Recent runs</h3>
+          <a mat-stroked-button routerLink="/payroll/runs">View all</a>
+        </div>
+        @if (recentMonths().length === 0) {
+          <app-empty-state
+            title="No payroll runs yet"
+            message="Create a payroll run to process salaries for the month."
+            icon="payments"
+          >
+            @if (canCreate) {
+              <button mat-flat-button color="primary" type="button" (click)="openCreateRun()">
+                <mat-icon aria-hidden="true">add</mat-icon>
+                Create run
+              </button>
+            }
+          </app-empty-state>
+        } @else {
+          <div class="payroll-table-card">
+            <div class="payroll-table-wrap">
+              <table class="payroll-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Period</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Net</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (run of recentMonths(); track run.month + '-' + run.status) {
+                    <tr class="payroll-table__row">
+                      <td>{{ payrollMonth(run.month) }} {{ year }}</td>
+                      <td>{{ runTitle(run) }}</td>
+                      <td>{{ formatMoney(run.netPay) }}</td>
+                      <td>
+                        <span [class]="statusClass(run.status)">
+                          <span class="payroll-status-pill__dot" aria-hidden="true"></span>
+                          {{ statusLabel(run.status) }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div>
+        <h3 class="payroll-overview-heading">Recent payslips</h3>
+        @if (recentPayslips().length === 0) {
+          <app-empty-state
+            title="No payslips yet"
+            message="Your payslips will appear here once payroll is processed."
+            icon="receipt_long"
+          />
+        } @else {
+          <div class="payroll-table-card">
+            <div class="payroll-table-wrap">
+              <table class="payroll-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Period</th>
+                    <th scope="col">Gross</th>
+                    <th scope="col">Net</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (slip of recentPayslips(); track slip.id) {
+                    <tr class="payroll-table__row">
+                      <td>{{ payrollMonth(slip.month) }} {{ slip.year }}</td>
+                      <td>{{ formatMoney(slip.grossPay, slip.currency) }}</td>
+                      <td>{{ formatMoney(slip.netPay, slip.currency) }}</td>
+                      <td>
+                        <span [class]="statusClass(slip.status)">
+                          <span class="payroll-status-pill__dot" aria-hidden="true"></span>
+                          {{ statusLabel(slip.status) }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+</app-organization-status>

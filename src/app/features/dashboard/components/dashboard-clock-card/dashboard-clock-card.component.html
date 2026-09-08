@@ -1,0 +1,83 @@
+@if (canClock) {
+  <mat-card class="dashboard-clock-card att-clock-card">
+    <div class="att-clock-card__header">
+      <div>
+        <h2>My clock</h2>
+        <p>Clock in or out from your branch office network</p>
+      </div>
+      <mat-icon aria-hidden="true">punch_clock</mat-icon>
+    </div>
+
+    @if (loading()) {
+      <div class="dashboard-clock-card__loading">
+        <mat-spinner diameter="28" />
+        <span>Loading clock status…</span>
+      </div>
+    } @else if (error()) {
+      <div class="dashboard-clock-card__error">
+        <p>{{ error() }}</p>
+        <button mat-stroked-button type="button" (click)="reload()">Try again</button>
+      </div>
+    } @else if (myToday(); as today) {
+      <div class="att-clock-card__times">
+        <div>
+          <span>Check-in</span>
+          <strong>{{ formatTime(today.record?.checkInAt) }}</strong>
+        </div>
+        <div>
+          <span>Check-out</span>
+          <strong>{{ formatTime(today.record?.checkOutAt) }}</strong>
+        </div>
+        <div>
+          <span>Status</span>
+          <strong>{{ today.record?.status?.replace(/_/g, ' ') || 'Not started' }}</strong>
+        </div>
+      </div>
+
+      <div class="att-clock-card__actions">
+        @if (clockState() === 'clock-in') {
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            [disabled]="clocking()"
+            (click)="clockIn()"
+          >
+            @if (clocking()) {
+              <mat-spinner diameter="16" />
+            } @else {
+              <mat-icon aria-hidden="true">login</mat-icon>
+            }
+            Clock in
+          </button>
+        } @else if (clockState() === 'clock-out') {
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            [disabled]="clocking()"
+            (click)="clockOut()"
+          >
+            @if (clocking()) {
+              <mat-spinner diameter="16" />
+            } @else {
+              <mat-icon aria-hidden="true">logout</mat-icon>
+            }
+            Clock out
+          </button>
+        } @else {
+          <div class="att-clock-card__done">
+            <mat-icon aria-hidden="true">task_alt</mat-icon>
+            <span>Day completed — you’re clocked out</span>
+          </div>
+        }
+      </div>
+    } @else {
+      <app-empty-state
+        title="No clock data"
+        message="We couldn’t load your attendance status for today."
+        icon="schedule"
+      />
+    }
+  </mat-card>
+}

@@ -1,0 +1,73 @@
+<app-organization-section-header
+  title="Leave calendar"
+  description="Approved and pending leave for the selected period."
+  icon="calendar_month"
+  [count]="loading() || error() ? null : events().length"
+/>
+
+<div class="leave-calendar-nav">
+  <button mat-icon-button type="button" aria-label="Previous month" (click)="prevMonth()">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+  <h2 class="leave-calendar-nav__title">{{ monthLabel() }}</h2>
+  <button mat-icon-button type="button" aria-label="Next month" (click)="nextMonth()">
+    <mat-icon>chevron_right</mat-icon>
+  </button>
+</div>
+
+<div class="leave-table-card">
+  @if (loading()) {
+    <div class="leave-table-state">
+      <mat-spinner diameter="32" />
+      <span>Loading calendar…</span>
+    </div>
+  } @else if (error()) {
+    <div class="leave-table-state leave-table-state--error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
+    </div>
+  } @else if (events().length === 0) {
+    <app-empty-state
+      title="No leave this month"
+      message="Approved and pending leave will appear on the calendar."
+      icon="event_busy"
+    />
+  } @else {
+    <div class="leave-calendar-grid" role="grid" aria-label="Leave calendar">
+      @for (day of weekdays; track day) {
+        <div class="leave-calendar-weekday" role="columnheader">{{ day }}</div>
+      }
+      @for (cell of days(); track cell.iso) {
+        <div
+          class="leave-calendar-day"
+          role="gridcell"
+          [class.leave-calendar-day--muted]="!cell.inMonth"
+          [class.leave-calendar-day--today]="cell.isToday"
+        >
+          <span class="leave-calendar-day__num">{{ cell.date.getDate() }}</span>
+          <div class="leave-calendar-day__events">
+            @for (event of cell.events.slice(0, 3); track event.id) {
+              <span
+                class="leave-calendar-event"
+                [style.background]="event.color || '#3b82f6'"
+                [attr.title]="
+                  (event.employeeName || '') +
+                  ' · ' +
+                  (event.leaveTypeName || 'Leave') +
+                  ' · ' +
+                  event.status
+                "
+              >
+                {{ eventLabel(event) }}
+              </span>
+            }
+            @if (cell.events.length > 3) {
+              <span class="leave-calendar-more">+{{ cell.events.length - 3 }} more</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

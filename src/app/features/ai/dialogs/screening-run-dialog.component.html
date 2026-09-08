@@ -1,0 +1,54 @@
+<h2 mat-dialog-title class="ai-dialog-title">
+  <mat-icon aria-hidden="true">person_search</mat-icon>
+  Screen resume with Nova
+</h2>
+
+<mat-dialog-content>
+  <p class="ai-dialog-subtitle">
+    Select a candidate and optionally a job opening. Nova returns a structured scorecard.
+  </p>
+
+  <form [formGroup]="form" class="ai-form" id="screening-form" (ngSubmit)="submit()">
+    <div class="ai-form__grid">
+      <mat-form-field appearance="outline" class="ai-form__full">
+        <mat-label>Candidate</mat-label>
+        <mat-select formControlName="candidateId">
+          @for (c of candidates(); track c.id) {
+            <mat-option [value]="c.id">{{ candidateLabel(c) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="ai-form__full">
+        <mat-label>Job opening (optional)</mat-label>
+        <mat-select formControlName="jobOpeningId">
+          <mat-option value="">None</mat-option>
+          @for (j of jobs(); track j.id) {
+            <mat-option [value]="j.id">{{ jobLabel(j) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="ai-form__full">
+        <mat-label>Notes (optional)</mat-label>
+        <textarea matInput rows="2" formControlName="notes"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="ai-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="screening-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner diameter="16" />
+    }
+    {{ saving() ? 'Screening…' : 'Run screening' }}
+  </button>
+</mat-dialog-actions>

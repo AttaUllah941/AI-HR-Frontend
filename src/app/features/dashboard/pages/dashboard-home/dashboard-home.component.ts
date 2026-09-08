@@ -1,109 +1,112 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthService } from '../../../../core/services/auth.service';
-
-interface KpiCard {
-  label: string;
-  value: string;
-  delta: string;
-  deltaTone: 'up' | 'down' | 'neutral';
-  hint?: string;
-}
-
-interface DeptSlice {
-  name: string;
-  count: number;
-  pct: number;
-}
-
-interface BarPoint {
-  label: string;
-  value: number;
-  height: number;
-}
+import { MatButtonModule } from '@angular/material/button';
+import { AttendanceTrendChartComponent } from '../../components/charts/attendance-trend-chart.component';
+import { DepartmentDonutChartComponent } from '../../components/charts/department-donut-chart.component';
+import { HiringFunnelChartComponent } from '../../components/charts/hiring-funnel-chart.component';
+import { EmployeeGrowthChartComponent } from '../../components/charts/employee-growth-chart.component';
+import { DashboardClockCardComponent } from '../../components/dashboard-clock-card/dashboard-clock-card.component';
+import {
+  DashboardKpiTrend,
+  DashboardService,
+  DashboardSummary,
+} from '../../../../core/services/dashboard.service';
 
 @Component({
   selector: 'app-dashboard-home',
   standalone: true,
-  imports: [MatIconModule, RouterLink],
+  imports: [
+    DecimalPipe,
+    RouterLink,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    AttendanceTrendChartComponent,
+    DepartmentDonutChartComponent,
+    HiringFunnelChartComponent,
+    EmployeeGrowthChartComponent,
+    DashboardClockCardComponent,
+  ],
   templateUrl: './dashboard-home.component.html',
   styleUrl: './dashboard-home.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardHomeComponent {
-  private readonly auth = inject(AuthService);
+export class DashboardHomeComponent implements OnInit {
+  private readonly dashboard = inject(DashboardService);
 
-  readonly firstName = computed(() => this.auth.user()?.firstName || 'there');
+  readonly loading = signal(true);
+  readonly error = signal<string | null>(null);
+  readonly summary = signal<DashboardSummary | null>(null);
 
-  readonly greeting = computed(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) {
-      return 'Good morning';
+  readonly iconStyles: Record<string, { bg: string; color: string }> = {
+    primary: { bg: '#eff6ff', color: '#3b82f6' },
+    secondary: { bg: '#f5f3ff', color: '#8b5cf6' },
+    success: { bg: '#ecfdf5', color: '#22c55e' },
+    warning: { bg: '#fffbeb', color: '#f59e0b' },
+    danger: { bg: '#fef2f2', color: '#ef4444' },
+    info: { bg: '#ecfeff', color: '#06b6d4' },
+  };
+
+  ngOnInit(): void {
+    this.load();
+  }
+
+  reload(): void {
+    this.load();
+  }
+
+  formatKpiValue(value: number | string | null): string {
+    if (value === null || value === undefined) {
+      return '—';
     }
-    if (hour < 18) {
-      return 'Good afternoon';
+    if (typeof value === 'number') {
+      return Number.isInteger(value) ? value.toLocaleString('en-US') : value.toString();
     }
-    return 'Good evening';
-  });
+    return value;
+  }
 
-  /**
-   * Demo KPI values matching Lovable reference layout until domain APIs land.
-   * Not claimed as live production metrics.
-   */
-  readonly kpis: KpiCard[] = [
-    { label: 'Total Employees', value: '1,284', delta: '+12', deltaTone: 'up' },
-    { label: 'Present Today', value: '1,142', delta: '89%', deltaTone: 'neutral', hint: 'of workforce' },
-    { label: 'Absent', value: '48', delta: '-6', deltaTone: 'down' },
-    { label: 'Late', value: '23', delta: '+4', deltaTone: 'up' },
-    { label: 'Open Positions', value: '17', delta: '+3', deltaTone: 'up' },
-    { label: 'Pending Leave', value: '9', delta: '-2', deltaTone: 'down' },
-    { label: 'Payroll Status', value: 'Ready', delta: 'Nov', deltaTone: 'neutral' },
-    { label: 'Perf. Score', value: '4.3', delta: '+0.2', deltaTone: 'up' },
-  ];
+  trendIcon(trend?: DashboardKpiTrend): string | null {
+    if (!trend || trend.direction === 'neutral') {
+      return null;
+    }
+    return trend.direction === 'up' ? 'arrow_upward' : 'arrow_downward';
+  }
 
-  readonly insights = [
-    'Attendance dropped 6% this week — highest impact in Support team.',
-    'Marketing has the highest overtime — 142 hrs above baseline.',
-    '3 employees flagged as at-risk of leaving (engagement + tenure signals).',
-    'November payroll is ready to process — 1,284 employees, $4.82M total.',
-  ];
+  trendClass(trend?: DashboardKpiTrend): string {
+    if (!trend) {
+      return '';
+    }
+    if (trend.direction === 'neutral') {
+      return 'is-neutral';
+    }
+    if (trend.value.trim().startsWith('-')) {
+      return 'is-negative';
+    }
+    return 'is-positive';
+  }
 
-  readonly attendanceTrend: BarPoint[] = [
-    { label: 'Mon', value: 1180, height: 78 },
-    { label: 'Tue', value: 1210, height: 84 },
-    { label: 'Wed', value: 1095, height: 68 },
-    { label: 'Thu', value: 1240, height: 90 },
-    { label: 'Fri', value: 1142, height: 76 },
-    { label: 'Sat', value: 420, height: 28 },
-    { label: 'Sun', value: 380, height: 24 },
-  ];
+  private load(): void {
+    this.loading.set(true);
+    this.error.set(null);
 
-  readonly departments: DeptSlice[] = [
-    { name: 'Engineering', count: 412, pct: 32 },
-    { name: 'Sales', count: 218, pct: 17 },
-    { name: 'Marketing', count: 156, pct: 12 },
-    { name: 'Ops', count: 184, pct: 14 },
-    { name: 'Support', count: 142, pct: 11 },
-  ];
-
-  readonly hiringFunnel: BarPoint[] = [
-    { label: 'Applied', value: 580, height: 100 },
-    { label: 'Screening', value: 310, height: 54 },
-    { label: 'Interview', value: 168, height: 30 },
-    { label: 'Offer', value: 42, height: 12 },
-    { label: 'Hired', value: 28, height: 8 },
-  ];
-
-  readonly employeeGrowth: BarPoint[] = [
-    { label: 'Jan', value: 1100, height: 55 },
-    { label: 'Feb', value: 1120, height: 58 },
-    { label: 'Mar', value: 1155, height: 64 },
-    { label: 'Apr', value: 1170, height: 68 },
-    { label: 'May', value: 1195, height: 74 },
-    { label: 'Jun', value: 1210, height: 78 },
-    { label: 'Jul', value: 1230, height: 84 },
-    { label: 'Aug', value: 1255, height: 90 },
-    { label: 'Sep', value: 1284, height: 100 },
-  ];
+    this.dashboard.getSummary().subscribe({
+      next: (summary) => {
+        this.summary.set(summary);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Unable to load dashboard data.');
+        this.loading.set(false);
+      },
+    });
+  }
 }

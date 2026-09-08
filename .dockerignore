@@ -1,0 +1,12 @@
+node_modules
+dist
+.angular
+.git
+.github
+.vscode
+*.md
+.env
+.env.*
+coverage
+*.tsbuildinfo
+npm-debug.log*

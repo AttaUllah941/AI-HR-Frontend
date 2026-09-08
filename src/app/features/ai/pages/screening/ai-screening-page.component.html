@@ -1,0 +1,132 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading resume screenings…"
+  errorTitle="Screening unavailable"
+  (retry)="reload()"
+>
+  <section class="ai-page" aria-label="Resume screening">
+    <div class="ai-action-bar">
+      <div>
+        <h2 class="ai-page-heading">Resume screening</h2>
+        <p class="ai-page-sub">
+          Run Nova against a candidate resume and review the scorecard — strengths, gaps, and
+          recommendation.
+        </p>
+      </div>
+      @if (canCreate) {
+        <button mat-flat-button color="primary" type="button" class="ai-add-btn" (click)="openRun()">
+          <mat-icon aria-hidden="true">person_search</mat-icon>
+          Screen candidate
+        </button>
+      }
+    </div>
+
+    @if (scorecard(); as card) {
+      <mat-card class="ai-result-card">
+        <h3 class="ai-result-card__title">Latest scorecard</h3>
+        <div class="ai-action-bar" style="margin-bottom: 0.75rem">
+          <div class="ai-score">
+            {{ card.score ?? '—' }}
+            <span>/ 100</span>
+          </div>
+          @if (card.recommendation) {
+            <span class="ai-status-pill ai-status-pill--info">
+              <span class="ai-status-pill__dot" aria-hidden="true"></span>
+              {{ card.recommendation }}
+            </span>
+          }
+        </div>
+        @if (card.summary) {
+          <p class="ai-result-card__body">{{ card.summary }}</p>
+        }
+        @if (card.strengths.length) {
+          <h4 class="ai-page-heading" style="margin-top: 1rem; font-size: 0.9rem">Strengths</h4>
+          <ul>
+            @for (s of card.strengths; track s) {
+              <li>{{ s }}</li>
+            }
+          </ul>
+        }
+        @if (card.gaps.length) {
+          <h4 class="ai-page-heading" style="margin-top: 0.5rem; font-size: 0.9rem">Gaps</h4>
+          <ul>
+            @for (g of card.gaps; track g) {
+              <li>{{ g }}</li>
+            }
+          </ul>
+        }
+        @if (!card.summary && card.rawText) {
+          <p class="ai-result-card__body">{{ card.rawText }}</p>
+        }
+      </mat-card>
+    }
+
+    @if (items().length === 0) {
+      <app-empty-state
+        title="No screenings yet"
+        message="Screen a candidate to generate a Nova scorecard."
+        icon="person_search"
+      >
+        @if (canCreate) {
+          <button mat-flat-button color="primary" type="button" (click)="openRun()">
+            Screen candidate
+          </button>
+        }
+      </app-empty-state>
+    } @else {
+      <div class="ai-table-card">
+        <div class="ai-table-wrap">
+          <table class="ai-table">
+            <thead>
+              <tr>
+                <th scope="col">Created</th>
+                <th scope="col">Status</th>
+                <th scope="col">Provider</th>
+                <th scope="col">Score</th>
+                <th scope="col" class="ai-table__actions-col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of items(); track item.id) {
+                <tr
+                  class="ai-table__row"
+                  style="cursor: pointer"
+                  (click)="selectGeneration(item)"
+                >
+                  <td>{{ createdLabel(item.createdAt) }}</td>
+                  <td>
+                    <span
+                      class="ai-status-pill"
+                      [class.ai-status-pill--success]="item.status === 'SUCCESS'"
+                      [class.ai-status-pill--failed]="item.status === 'FAILED'"
+                      [class.ai-status-pill--pending]="item.status === 'PENDING'"
+                    >
+                      <span class="ai-status-pill__dot" aria-hidden="true"></span>
+                      {{ item.status }}
+                    </span>
+                  </td>
+                  <td>{{ item.provider || '—' }}</td>
+                  <td>{{ scoreFor(item) }}</td>
+                  <td class="ai-table__actions-col" (click)="$event.stopPropagation()">
+                    @if (canDelete) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        class="ai-table__menu-btn"
+                        aria-label="Delete"
+                        (click)="deleteGeneration(item.id)"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  </section>
+</app-organization-status>

@@ -1,0 +1,86 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading files…"
+  errorTitle="Files unavailable"
+  (retry)="reload()"
+>
+  @if (summary(); as s) {
+    <section class="files-page" aria-label="Files overview">
+      <div class="files-action-bar">
+        <div>
+          <h2 class="files-page-heading">Storage overview</h2>
+          <p class="files-page-sub">
+            Provider {{ s.storage.provider }} (runtime {{ s.storage.runtimeProvider }}) · max upload
+            {{ formatBytes(s.maxUploadBytes) }}
+          </p>
+        </div>
+        <div class="files-action-bar__actions">
+          <button mat-stroked-button type="button" class="files-add-btn" (click)="reload()">
+            <mat-icon aria-hidden="true">refresh</mat-icon>
+            Refresh
+          </button>
+          @if (canCreate) {
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              class="files-add-btn"
+              (click)="openUpload()"
+            >
+              <mat-icon aria-hidden="true">upload_file</mat-icon>
+              Upload
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="files-meta-grid">
+        <div class="files-meta-chip">
+          <span class="files-meta-chip__label">Files</span>
+          <span class="files-meta-chip__value">{{ s.totalFiles }}</span>
+          <span class="files-meta-chip__hint">{{ formatBytes(s.totalBytes) }} used</span>
+        </div>
+        <div class="files-meta-chip">
+          <span class="files-meta-chip__label">Documents</span>
+          <span class="files-meta-chip__value">{{ s.countsByCategory['EMPLOYEE_DOCUMENT'] || 0 }}</span>
+          <span class="files-meta-chip__hint">Employee docs</span>
+        </div>
+        <div class="files-meta-chip">
+          <span class="files-meta-chip__label">Resumes</span>
+          <span class="files-meta-chip__value">{{ s.countsByCategory['RESUME'] || 0 }}</span>
+          <span class="files-meta-chip__hint">Candidates</span>
+        </div>
+        <div class="files-meta-chip">
+          <span class="files-meta-chip__label">Other</span>
+          <span class="files-meta-chip__value">{{
+            (s.countsByCategory['GENERAL'] || 0) +
+              (s.countsByCategory['AVATAR'] || 0) +
+              (s.countsByCategory['POLICY'] || 0) +
+              (s.countsByCategory['OTHER'] || 0)
+          }}</span>
+          <span class="files-meta-chip__hint">General / avatar / policy</span>
+        </div>
+      </div>
+
+      <div class="files-quick-links">
+        <a class="files-quick-link" routerLink="/files/library">
+          <mat-icon aria-hidden="true">folder_open</mat-icon>
+          Full library
+        </a>
+        <a class="files-quick-link" routerLink="/files/documents">
+          <mat-icon aria-hidden="true">description</mat-icon>
+          Employee documents
+        </a>
+        <a class="files-quick-link" routerLink="/files/resumes">
+          <mat-icon aria-hidden="true">badge</mat-icon>
+          Resumes
+        </a>
+        <a class="files-quick-link" routerLink="/settings/storage">
+          <mat-icon aria-hidden="true">cloud</mat-icon>
+          Storage settings
+        </a>
+      </div>
+    </section>
+  }
+</app-organization-status>

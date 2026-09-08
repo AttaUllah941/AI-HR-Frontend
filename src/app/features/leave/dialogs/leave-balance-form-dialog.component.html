@@ -1,0 +1,82 @@
+<h2 mat-dialog-title class="leave-dialog-title">
+  <mat-icon aria-hidden="true">account_balance_wallet</mat-icon>
+  {{ isEdit ? 'Edit leave balance' : 'Set leave balance' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="leave-dialog-subtitle">
+    {{
+      isEdit
+        ? 'Update entitlement and carried-forward days.'
+        : 'Upsert entitled leave days for an employee.'
+    }}
+  </p>
+
+  <form [formGroup]="form" class="leave-form" id="leave-balance-form" (ngSubmit)="submit()">
+    <div class="leave-form__grid">
+      <mat-form-field appearance="outline" class="leave-form__full">
+        <mat-label>Employee</mat-label>
+        <mat-select formControlName="employeeId">
+          @for (emp of employees(); track emp.id) {
+            <mat-option [value]="emp.id">
+              {{ emp.firstName }} {{ emp.lastName }}
+            </mat-option>
+          }
+        </mat-select>
+        @if (form.controls.employeeId.touched && form.controls.employeeId.hasError('required')) {
+          <mat-error>Employee is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="leave-form__full">
+        <mat-label>Leave type</mat-label>
+        <mat-select formControlName="leaveTypeId">
+          @for (type of leaveTypes(); track type.id) {
+            <mat-option [value]="type.id">{{ type.name }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.leaveTypeId.touched && form.controls.leaveTypeId.hasError('required')) {
+          <mat-error>Leave type is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Year</mat-label>
+        <input matInput type="number" formControlName="year" min="2000" max="2100" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Entitled days</mat-label>
+        <input matInput type="number" formControlName="entitled" min="0" max="365" step="0.5" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="leave-form__full">
+        <mat-label>Carried forward</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="carriedForward"
+          min="0"
+          max="365"
+          step="0.5"
+        />
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="leave-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="leave-balance-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : 'Save balance' }}
+  </button>
+</mat-dialog-actions>

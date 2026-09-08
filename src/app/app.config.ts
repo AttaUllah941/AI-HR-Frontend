@@ -1,3 +1,4 @@
+// this file is used to configure the application
 import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
@@ -8,8 +9,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
-import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { refreshInterceptor } from './core/interceptors/refresh.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,7 +20,7 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding(),
       withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
     ),
-    // Closest-to-backend last: refresh must see 401 before error clears the session.
+    // Order matters: refresh must wrap the HTTP call before error handles residual 401s.
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, refreshInterceptor])),
     provideAnimationsAsync(),
   ],

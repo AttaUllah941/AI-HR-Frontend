@@ -1,0 +1,116 @@
+<app-organization-section-header
+  title="Payslips"
+  [description]="sectionDescription()"
+  icon="receipt_long"
+  [count]="loading() || error() ? null : total()"
+>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Year</mat-label>
+    <mat-select [formControl]="yearControl">
+      @for (y of yearOptions; track y) {
+        <mat-option [value]="y">{{ y }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Status</mat-label>
+    <mat-select [formControl]="statusControl">
+      @for (opt of statusOptions; track opt.value) {
+        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</app-organization-section-header>
+
+<div class="payroll-table-card">
+  @if (loading()) {
+    <div class="payroll-table-state">
+      <mat-spinner diameter="32" />
+      <span>Loading payslips…</span>
+    </div>
+  } @else if (error()) {
+    <div class="payroll-table-state payroll-table-state--error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
+    </div>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      title="No payslips"
+      message="Payslips appear after a payroll run is processed."
+      icon="receipt_long"
+    />
+  } @else {
+    <div class="payroll-table-wrap">
+      <table class="payroll-table">
+        <thead>
+          <tr>
+            @if (!isMineOnly()) {
+              <th scope="col">Employee</th>
+            }
+            <th scope="col">Period</th>
+            <th scope="col">Gross</th>
+            <th scope="col">Net</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="payroll-table__actions-col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr class="payroll-table__row">
+              @if (!isMineOnly()) {
+                <td>
+                  <div class="payroll-table__employee-text">
+                    <strong>
+                      {{ item.employee?.firstName }} {{ item.employee?.lastName }}
+                    </strong>
+                    <span>{{ item.employee?.employeeCode || '—' }}</span>
+                  </div>
+                </td>
+              }
+              <td>{{ monthLabel(item.month) }} {{ item.year }}</td>
+              <td>{{ formatMoney(item.grossPay, item.currency) }}</td>
+              <td>{{ formatMoney(item.netPay, item.currency) }}</td>
+              <td>
+                <span [class]="statusClass(item.status)">
+                  <span class="payroll-status-pill__dot" aria-hidden="true"></span>
+                  {{ statusLabel(item.status) }}
+                </span>
+              </td>
+              <td class="payroll-table__actions-col">
+                <button
+                  mat-icon-button
+                  type="button"
+                  aria-label="View payslip"
+                  (click)="openDetail(item)"
+                >
+                  <mat-icon>visibility</mat-icon>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="payroll-table-footer">
+        <span>Page {{ page() }} of {{ totalPages() }} · {{ total() }} total</span>
+        <div class="payroll-table-footer__nav">
+          <button mat-stroked-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+            Previous
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="page() >= totalPages()"
+            (click)="nextPage()"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>

@@ -1,122 +1,407 @@
-<div
-  class="main-layout"
-  [class.main-layout--collapsed]="sidebarCollapsed()"
-  [class.main-layout--mobile-open]="mobileOpen()"
->
-  <aside class="sidebar" aria-label="Primary navigation">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<div class="main-layout" [class.main-layout--mobile-open]="mobileOpen()">
+
+  <aside id="primary-sidebar" class="sidebar" [attr.aria-label]="'Primary navigation'">
+
     <div class="sidebar__brand">
-      <div class="sidebar__logo" aria-hidden="true">Z</div>
-      @if (!sidebarCollapsed()) {
-        <div class="sidebar__brand-text">
-          <strong>{{ appName }}</strong>
-          <span>AI Workspace</span>
-        </div>
-      }
+
+      <div class="sidebar__logo" aria-hidden="true">
+
+        <mat-icon>auto_awesome</mat-icon>
+
+      </div>
+
+      <div class="sidebar__brand-text">
+
+        <strong>{{ appName }}</strong>
+
+        <span>AI Workspace</span>
+
+      </div>
+
     </div>
+
+
 
     <nav class="sidebar__nav">
-      @for (item of navItems; track item.route) {
+
+      @for (item of navItems(); track item.route) {
+
         <a
+
           [routerLink]="item.route"
           routerLinkActive="is-active"
-          [matTooltip]="sidebarCollapsed() ? item.label : ''"
-          matTooltipPosition="right"
+          ariaCurrentWhenActive="page"
+
           (click)="closeMobile()"
+
         >
+
           <mat-icon>{{ item.icon }}</mat-icon>
-          @if (!sidebarCollapsed()) {
-            <span class="sidebar__label">{{ item.label }}</span>
-            @if (item.badge) {
-              <span class="sidebar__badge">{{ item.badge }}</span>
-            }
-          }
+
+          <span>{{ item.label }}</span>
+
         </a>
+
       }
+
+
+
+      <div class="sidebar__divider" aria-hidden="true"></div>
+
+
+
+      @for (item of secondaryItems(); track item.route) {
+
+        <a
+
+          [routerLink]="item.route"
+          routerLinkActive="is-active"
+          ariaCurrentWhenActive="page"
+
+          (click)="closeMobile()"
+
+        >
+
+          <mat-icon>{{ item.icon }}</mat-icon>
+
+          <span>{{ item.label }}</span>
+
+          @if (item.badge) {
+
+            <span class="sidebar__badge">{{ item.badge }}</span>
+
+          }
+
+        </a>
+
+      }
+
     </nav>
 
+
+
     <div class="sidebar__footer">
-      <a
-        class="sidebar__user"
-        routerLink="/profile"
-        [matTooltip]="sidebarCollapsed() ? displayName() : ''"
-        matTooltipPosition="right"
-        (click)="closeMobile()"
-      >
+
+      <div class="sidebar__profile">
+
         <span class="sidebar__avatar" aria-hidden="true">{{ initials() }}</span>
-        @if (!sidebarCollapsed()) {
-          <span class="sidebar__user-text">
-            <strong>{{ displayName() }}</strong>
-            <span>{{ roleLabel() }}</span>
-          </span>
-        }
-      </a>
-      @if (!sidebarCollapsed()) {
-        <button
-          mat-icon-button
-          type="button"
-          class="sidebar__logout"
-          aria-label="Sign out"
-          matTooltip="Sign out"
-          (click)="logout()"
-        >
-          <mat-icon>logout</mat-icon>
-        </button>
-      }
+
+        <div class="sidebar__profile-meta">
+
+          <strong>{{ displayName() }}</strong>
+
+          <span>{{ roleLabel() }}</span>
+
+        </div>
+
+      </div>
+
+      <button
+
+        mat-icon-button
+
+        type="button"
+
+        class="sidebar__logout"
+
+        aria-label="Sign out"
+
+        (click)="logout()"
+
+      >
+
+        <mat-icon>logout</mat-icon>
+
+      </button>
+
     </div>
+
   </aside>
 
+
+
   @if (mobileOpen()) {
+
     <button type="button" class="sidebar-backdrop" aria-label="Close menu" (click)="closeMobile()"></button>
+
   }
 
+
+
   <div class="main-layout__content">
+
     <header class="topbar">
+
       <div class="topbar__left">
+
         <button
+
           mat-icon-button
+
           type="button"
+
           class="topbar__menu-mobile"
+
           aria-label="Open navigation"
+
+          [attr.aria-expanded]="mobileOpen()"
+
+          aria-controls="primary-sidebar"
+
           (click)="toggleMobile()"
+
         >
+
           <mat-icon>menu</mat-icon>
+
         </button>
-        <button
-          mat-icon-button
-          type="button"
-          class="topbar__menu-desktop"
-          aria-label="Toggle sidebar"
-          (click)="toggleSidebar()"
-        >
-          <mat-icon>{{ sidebarCollapsed() ? 'menu' : 'menu_open' }}</mat-icon>
-        </button>
-        <div class="topbar__search" role="search">
-          <mat-icon aria-hidden="true">search</mat-icon>
-          <input
-            #globalSearch
-            type="search"
-            placeholder="Search employees, docs, policies…"
-            aria-label="Global search"
-          />
-          <kbd class="topbar__kbd">⌘K</kbd>
-        </div>
+
+        <h1 class="topbar__greeting">
+          @if (pageTitle()) {
+            {{ pageTitle() }}
+          } @else {
+            {{ greetingMessage() }}
+          }
+        </h1>
+
       </div>
+
+
+
+      <form class="topbar__search" role="search" (submit)="$event.preventDefault(); onSearchSubmit()">
+
+        <mat-icon aria-hidden="true">search</mat-icon>
+
+        <input
+
+          type="search"
+
+          name="q"
+
+          placeholder="Search employees, docs, policies..."
+
+          aria-label="Global search"
+
+          [ngModel]="searchQuery()"
+
+          (ngModelChange)="searchQuery.set($event)"
+
+        />
+
+        <kbd class="topbar__kbd" aria-hidden="true">⌘K</kbd>
+
+      </form>
+
+
 
       <div class="topbar__right">
-        <span class="topbar__company" [matTooltip]="companyName">{{ companyName }}</span>
-        <button mat-icon-button type="button" aria-label="Notifications" routerLink="/notifications">
-          <mat-icon>notifications</mat-icon>
+
+        <button mat-stroked-button type="button" class="company-chip" [matMenuTriggerFor]="companyMenu">
+
+          <mat-icon>apartment</mat-icon>
+
+          <span>{{ companyName() }}</span>
+
+          <mat-icon class="company-chip__chevron">expand_more</mat-icon>
+
         </button>
-        <a class="topbar__profile" routerLink="/profile" [attr.aria-label]="'Profile ' + displayName()">
-          <span class="topbar__avatar">{{ initials() }}</span>
-        </a>
+
+        <mat-menu #companyMenu="matMenu" class="zh-menu" xPosition="before">
+
+          <button mat-menu-item type="button" disabled>
+
+            <mat-icon>check</mat-icon>
+
+            <span>{{ companyName() }}</span>
+
+          </button>
+
+        </mat-menu>
+
+
+
+        <button
+
+          mat-icon-button
+
+          type="button"
+
+          aria-label="Notifications"
+
+          [matMenuTriggerFor]="notificationMenu"
+
+          [matBadge]="notificationCount() || null"
+
+          matBadgeSize="small"
+
+          matBadgeColor="warn"
+
+          [matBadgeHidden]="!notificationCount()"
+
+        >
+
+          <mat-icon>notifications</mat-icon>
+
+        </button>
+
+        <mat-menu #notificationMenu="matMenu" class="zh-menu" xPosition="before">
+
+          <div class="menu-panel" (click)="$event.stopPropagation()">
+
+            <div class="menu-panel__header">
+
+              <strong>Notifications</strong>
+
+              <div class="menu-panel__header-actions">
+
+                @if (notificationCount() > 0) {
+
+                  <button mat-button type="button" class="menu-panel__mark-all" (click)="markAllNotificationsRead()">
+
+                    Mark all read
+
+                  </button>
+
+                }
+
+                <a routerLink="/notifications">View all</a>
+
+              </div>
+
+            </div>
+
+            @if (notifications().length === 0) {
+
+              <p class="menu-panel__empty">No recent notifications</p>
+
+            } @else {
+
+              <ul class="menu-panel__list">
+
+                @for (item of notifications(); track item.id) {
+
+                  <li
+
+                    class="menu-panel__item"
+
+                    [class.menu-panel__item--unread]="!item.read"
+
+                    role="button"
+
+                    tabindex="0"
+
+                    (click)="onNotificationClick(item)"
+
+                    (keydown.enter)="onNotificationClick(item)"
+
+                  >
+
+                    <strong>{{ item.title }}</strong>
+
+                    <span>{{ item.body }}</span>
+
+                    <time>{{ item.createdAt | date: 'short' }}</time>
+
+                  </li>
+
+                }
+
+              </ul>
+
+            }
+
+          </div>
+
+        </mat-menu>
+
+
+
+        <button
+
+          mat-icon-button
+
+          type="button"
+
+          class="topbar__avatar-btn"
+
+          [matMenuTriggerFor]="userMenu"
+
+          aria-label="User menu"
+
+        >
+
+          <span class="topbar__avatar" aria-hidden="true">{{ initials() }}</span>
+
+        </button>
+
+        <mat-menu #userMenu="matMenu" class="zh-menu" xPosition="before">
+
+          <a mat-menu-item routerLink="/profile">
+
+            <mat-icon>person</mat-icon>
+
+            <span>Profile</span>
+
+          </a>
+
+          <a mat-menu-item routerLink="/mfa-setup">
+
+            <mat-icon>security</mat-icon>
+
+            <span>Security / MFA</span>
+
+          </a>
+
+          @if (user()?.permissions?.includes('settings:view')) {
+
+            <a mat-menu-item routerLink="/settings">
+
+              <mat-icon>settings</mat-icon>
+
+              <span>Settings</span>
+
+            </a>
+
+          }
+
+          <mat-divider />
+
+          <button mat-menu-item type="button" (click)="logout()">
+
+            <mat-icon>logout</mat-icon>
+
+            <span>Sign out</span>
+
+          </button>
+
+        </mat-menu>
+
       </div>
+
     </header>
 
-    <main id="main-content" class="page-content">
+
+
+    <main id="main-content" class="page-content" [class.page-content--dashboard]="!showBreadcrumbs()">
+
+      @if (showBreadcrumbs()) {
+
+        <app-breadcrumb [items]="breadcrumbs()" />
+
+      }
+
       <router-outlet />
+
     </main>
+
   </div>
 
+
+
   <app-loading-overlay />
+
 </div>
+
+

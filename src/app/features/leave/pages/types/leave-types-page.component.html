@@ -1,0 +1,95 @@
+<app-organization-section-header
+  title="Leave types"
+  description="Configure paid and unpaid leave categories for your company."
+  icon="category"
+  [count]="loading() || error() ? null : items().length"
+>
+  @if (canUpdate) {
+    <button mat-flat-button color="primary" type="button" (click)="openForm()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Add leave type
+    </button>
+  }
+</app-organization-section-header>
+
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading leave types…"
+  errorTitle="Leave types unavailable"
+  (retry)="reload()"
+>
+  @if (items().length === 0) {
+    <app-empty-state
+      title="No leave types yet"
+      message="Add your first leave type to start tracking entitlements and requests."
+      icon="category"
+    >
+      @if (canUpdate) {
+        <button mat-flat-button color="primary" type="button" (click)="openForm()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add leave type
+        </button>
+      }
+    </app-empty-state>
+  } @else {
+    <div class="org-entity-list" role="list" aria-label="Leave types">
+      @for (item of items(); track item.id) {
+        <mat-card class="org-entity-card" role="listitem">
+          <div class="org-entity-card__body">
+            <div class="org-entity-card__title">
+              <span
+                class="leave-type-swatch"
+                [style.background]="item.color"
+                aria-hidden="true"
+              ></span>
+              <strong>{{ item.name }}</strong>
+              <code class="org-entity-card__code">{{ item.code }}</code>
+              @if (!item.isActive) {
+                <span class="org-entity-card__badge">Inactive</span>
+              }
+              @if (item.isPaid) {
+                <span class="org-entity-card__badge">Paid</span>
+              }
+            </div>
+            <p class="org-entity-card__meta">
+              <mat-icon aria-hidden="true">event</mat-icon>
+              Max {{ item.maxDaysPerYear }} days/year · Carry {{ item.carryForwardDays }}
+              @if (item.allowHalfDay) {
+                · Half day
+              }
+              @if (item.requiresApproval) {
+                · Approval required
+              }
+            </p>
+            @if (item.description) {
+              <p class="leave-type-desc">{{ item.description }}</p>
+            }
+          </div>
+          <div class="org-entity-card__actions">
+            @if (canUpdate) {
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Edit {{ item.name }}"
+                [disabled]="deletingId() === item.id"
+                (click)="openForm(item)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Delete {{ item.name }}"
+                [disabled]="deletingId() === item.id"
+                (click)="remove(item)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
+        </mat-card>
+      }
+    </div>
+  }
+</app-organization-status>

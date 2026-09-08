@@ -1,0 +1,161 @@
+<app-organization-section-header
+  title="Payroll runs"
+  description="Create, process, approve, and pay monthly payroll runs."
+  icon="payments"
+  [count]="loading() || error() ? null : total()"
+>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Year</mat-label>
+    <mat-select [formControl]="yearControl">
+      @for (y of yearOptions; track y) {
+        <mat-option [value]="y">{{ y }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Status</mat-label>
+    <mat-select [formControl]="statusControl">
+      @for (opt of statusOptions; track opt.value) {
+        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (canCreate) {
+    <button mat-flat-button color="primary" type="button" (click)="openCreate()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Create run
+    </button>
+  }
+</app-organization-section-header>
+
+<div class="payroll-table-card">
+  @if (loading()) {
+    <div class="payroll-table-state">
+      <mat-spinner diameter="32" />
+      <span>Loading payroll runs…</span>
+    </div>
+  } @else if (error()) {
+    <div class="payroll-table-state payroll-table-state--error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
+    </div>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      title="No payroll runs"
+      message="Create a run or adjust the year and status filters."
+      icon="payments"
+    >
+      @if (canCreate) {
+        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Create run
+        </button>
+      }
+    </app-empty-state>
+  } @else {
+    <div class="payroll-table-wrap">
+      <table class="payroll-table">
+        <thead>
+          <tr>
+            <th scope="col">Period</th>
+            <th scope="col">Title</th>
+            <th scope="col">Entries</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="payroll-table__actions-col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr class="payroll-table__row" (click)="openEntries(item)" style="cursor: pointer">
+              <td>
+                <strong>{{ monthLabel(item.month) }} {{ item.year }}</strong>
+              </td>
+              <td>{{ item.title || '—' }}</td>
+              <td>{{ entryCount(item) }}</td>
+              <td>
+                <span [class]="statusClass(item.status)">
+                  <span class="payroll-status-pill__dot" aria-hidden="true"></span>
+                  {{ statusLabel(item.status) }}
+                </span>
+              </td>
+              <td class="payroll-table__actions-col" (click)="$event.stopPropagation()">
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="payroll-table__menu-btn"
+                  aria-label="Actions"
+                  [matMenuTriggerFor]="rowMenu"
+                  [disabled]="actionId() === item.id"
+                  (click)="setMenuItem(item)"
+                >
+                  <mat-icon>more_horiz</mat-icon>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="payroll-table-footer">
+        <span>Page {{ page() }} of {{ totalPages() }} · {{ total() }} total</span>
+        <div class="payroll-table-footer__nav">
+          <button mat-stroked-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+            Previous
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="page() >= totalPages()"
+            (click)="nextPage()"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    }
+
+    <mat-menu #rowMenu="matMenu" xPosition="before">
+      @if (menuItem(); as item) {
+        <button mat-menu-item type="button" (click)="openEntries(item)">
+          <mat-icon>list_alt</mat-icon>
+          <span>View entries</span>
+        </button>
+        @if (canEdit(item)) {
+          <button mat-menu-item type="button" (click)="openEdit(item)">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+        }
+        @if (canProcess(item)) {
+          <button mat-menu-item type="button" (click)="process(item)">
+            <mat-icon>play_circle</mat-icon>
+            <span>Process</span>
+          </button>
+        }
+        @if (canApproveRun(item)) {
+          <button mat-menu-item type="button" (click)="approve(item)">
+            <mat-icon>check_circle</mat-icon>
+            <span>Approve</span>
+          </button>
+        }
+        @if (canMarkPaid(item)) {
+          <button mat-menu-item type="button" (click)="markPaid(item)">
+            <mat-icon>paid</mat-icon>
+            <span>Mark paid</span>
+          </button>
+        }
+        @if (canCancelRun(item)) {
+          <button mat-menu-item type="button" (click)="cancel(item)">
+            <mat-icon>cancel</mat-icon>
+            <span>Cancel</span>
+          </button>
+        }
+      }
+    </mat-menu>
+  }
+</div>

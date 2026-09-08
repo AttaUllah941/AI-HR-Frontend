@@ -1,0 +1,29 @@
+<li class="org-node">
+  <div class="org-node__card">
+    <div class="org-node__head">
+      <mat-icon aria-hidden="true">apartment</mat-icon>
+      <div>
+        <strong>{{ node().name }}</strong>
+        <code>{{ node().code }}</code>
+      </div>
+    </div>
+    @if (node().branch) {
+      <p>{{ node().branch!.name }}</p>
+    }
+    @if (node().teams.length) {
+      <ul class="org-node__teams">
+        @for (team of node().teams; track team.id) {
+          <li>{{ team.name }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  @if (node().children.length) {
+    <ul class="org-node__children">
+      @for (child of node().children; track child.id) {
+        <app-org-chart-node [node]="child" />
+      }
+    </ul>
+  }
+</li>

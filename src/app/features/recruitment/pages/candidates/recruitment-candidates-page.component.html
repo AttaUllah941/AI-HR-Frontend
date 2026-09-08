@@ -1,0 +1,150 @@
+<app-organization-section-header
+  title="Candidates"
+  description="Talent pool, resumes, and screening scores."
+  icon="person_search"
+  [count]="loading() || error() ? null : total()"
+>
+  <div class="recruitment-action-bar__search">
+    <mat-icon aria-hidden="true">search</mat-icon>
+    <input
+      type="search"
+      [formControl]="searchControl"
+      placeholder="Search name or email"
+      aria-label="Search candidates"
+    />
+  </div>
+
+  @if (canCreate) {
+    <button mat-flat-button color="primary" type="button" (click)="openCreate()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Add candidate
+    </button>
+  }
+</app-organization-section-header>
+
+<div class="recruitment-table-card">
+  @if (loading()) {
+    <div class="recruitment-table-state">
+      <mat-spinner diameter="32" />
+      <span>Loading candidates…</span>
+    </div>
+  } @else if (error()) {
+    <div class="recruitment-table-state recruitment-table-state--error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
+    </div>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      title="No candidates"
+      message="Add a candidate or clear the search filter."
+      icon="person_search"
+    >
+      @if (canCreate) {
+        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add candidate
+        </button>
+      }
+    </app-empty-state>
+  } @else {
+    <div class="recruitment-table-wrap">
+      <table class="recruitment-table">
+        <thead>
+          <tr>
+            <th scope="col">Candidate</th>
+            <th scope="col">Current role</th>
+            <th scope="col">Source</th>
+            <th scope="col">Screening</th>
+            <th scope="col">Resume</th>
+            <th scope="col" class="recruitment-table__actions-col">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr class="recruitment-table__row">
+              <td>
+                <div class="recruitment-table__employee-text">
+                  <strong>{{ fullName(item) }}</strong>
+                  <span>{{ item.email }}</span>
+                </div>
+              </td>
+              <td>
+                {{ item.currentTitle || '—' }}
+                @if (item.currentCompany) {
+                  <div class="recruitment-table__employee-text">
+                    <span>{{ item.currentCompany }}</span>
+                  </div>
+                }
+              </td>
+              <td>{{ item.source || '—' }}</td>
+              <td>{{ item.screeningScore != null ? item.screeningScore : '—' }}</td>
+              <td>{{ item.resumeFileName || (item.resumeUrl ? 'Linked' : '—') }}</td>
+              <td class="recruitment-table__actions-col">
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="recruitment-table__menu-btn"
+                  aria-label="Actions"
+                  [matMenuTriggerFor]="rowMenu"
+                  [disabled]="actionId() === item.id"
+                  (click)="setMenuItem(item)"
+                >
+                  <mat-icon>more_horiz</mat-icon>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="recruitment-table-footer">
+        <span>Page {{ page() }} of {{ totalPages() }} · {{ total() }} total</span>
+        <div class="recruitment-table-footer__nav">
+          <button mat-stroked-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+            Previous
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="page() >= totalPages()"
+            (click)="nextPage()"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    }
+
+    <mat-menu #rowMenu="matMenu" xPosition="before">
+      @if (menuItem(); as item) {
+        @if (canCreate) {
+          <button mat-menu-item type="button" (click)="openEdit(item)">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+        }
+        @if (canUpdate) {
+          <button mat-menu-item type="button" (click)="openResume(item)">
+            <mat-icon>attach_file</mat-icon>
+            <span>Attach resume</span>
+          </button>
+          <button mat-menu-item type="button" (click)="openScreening(item)">
+            <mat-icon>fact_check</mat-icon>
+            <span>Screening score</span>
+          </button>
+        }
+        @if (canDelete) {
+          <button mat-menu-item type="button" (click)="remove(item)">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+          </button>
+        }
+      }
+    </mat-menu>
+  }
+</div>

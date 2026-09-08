@@ -1,0 +1,65 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading storage settings…"
+  errorTitle="Storage settings unavailable"
+  (retry)="reload()"
+>
+  <section class="settings-page" aria-label="Storage settings">
+    <div class="settings-action-bar">
+      <div>
+        <h2 class="settings-page-heading">File storage</h2>
+        <p class="settings-page-sub">
+          Configure where uploads will live (used by Phase 16 file management).
+        </p>
+      </div>
+      @if (canUpdate) {
+        <div class="settings-action-bar__actions">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="settings-add-btn"
+            [disabled]="form.invalid || saving()"
+            (click)="save()"
+          >
+            @if (saving()) {
+              <mat-spinner diameter="16" />
+            } @else {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
+            {{ saving() ? 'Saving…' : 'Save storage' }}
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="settings-panel-card">
+      <form [formGroup]="form" class="settings-form" (ngSubmit)="save()">
+        <div class="settings-form__grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Provider</mat-label>
+            <mat-select formControlName="storageProvider">
+              <mat-option value="local">local</mat-option>
+              <mat-option value="s3">s3</mat-option>
+              <mat-option value="azure">azure</mat-option>
+              <mat-option value="gcs">gcs</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Bucket / container</mat-label>
+            <input matInput formControlName="storageBucket" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Region</mat-label>
+            <input matInput formControlName="storageRegion" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Public base URL</mat-label>
+            <input matInput formControlName="storagePublicBaseUrl" />
+          </mat-form-field>
+        </div>
+      </form>
+    </div>
+  </section>
+</app-organization-status>

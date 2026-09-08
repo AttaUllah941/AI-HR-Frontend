@@ -1,0 +1,47 @@
+<h2 mat-dialog-title class="recruitment-dialog-title">
+  <mat-icon aria-hidden="true">task_alt</mat-icon>
+  Complete interview
+</h2>
+
+<mat-dialog-content>
+  <p class="recruitment-dialog-subtitle">Record outcome, rating, and feedback.</p>
+
+  <form [formGroup]="form" class="recruitment-form" id="interview-complete-form" (ngSubmit)="submit()">
+    <div class="recruitment-form__grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Outcome</mat-label>
+        <mat-select formControlName="status">
+          @for (opt of statusOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Rating (0–5)</mat-label>
+        <input matInput type="number" min="0" max="5" step="0.5" formControlName="rating" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="recruitment-form__full">
+        <mat-label>Feedback</mat-label>
+        <textarea matInput rows="4" formControlName="feedback"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="recruitment-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="interview-complete-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : 'Complete' }}
+  </button>
+</mat-dialog-actions>

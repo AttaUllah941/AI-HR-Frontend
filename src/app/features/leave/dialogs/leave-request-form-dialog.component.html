@@ -1,0 +1,93 @@
+<h2 mat-dialog-title class="leave-dialog-title">
+  <mat-icon aria-hidden="true">event_available</mat-icon>
+  {{ viewOnly ? 'Leave request' : isEdit ? 'Edit leave request' : 'Apply for leave' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="leave-dialog-subtitle">
+    {{
+      viewOnly
+        ? 'Review leave request details.'
+        : isEdit
+          ? 'Update this pending leave request.'
+          : 'Submit a leave request for review.'
+    }}
+  </p>
+
+  <form [formGroup]="form" class="leave-form" id="leave-request-form" (ngSubmit)="submit()">
+    <div class="leave-form__grid">
+      @if (canAssignEmployee) {
+        <mat-form-field appearance="outline" class="leave-form__full">
+          <mat-label>Employee</mat-label>
+          <mat-select formControlName="employeeId">
+            <mat-option value="">Myself / current employee</mat-option>
+            @for (emp of employees(); track emp.id) {
+              <mat-option [value]="emp.id">
+                {{ emp.firstName }} {{ emp.lastName }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      <mat-form-field appearance="outline" class="leave-form__full">
+        <mat-label>Leave type</mat-label>
+        <mat-select formControlName="leaveTypeId">
+          @for (type of leaveTypes(); track type.id) {
+            <mat-option [value]="type.id">{{ type.name }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.leaveTypeId.touched && form.controls.leaveTypeId.hasError('required')) {
+          <mat-error>Leave type is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Start date</mat-label>
+        <input matInput type="date" formControlName="startDate" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>End date</mat-label>
+        <input matInput type="date" formControlName="endDate" />
+        @if (form.touched && form.hasError('dateRange')) {
+          <mat-error>End date must be on or after start date</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="leave-form__full">
+        <mat-label>Day type</mat-label>
+        <mat-select formControlName="dayType">
+          @for (opt of dayTypeOptions(); track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="leave-form__full">
+        <mat-label>Reason</mat-label>
+        <textarea matInput rows="3" formControlName="reason"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="leave-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">
+    {{ viewOnly ? 'Close' : 'Cancel' }}
+  </button>
+  @if (!viewOnly) {
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      form="leave-request-form"
+      [disabled]="form.invalid || saving()"
+    >
+      @if (saving()) {
+        <mat-spinner class="save-spinner" diameter="16" />
+      }
+      {{ saving() ? 'Saving…' : isEdit ? 'Save changes' : 'Submit request' }}
+    </button>
+  }
+</mat-dialog-actions>

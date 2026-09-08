@@ -1,0 +1,53 @@
+.leave-tabs {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--zh-border);
+  background: var(--zh-card);
+  border-radius: var(--zh-radius) var(--zh-radius) 0 0;
+  padding: 0 0.35rem;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 3rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    opacity: 0.85;
+    transition: opacity 0.15s ease;
+
+    mat-icon {
+      font-size: 1.05rem;
+      width: 1.05rem;
+      height: 1.05rem;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &.mdc-tab--active,
+    &.mat-mdc-tab-link-active {
+      opacity: 1;
+      font-weight: 600;
+    }
+  }
+}
+
+.leave-tabs__panel {
+  display: block;
+  min-height: 12rem;
+}
+
+@media (max-width: 900px) {
+  .leave-tabs a mat-icon {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .leave-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+}

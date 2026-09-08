@@ -1,0 +1,40 @@
+<h2 mat-dialog-title class="recruitment-dialog-title">
+  <mat-icon aria-hidden="true">fact_check</mat-icon>
+  Screening score
+</h2>
+
+<mat-dialog-content>
+  <p class="recruitment-dialog-subtitle">
+    Update screening for {{ data.candidate.firstName }} {{ data.candidate.lastName }}.
+  </p>
+
+  <form [formGroup]="form" class="recruitment-form" id="screening-form" (ngSubmit)="submit()">
+    <div class="recruitment-form__grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Score (0–100)</mat-label>
+        <input matInput type="number" min="0" max="100" formControlName="screeningScore" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="recruitment-form__full">
+        <mat-label>Notes</mat-label>
+        <textarea matInput rows="3" formControlName="screeningNotes"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="recruitment-dialog-actions">
+  <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="screening-form"
+    [disabled]="form.invalid || saving()"
+  >
+    @if (saving()) {
+      <mat-spinner class="save-spinner" diameter="16" />
+    }
+    {{ saving() ? 'Saving…' : 'Save screening' }}
+  </button>
+</mat-dialog-actions>

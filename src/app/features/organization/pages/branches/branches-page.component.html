@@ -1,0 +1,81 @@
+<app-organization-section-header
+  title="Branches"
+  description="Manage office locations and regional branches for your organization."
+  icon="apartment"
+  [count]="loading() || error() ? null : items().length"
+>
+  @if (canCreate) {
+    <button mat-flat-button color="primary" type="button" (click)="openForm()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Add branch
+    </button>
+  }
+</app-organization-section-header>
+
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading branches…"
+  errorTitle="Branches unavailable"
+  (retry)="reload()"
+>
+  @if (items().length === 0) {
+    <app-empty-state
+      title="No branches yet"
+      message="Add your first branch to represent office locations across your organization."
+      icon="apartment"
+    >
+      @if (canCreate) {
+        <button mat-flat-button color="primary" type="button" (click)="openForm()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add branch
+        </button>
+      }
+    </app-empty-state>
+  } @else {
+    <div class="org-entity-list" role="list" aria-label="Branches">
+      @for (item of items(); track item.id) {
+        <mat-card class="org-entity-card" role="listitem">
+          <div class="org-entity-card__body">
+            <div class="org-entity-card__title">
+              <strong>{{ item.name }}</strong>
+              <code class="org-entity-card__code">{{ item.code }}</code>
+              @if (item.isHeadOffice) {
+                <span class="org-entity-card__badge">Head office</span>
+              }
+            </div>
+            <p class="org-entity-card__meta">
+              <mat-icon aria-hidden="true">location_on</mat-icon>
+              {{ item.city || '—' }}{{ item.country ? ', ' + item.country : '' }}
+            </p>
+          </div>
+          <div class="org-entity-card__actions">
+            @if (canUpdate) {
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Edit {{ item.name }}"
+                [disabled]="deletingId() === item.id"
+                (click)="openForm(item)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+            @if (canDelete) {
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Delete {{ item.name }}"
+                [disabled]="deletingId() === item.id"
+                (click)="remove(item)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
+        </mat-card>
+      }
+    </div>
+  }
+</app-organization-status>
+

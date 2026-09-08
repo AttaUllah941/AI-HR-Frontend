@@ -1,0 +1,87 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading settings…"
+  errorTitle="Settings unavailable"
+  (retry)="reload()"
+>
+  @if (summary(); as s) {
+    <section class="settings-page" aria-label="Settings overview">
+      <div class="settings-action-bar">
+        <div>
+          <h2 class="settings-page-heading">{{ s.company.name }}</h2>
+          <p class="settings-page-sub">
+            {{ s.company.legalName || 'Company workspace' }} · {{ s.company.timezone }} ·
+            {{ s.company.locale }}
+          </p>
+        </div>
+        <div class="settings-action-bar__actions">
+          <button mat-stroked-button type="button" class="settings-add-btn" (click)="reload()">
+            <mat-icon aria-hidden="true">refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-meta-grid">
+        <div class="settings-meta-chip">
+          <span class="settings-meta-chip__label">Users</span>
+          <span class="settings-meta-chip__value">{{ s.counts.users }}</span>
+          <span class="settings-meta-chip__hint">{{ s.counts.activeUsers }} active</span>
+        </div>
+        <div class="settings-meta-chip">
+          <span class="settings-meta-chip__label">Roles</span>
+          <span class="settings-meta-chip__value">{{ s.counts.roles }}</span>
+          <span class="settings-meta-chip__hint">{{ s.counts.permissions }} permissions</span>
+        </div>
+        <div class="settings-meta-chip">
+          <span class="settings-meta-chip__label">Email</span>
+          <span class="settings-meta-chip__value">{{ s.config.emailProvider }}</span>
+          <span class="settings-meta-chip__hint">
+            API key {{ s.config.emailApiKeySet ? 'set' : 'not set' }}
+          </span>
+        </div>
+        <div class="settings-meta-chip">
+          <span class="settings-meta-chip__label">Storage</span>
+          <span class="settings-meta-chip__value">{{ s.config.storageProvider }}</span>
+          <span class="settings-meta-chip__hint">File provider</span>
+        </div>
+      </div>
+
+      <div class="settings-quick-links">
+        <a class="settings-quick-link" routerLink="/settings/company">
+          <mat-icon aria-hidden="true">business</mat-icon>
+          Company profile
+        </a>
+        <a class="settings-quick-link" routerLink="/settings/users">
+          <mat-icon aria-hidden="true">group</mat-icon>
+          Users
+        </a>
+        <a class="settings-quick-link" routerLink="/settings/roles">
+          <mat-icon aria-hidden="true">admin_panel_settings</mat-icon>
+          Roles &amp; permissions
+        </a>
+        <a class="settings-quick-link" routerLink="/settings/email">
+          <mat-icon aria-hidden="true">mail</mat-icon>
+          Email settings
+        </a>
+        <a class="settings-quick-link" routerLink="/settings/storage">
+          <mat-icon aria-hidden="true">cloud</mat-icon>
+          Storage
+        </a>
+        <a class="settings-quick-link" routerLink="/settings/system">
+          <mat-icon aria-hidden="true">tune</mat-icon>
+          System &amp; integrations
+        </a>
+        <a class="settings-quick-link" routerLink="/settings/security">
+          <mat-icon aria-hidden="true">security</mat-icon>
+          Security hardening
+        </a>
+        <a class="settings-quick-link" routerLink="/settings/audit">
+          <mat-icon aria-hidden="true">history</mat-icon>
+          Audit logs
+        </a>
+      </div>
+    </section>
+  }
+</app-organization-status>

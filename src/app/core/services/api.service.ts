@@ -15,15 +15,30 @@ export class ApiService {
     });
   }
 
-  getText(path: string, params?: Record<string, string | number | boolean | undefined>): Observable<string> {
+  /** Binary download (CSV/PDF exports). */
+  getBlob(
+    path: string,
+    params?: Record<string, string | number | boolean | undefined>,
+  ): Observable<Blob> {
     return this.http.get(`${this.baseUrl}${path}`, {
       params: this.toParams(params),
-      responseType: 'text',
+      responseType: 'blob',
+    });
+  }
+
+  postBlob(path: string, body?: unknown): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}${path}`, body ?? {}, {
+      responseType: 'blob',
     });
   }
 
   post<T>(path: string, body?: unknown): Observable<ApiResponse<T>> {
     return this.http.post<ApiResponse<T>>(`${this.baseUrl}${path}`, body ?? {});
+  }
+
+  /** Multipart upload — do not set Content-Type (browser sets boundary). */
+  postFormData<T>(path: string, formData: FormData): Observable<ApiResponse<T>> {
+    return this.http.post<ApiResponse<T>>(`${this.baseUrl}${path}`, formData);
   }
 
   put<T>(path: string, body?: unknown): Observable<ApiResponse<T>> {
