@@ -225,8 +225,22 @@ export class AuthService {
     );
   }
 
-  setupMfa(): Observable<MfaSetupData> {
-    return this.api.post<MfaSetupData>('/auth/mfa/setup').pipe(map((res) => this.unwrap(res)));
+  /** Password and code are required by the server when MFA is already enabled (re-setup). */
+  setupMfa(credentials?: { password: string; code: string }): Observable<MfaSetupData> {
+    return this.api
+      .post<MfaSetupData>('/auth/mfa/setup', credentials ?? {})
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => {
+          // Setup replaces the secret and leaves MFA off until it is confirmed again.
+          const current = this.userSignal();
+          if (current?.mfaEnabled) {
+            const updated = { ...current, mfaEnabled: false };
+            this.userStorage().setItem(USER_KEY, JSON.stringify(updated));
+            this.userSignal.set(updated);
+          }
+        }),
+      );
   }
 
   enableMfa(code: string): Observable<{ mfaEnabled: boolean }> {

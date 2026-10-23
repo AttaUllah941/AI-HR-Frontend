@@ -177,10 +177,7 @@ export class PerformanceFeedbackPageComponent implements OnInit {
   }
 
   fromLabel(item: PerformanceFeedback): string {
-    if (item.isAnonymous) {
-      return 'Anonymous';
-    }
-    return this.api.employeeLabel(item.fromEmployee);
+    return this.api.feedbackAuthorLabel(item);
   }
 
   toLabel(item: PerformanceFeedback): string {

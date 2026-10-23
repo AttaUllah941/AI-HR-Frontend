@@ -9,6 +9,10 @@
 } @else if (summary(); as data) {
   <app-dashboard-clock-card />
 
+  @if (data.kpis.length === 0) {
+    <p class="state-msg">No metrics are available for your account yet.</p>
+  }
+
   <section class="kpi-grid" aria-label="Key metrics">
     @for (card of data.kpis; track card.key) {
       <mat-card class="kpi-card">
@@ -36,30 +40,32 @@
     }
   </section>
 
-  <mat-card class="ai-banner">
-    <div class="ai-banner__header">
-      <div class="ai-banner__title">
-        <span class="ai-banner__icon" aria-hidden="true">
-          <mat-icon>auto_awesome</mat-icon>
-        </span>
-        <h2>{{ data.aiInsights.title }}</h2>
-        @if (data.aiInsights.live) {
-          <span class="ai-banner__live">LIVE</span>
-        }
+  @if (data.aiInsights.items.length > 0) {
+    <mat-card class="ai-banner">
+      <div class="ai-banner__header">
+        <div class="ai-banner__title">
+          <span class="ai-banner__icon" aria-hidden="true">
+            <mat-icon>auto_awesome</mat-icon>
+          </span>
+          <h2>{{ data.aiInsights.title }}</h2>
+          @if (data.aiInsights.live) {
+            <span class="ai-banner__live">LIVE</span>
+          }
+        </div>
       </div>
-    </div>
-    <ul class="ai-banner__list">
-      @for (item of data.aiInsights.items; track $index) {
-        <li>
-          {{ item.prefix }}<strong>{{ item.highlight }}</strong>{{ item.suffix }}
-        </li>
-      }
-    </ul>
-    <a class="ai-banner__cta" [routerLink]="data.aiInsights.ctaRoute">
-      {{ data.aiInsights.ctaLabel }}
-      <mat-icon>arrow_outward</mat-icon>
-    </a>
-  </mat-card>
+      <ul class="ai-banner__list">
+        @for (item of data.aiInsights.items; track $index) {
+          <li>
+            {{ item.prefix }}<strong>{{ item.highlight }}</strong>{{ item.suffix }}
+          </li>
+        }
+      </ul>
+      <a class="ai-banner__cta" [routerLink]="data.aiInsights.ctaRoute">
+        {{ data.aiInsights.ctaLabel }}
+        <mat-icon>arrow_outward</mat-icon>
+      </a>
+    </mat-card>
+  }
 
   <section class="dashboard-grid">
     <mat-card class="panel panel--attendance">

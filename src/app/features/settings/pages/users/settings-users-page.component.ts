@@ -53,6 +53,7 @@ export class SettingsUsersPageComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly total = signal(0);
   readonly generatedPassword = signal<string | null>(null);
+  readonly passwordEmailed = signal(false);
 
   readonly canCreate = this.auth.hasPermission('users:create');
   readonly canUpdate = this.auth.hasPermission('users:update');
@@ -114,6 +115,7 @@ export class SettingsUsersPageComponent implements OnInit {
         if (!result) return;
         if (typeof result === 'object' && result.created) {
           this.generatedPassword.set(result.temporaryPassword ?? null);
+          this.passwordEmailed.set(Boolean(result.temporaryPasswordEmailed));
           this.reload();
         } else if (result === true) {
           this.reload();
@@ -163,5 +165,6 @@ export class SettingsUsersPageComponent implements OnInit {
 
   dismissPassword(): void {
     this.generatedPassword.set(null);
+    this.passwordEmailed.set(false);
   }
 }

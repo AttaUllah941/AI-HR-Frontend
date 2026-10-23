@@ -49,10 +49,11 @@ export class MfaSetupPageComponent implements OnInit {
     this.startSetup();
   }
 
-  private startSetup(): void {
+  private startSetup(credentials?: { password: string; code: string }): void {
     this.loading.set(true);
-    this.auth.setupMfa().subscribe({
+    this.auth.setupMfa(credentials).subscribe({
       next: async (data) => {
+        this.mfaEnabled.set(false);
         this.setup.set(data);
         try {
           const url = await QRCode.toDataURL(data.otpauthUrl, {
@@ -68,6 +69,11 @@ export class MfaSetupPageComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
+        if (credentials) {
+          // Stay on the re-authentication form so the user can correct the password or code.
+          this.mfaEnabled.set(true);
+          return;
+        }
         void this.router.navigate(['/dashboard']);
       },
     });
@@ -89,6 +95,17 @@ export class MfaSetupPageComponent implements OnInit {
       },
       error: () => this.submitting.set(false),
     });
+  }
+
+  onReset(): void {
+    if (this.disableForm.invalid || this.submitting()) {
+      this.disableForm.markAllAsTouched();
+      return;
+    }
+
+    const { password, code } = this.disableForm.getRawValue();
+    this.disableForm.reset();
+    this.startSetup({ password, code });
   }
 
   onDisable(): void {

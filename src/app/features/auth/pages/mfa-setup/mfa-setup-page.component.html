@@ -2,7 +2,10 @@
   @if (mfaEnabled()) {
     <header>
       <h2>Two-factor authentication</h2>
-      <p>MFA is enabled on your account. Enter your password and a current code to disable it.</p>
+      <p>
+        MFA is enabled on your account. Enter your password and a current code to disable it or to
+        replace your authenticator.
+      </p>
     </header>
 
     <form [formGroup]="disableForm" (ngSubmit)="onDisable()">
@@ -24,6 +27,15 @@
         [disabled]="disableForm.invalid || submitting()"
       >
         {{ submitting() ? 'Disabling…' : 'Disable MFA' }}
+      </button>
+      <button
+        mat-stroked-button
+        class="full"
+        type="button"
+        (click)="onReset()"
+        [disabled]="disableForm.invalid || submitting()"
+      >
+        Replace authenticator
       </button>
     </form>
   } @else {

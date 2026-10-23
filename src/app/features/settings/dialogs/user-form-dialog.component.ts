@@ -21,7 +21,9 @@ export interface UserFormDialogData {
   mode: 'create' | 'edit';
 }
 
-export type UserFormDialogResult = boolean | { created: true; temporaryPassword?: string };
+export type UserFormDialogResult =
+  | boolean
+  | { created: true; temporaryPassword?: string; temporaryPasswordEmailed?: boolean };
 
 @Component({
   selector: 'app-user-form-dialog',
@@ -68,7 +70,14 @@ export class UserFormDialogComponent {
       this.data.user?.roles.map((r) => r.code) ?? ([] as string[]),
       [Validators.required, Validators.minLength(1)],
     ],
-    temporaryPassword: [''],
+    temporaryPassword: [
+      '',
+      [
+        Validators.minLength(8),
+        Validators.maxLength(128),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).*$/),
+      ],
+    ],
   });
 
   submit(): void {
@@ -112,10 +121,15 @@ export class UserFormDialogComponent {
       })
       .subscribe({
         next: (res: CreateUserResult) => {
-          this.toast.success('User created.');
+          this.toast.success(
+            res.temporaryPasswordEmailed
+              ? 'User created. A temporary password was emailed to them.'
+              : 'User created.',
+          );
           this.dialogRef.close({
             created: true,
             temporaryPassword: res.temporaryPassword,
+            temporaryPasswordEmailed: res.temporaryPasswordEmailed,
           });
         },
         error: (err: { error?: { message?: string }; message?: string }) => {

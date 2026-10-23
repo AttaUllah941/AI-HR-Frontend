@@ -25,14 +25,18 @@
         <mat-label>Description</mat-label>
         <textarea matInput rows="2" formControlName="description"></textarea>
       </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Employee ID</mat-label>
-        <input matInput formControlName="employeeId" placeholder="Required for documents" />
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Candidate ID</mat-label>
-        <input matInput formControlName="candidateId" placeholder="Required for resumes" />
-      </mat-form-field>
+      @if (canAttachEmployee) {
+        <mat-form-field appearance="outline">
+          <mat-label>Employee ID</mat-label>
+          <input matInput formControlName="employeeId" placeholder="Required for documents" />
+        </mat-form-field>
+      }
+      @if (canAttachCandidate) {
+        <mat-form-field appearance="outline">
+          <mat-label>Candidate ID</mat-label>
+          <input matInput formControlName="candidateId" placeholder="Required for resumes" />
+        </mat-form-field>
+      }
     </div>
   </form>
 </mat-dialog-content>

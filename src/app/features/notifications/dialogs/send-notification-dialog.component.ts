@@ -14,6 +14,7 @@ import {
   NotificationCategory,
   NotificationChannel,
   NotificationsService,
+  describeSendResult,
 } from '../../../core/services/notifications.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -100,9 +101,12 @@ export class SendNotificationDialogComponent {
       })
       .subscribe({
         next: (res) => {
-          this.toast.success(
-            res.count ? `Dispatched ${res.count} notification(s).` : 'No channels delivered.',
-          );
+          const message = describeSendResult(res);
+          if (res.count) {
+            this.toast.success(message);
+          } else {
+            this.toast.info(message);
+          }
           this.dialogRef.close(true);
         },
         error: (err: { error?: { message?: string }; message?: string }) => {

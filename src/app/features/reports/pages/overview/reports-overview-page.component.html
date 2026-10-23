@@ -35,6 +35,7 @@
           </button>
           <mat-menu #exportMenu="matMenu">
             <button mat-menu-item type="button" (click)="exportOverview('CSV')">CSV</button>
+            <button mat-menu-item type="button" (click)="exportOverview('XLSX')">Excel (.xlsx)</button>
             <button mat-menu-item type="button" (click)="exportOverview('PDF')">PDF</button>
             <button mat-menu-item type="button" (click)="exportOverview('JSON')">JSON</button>
           </mat-menu>
@@ -120,7 +121,7 @@
                     mat-stroked-button
                     type="button"
                     [disabled]="exporting()"
-                    (click)="exportModule(mod.key, 'CSV', $event)"
+                    (click)="exportModule(mod.key, 'XLSX', $event)"
                   >
                     Excel
                   </button>

@@ -45,7 +45,11 @@
   } @else if (items().length === 0) {
     <app-empty-state
       title="No payroll runs"
-      message="Create a run or adjust the year and status filters."
+      [message]="
+        canManageRuns
+          ? 'Create a run or adjust the year and status filters.'
+          : 'Payroll runs are visible to payroll administrators only. Your payslips are available under Payslips.'
+      "
       icon="payments"
     >
       @if (canCreate) {

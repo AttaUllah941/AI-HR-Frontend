@@ -51,7 +51,7 @@
       <div class="profile-panel-card">
         <h3 class="profile-page-heading">Change password</h3>
         <p class="profile-page-sub">
-          Use at least 8 characters with uppercase, lowercase, and a number. Other sessions will be
+          Your new password must meet your company's password policy. Other sessions will be
           revoked.
         </p>
         <form [formGroup]="form" class="profile-form" (ngSubmit)="changePassword()">
@@ -75,7 +75,7 @@
                 autocomplete="new-password"
               />
               @if (form.controls.newPassword.touched && form.controls.newPassword.invalid) {
-                <mat-error>Must include upper, lower, and a number (min 8).</mat-error>
+                <mat-error>New password is required.</mat-error>
               }
             </mat-form-field>
 

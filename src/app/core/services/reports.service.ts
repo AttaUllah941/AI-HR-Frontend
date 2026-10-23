@@ -13,7 +13,16 @@ export type ReportType =
   | 'PERFORMANCE'
   | 'EMPLOYEES';
 
-export type ReportExportFormat = 'CSV' | 'PDF' | 'JSON';
+export type ReportExportFormat = 'CSV' | 'PDF' | 'JSON' | 'XLSX';
+
+export function buildReportFileName(
+  reportType: string,
+  format: ReportExportFormat,
+  date: Date = new Date(),
+): string {
+  const stamp = date.toISOString().slice(0, 10);
+  return `zenith-${reportType.toLowerCase()}-${stamp}.${format.toLowerCase()}`;
+}
 
 export interface ChartPoint {
   label: string;
@@ -250,9 +259,7 @@ export class ReportsService {
   }
 
   exportReport(body: ExportReportBody): Observable<Blob> {
-    const stamp = new Date().toISOString().slice(0, 10);
-    const ext = body.format.toLowerCase();
-    const fileName = `zenith-${body.reportType.toLowerCase()}-${stamp}.${ext}`;
+    const fileName = buildReportFileName(body.reportType, body.format);
     return this.api.postBlob('/reports/export', body).pipe(
       tap((blob) => downloadBlob(blob, fileName)),
     );

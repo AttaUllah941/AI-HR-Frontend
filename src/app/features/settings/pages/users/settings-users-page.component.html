@@ -34,9 +34,18 @@
     @if (generatedPassword(); as pwd) {
       <div class="settings-panel-card">
         <p class="settings-page-sub">
-          Temporary password for the new user (copy now — it will not be shown again):
+          Temporary password for the new user (development mode only — copy now, it will not be shown again):
         </p>
         <p class="settings-page-heading">{{ pwd }}</p>
+        <button mat-stroked-button type="button" (click)="dismissPassword()">Dismiss</button>
+      </div>
+    }
+
+    @if (passwordEmailed()) {
+      <div class="settings-panel-card">
+        <p class="settings-page-sub">
+          The new user's temporary password was emailed to them. It is not shown here.
+        </p>
         <button mat-stroked-button type="button" (click)="dismissPassword()">Dismiss</button>
       </div>
     }

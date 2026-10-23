@@ -97,9 +97,9 @@ export class DepartmentsPageComponent implements OnInit {
             this.deletingId.set(null);
             this.reload();
           },
-          error: () => {
+          error: (err: { error?: { message?: string } }) => {
             this.deletingId.set(null);
-            this.toast.error('Unable to delete department');
+            this.toast.error(err?.error?.message || 'Unable to delete department');
           },
         });
       });

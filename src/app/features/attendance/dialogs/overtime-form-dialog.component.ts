@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { AttendanceService } from '../../../core/services/attendance.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 
@@ -32,12 +33,15 @@ export class OvertimeFormDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly attendance = inject(AttendanceService);
   private readonly employeesApi = inject(EmployeeService);
+  private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<OvertimeFormDialogComponent, boolean>);
   readonly data = inject<{ }>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);
   readonly employees = signal<EmployeeListItem[]>([]);
+  /** Only attendance:update / attendance:approve holders may file overtime for other employees. */
+  readonly canPickEmployee = this.auth.hasAnyPermission('attendance:update', 'attendance:approve');
 
   readonly form = this.fb.nonNullable.group({
     employeeId: ['', Validators.required],
@@ -47,9 +51,17 @@ export class OvertimeFormDialogComponent {
   });
 
   constructor() {
-    this.employeesApi.list({ page: 1, pageSize: 100, sortBy: 'lastName', sortDir: 'asc' }).subscribe({
-      next: (res) => this.employees.set(res.items),
-    });
+    if (this.canPickEmployee) {
+      this.employeesApi
+        .list({ page: 1, pageSize: 100, sortBy: 'lastName', sortDir: 'asc' })
+        .subscribe({
+          next: (res) => this.employees.set(res.items),
+        });
+    } else {
+      this.attendance.getMyToday().subscribe({
+        next: (today) => this.form.controls.employeeId.setValue(today.employeeId),
+      });
+    }
   }
 
   submit(): void {

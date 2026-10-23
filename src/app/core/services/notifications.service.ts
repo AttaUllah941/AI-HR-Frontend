@@ -181,6 +181,21 @@ export interface SendNotificationBody {
 export interface SendNotificationResult {
   items: NotificationItem[];
   count: number;
+  /** Channels skipped because the recipient disabled them for the category. */
+  skippedChannels?: string[];
+  /** Set when nothing could be delivered. */
+  message?: string;
+}
+
+export function describeSendResult(res: SendNotificationResult): string {
+  if (!res.count) {
+    return res.message || 'No channels delivered.';
+  }
+  const skipped = res.skippedChannels ?? [];
+  const base = `Dispatched ${res.count} notification(s).`;
+  return skipped.length
+    ? `${base} Skipped (disabled by recipient): ${skipped.join(', ')}.`
+    : base;
 }
 
 @Injectable({ providedIn: 'root' })

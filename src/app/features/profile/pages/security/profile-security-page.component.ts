@@ -39,15 +39,7 @@ export class ProfileSecurityPageComponent implements OnInit {
 
   readonly form = this.fb.nonNullable.group({
     currentPassword: ['', [Validators.required]],
-    newPassword: [
-      '',
-      [
-        Validators.required,
-        Validators.minLength(8),
-        Validators.maxLength(128),
-        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).+$/),
-      ],
-    ],
+    newPassword: ['', [Validators.required, Validators.maxLength(128)]],
     confirmPassword: ['', [Validators.required]],
   });
 
@@ -107,10 +99,8 @@ export class ProfileSecurityPageComponent implements OnInit {
           this.saving.set(false);
           this.reload();
         },
-        error: (err: { error?: { message?: string }; message?: string }) => {
-          this.toast.error(err?.error?.message || err?.message || 'Unable to change password.');
-          this.saving.set(false);
-        },
+        // The global error interceptor already toasts the server's password-policy message.
+        error: () => this.saving.set(false),
       });
   }
 

@@ -43,7 +43,13 @@
         <mat-form-field appearance="outline" class="settings-form__full">
           <mat-label>Temporary password (optional)</mat-label>
           <input matInput formControlName="temporaryPassword" type="password" autocomplete="new-password" />
-          <mat-hint>Leave blank to auto-generate</mat-hint>
+          <mat-hint>
+            Leave blank to auto-generate and email it. Otherwise use 8+ characters with upper, lower
+            and a number.
+          </mat-hint>
+          @if (form.controls.temporaryPassword.invalid) {
+            <mat-error>Needs 8+ characters with upper case, lower case and a number.</mat-error>
+          }
         </mat-form-field>
       }
     </div>

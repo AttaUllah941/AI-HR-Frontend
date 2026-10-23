@@ -73,6 +73,12 @@ export class PayrollRunsPageComponent implements OnInit {
   readonly canUpdate = this.auth.hasPermission('payroll:update');
   readonly canApprove = this.auth.hasPermission('payroll:approve');
   readonly canDelete = this.auth.hasPermission('payroll:delete');
+  /** The server returns an empty run list to plain payroll:view holders. */
+  readonly canManageRuns = this.auth.hasAnyPermission(
+    'payroll:create',
+    'payroll:update',
+    'payroll:approve',
+  );
 
   readonly statusOptions = STATUS_OPTIONS;
   readonly statusControl = new FormControl<PayrollRunStatus | ''>('', { nonNullable: true });

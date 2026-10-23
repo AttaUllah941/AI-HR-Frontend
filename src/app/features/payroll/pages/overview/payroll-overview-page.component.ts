@@ -42,10 +42,9 @@ export class PayrollOverviewPageComponent implements OnInit {
   readonly isEmployeeView = signal(false);
 
   readonly canCreate = this.auth.hasPermission('payroll:create');
+  /** Company-wide payroll visibility mirrors the server: payroll:update or payroll:approve. */
   readonly canManage =
-    this.auth.hasPermission('payroll:create') ||
-    this.auth.hasPermission('payroll:update') ||
-    this.auth.hasPermission('payroll:approve');
+    this.auth.hasPermission('payroll:update') || this.auth.hasPermission('payroll:approve');
 
   readonly kpis = computed(() => {
     if (this.isEmployeeView()) {

@@ -58,10 +58,9 @@ export class PayrollPayslipsPageComponent implements OnInit {
   readonly pageSize = 20;
   readonly isMineOnly = signal(false);
 
+  /** Company-wide payroll visibility mirrors the server: payroll:update or payroll:approve. */
   readonly canManage =
-    this.auth.hasPermission('payroll:create') ||
-    this.auth.hasPermission('payroll:update') ||
-    this.auth.hasPermission('payroll:approve');
+    this.auth.hasPermission('payroll:update') || this.auth.hasPermission('payroll:approve');
 
   sectionDescription(): string {
     return this.isMineOnly()

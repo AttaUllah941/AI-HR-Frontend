@@ -68,6 +68,8 @@ export interface DashboardAttendancePoint {
 
   absent: number;
 
+  late?: number;
+
 }
 
 
@@ -214,6 +216,50 @@ export interface DashboardNotificationItem {
 
 
 
+/**
+ * The server only returns the sections the caller is permitted to see, so any section may be
+ * empty or missing. Fill in safe defaults so templates never dereference undefined.
+ */
+export function normalizeDashboardSummary(raw: Partial<DashboardSummary>): DashboardSummary {
+  return {
+    greeting: raw.greeting ?? { firstName: '', message: 'Welcome', period: 'morning', date: '' },
+    company: raw.company ?? { id: null, name: 'Your company' },
+    previewMode: raw.previewMode ?? false,
+    kpis: raw.kpis ?? [],
+    aiInsights: {
+      title: raw.aiInsights?.title ?? 'AI Insights',
+      live: raw.aiInsights?.live ?? false,
+      items: raw.aiInsights?.items ?? [],
+      ctaLabel: raw.aiInsights?.ctaLabel ?? '',
+      ctaRoute: raw.aiInsights?.ctaRoute ?? '/ai/assistant',
+    },
+    attendanceTrend: {
+      period: raw.attendanceTrend?.period ?? '',
+      series: raw.attendanceTrend?.series ?? [],
+    },
+    departmentDistribution: {
+      total: raw.departmentDistribution?.total ?? 0,
+      slices: raw.departmentDistribution?.slices ?? [],
+    },
+    hiringFunnel: {
+      period: raw.hiringFunnel?.period ?? '',
+      stages: raw.hiringFunnel?.stages ?? [],
+    },
+    employeeGrowth: {
+      period: raw.employeeGrowth?.period ?? '',
+      points: raw.employeeGrowth?.points ?? [],
+    },
+    stats: {
+      totalUsers: raw.stats?.totalUsers ?? 0,
+      activeUsers: raw.stats?.activeUsers ?? 0,
+      activeSessions: raw.stats?.activeSessions ?? 0,
+      departments: raw.stats?.departments ?? 0,
+      teams: raw.stats?.teams ?? 0,
+    },
+    modules: raw.modules ?? {},
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 
 export class DashboardService {
@@ -228,7 +274,7 @@ export class DashboardService {
 
       .get<DashboardSummary>('/dashboard/summary')
 
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(map((res) => normalizeDashboardSummary(this.unwrap(res))));
 
   }
 

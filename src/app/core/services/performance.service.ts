@@ -107,7 +107,8 @@ export interface PerformanceReview {
 
 export interface PerformanceFeedback {
   id: string;
-  fromEmployeeId: string;
+  /** Empty when the author is redacted for anonymous feedback. */
+  fromEmployeeId: string | null;
   toEmployeeId: string;
   type: FeedbackType;
   rating: number | null;
@@ -582,6 +583,13 @@ export class PerformanceService {
       return '—';
     }
     return `${emp.firstName} ${emp.lastName}`;
+  }
+
+  feedbackAuthorLabel(item: PerformanceFeedback): string {
+    if (item.isAnonymous || (!item.fromEmployee && !item.fromEmployeeId)) {
+      return 'Anonymous';
+    }
+    return this.employeeLabel(item.fromEmployee);
   }
 
   employeeSubLabel(emp?: PerformanceEmployeeRef | null): string {

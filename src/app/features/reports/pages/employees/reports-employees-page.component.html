@@ -30,6 +30,7 @@
           </button>
           <mat-menu #exportMenu="matMenu">
             <button mat-menu-item type="button" (click)="exportReport('CSV')">CSV</button>
+            <button mat-menu-item type="button" (click)="exportReport('XLSX')">Excel (.xlsx)</button>
             <button mat-menu-item type="button" (click)="exportReport('PDF')">PDF</button>
             <button mat-menu-item type="button" (click)="exportReport('JSON')">JSON</button>
           </mat-menu>

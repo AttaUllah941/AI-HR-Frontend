@@ -13,6 +13,7 @@ import {
   AttendanceStatus,
   Shift,
 } from '../../../core/services/attendance.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 
@@ -78,6 +79,7 @@ export class AttendanceRecordFormDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly attendance = inject(AttendanceService);
   private readonly employeesApi = inject(EmployeeService);
+  private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<AttendanceRecordFormDialogComponent, boolean>);
   readonly data = inject<AttendanceRecordDialogData>(MAT_DIALOG_DATA);
@@ -87,6 +89,8 @@ export class AttendanceRecordFormDialogComponent {
   readonly shifts = signal<Shift[]>([]);
   readonly statusOptions = STATUS_OPTIONS;
   readonly viewOnly = this.data.viewOnly === true;
+  /** Only attendance:update / attendance:approve holders may act on other employees' records. */
+  readonly canPickEmployee = this.auth.hasAnyPermission('attendance:update', 'attendance:approve');
 
   readonly form = this.fb.nonNullable.group({
     employeeId: [this.data.record?.employeeId ?? '', Validators.required],
@@ -102,9 +106,18 @@ export class AttendanceRecordFormDialogComponent {
   });
 
   constructor() {
-    this.employeesApi.list({ page: 1, pageSize: 100, sortBy: 'lastName', sortDir: 'asc' }).subscribe({
-      next: (data) => this.employees.set(data.items),
-    });
+    if (this.canPickEmployee) {
+      this.employeesApi
+        .list({ page: 1, pageSize: 100, sortBy: 'lastName', sortDir: 'asc' })
+        .subscribe({
+          next: (data) => this.employees.set(data.items),
+        });
+    } else if (!this.data.record) {
+      // Plain users can only record attendance for their own employee profile.
+      this.attendance.getMyToday().subscribe({
+        next: (today) => this.form.controls.employeeId.setValue(today.employeeId),
+      });
+    }
     this.attendance.listShifts().subscribe({
       next: (items) => this.shifts.set(items),
     });

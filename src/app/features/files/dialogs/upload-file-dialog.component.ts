@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { AuthService } from '../../../core/services/auth.service';
 import {
   FILE_CATEGORIES,
   FILE_CATEGORY_LABELS,
@@ -40,21 +41,34 @@ export class UploadFileDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly files = inject(FilesService);
   private readonly toast = inject(ToastService);
+  private readonly auth = inject(AuthService);
   private readonly dialogRef = inject(MatDialogRef<UploadFileDialogComponent, boolean>);
   readonly data = inject<UploadFileDialogData>(MAT_DIALOG_DATA, { optional: true });
 
-  readonly categories = FILE_CATEGORIES;
+  /** Attaching to an employee or candidate needs write access to that record type. */
+  readonly canAttachEmployee = this.auth.hasPermission('employees:update');
+  readonly canAttachCandidate = this.auth.hasPermission('recruitment:update');
+  readonly categories = FILE_CATEGORIES.filter(
+    (cat) =>
+      (cat !== 'EMPLOYEE_DOCUMENT' || this.canAttachEmployee) &&
+      (cat !== 'RESUME' || this.canAttachCandidate),
+  );
   readonly categoryLabels = FILE_CATEGORY_LABELS;
   readonly saving = signal(false);
   readonly selectedFile = signal<File | null>(null);
 
   readonly form = this.fb.nonNullable.group({
-    category: [this.data?.defaultCategory ?? ('GENERAL' as FileCategory), Validators.required],
+    category: [this.initialCategory(), Validators.required],
     title: [''],
     description: [''],
     employeeId: [''],
     candidateId: [''],
   });
+
+  private initialCategory(): FileCategory {
+    const wanted = this.data?.defaultCategory ?? 'GENERAL';
+    return this.categories.includes(wanted) ? wanted : 'GENERAL';
+  }
 
   onFilePicked(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -86,8 +100,8 @@ export class UploadFileDialogComponent {
         category: raw.category,
         title: raw.title.trim() || undefined,
         description: raw.description.trim() || undefined,
-        employeeId: raw.employeeId.trim() || undefined,
-        candidateId: raw.candidateId.trim() || undefined,
+        employeeId: (this.canAttachEmployee && raw.employeeId.trim()) || undefined,
+        candidateId: (this.canAttachCandidate && raw.candidateId.trim()) || undefined,
       })
       .subscribe({
         next: () => {
