@@ -179,7 +179,11 @@ export class LeaveService {
 
   listBalances(params: LeaveBalanceListParams = {}): Observable<LeaveBalance[]> {
     return this.api
-      .get<{ items: LeaveBalance[] }>('/leave/balances', params as Record<string, string | number>)
+      .get<{ items: LeaveBalance[] }>('/leave/balances', {
+        ...(params as Record<string, string | number>),
+        page: 1,
+        pageSize: 100,
+      })
       .pipe(map((res) => this.unwrap(res).items));
   }
 

@@ -87,7 +87,7 @@ export class ReportsPerformancePageComponent implements OnInit {
       })
       .subscribe({
         next: () => {
-          this.toast.success(`${format} export started.`);
+          this.toast.success(`${format} download ready.`);
           this.exporting.set(false);
         },
         error: (err: { error?: { message?: string }; message?: string }) => {

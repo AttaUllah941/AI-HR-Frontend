@@ -4,6 +4,8 @@ import {
 
   Component,
 
+  DestroyRef,
+
   HostListener,
 
   OnInit,
@@ -15,6 +17,8 @@ import {
   signal,
 
 } from '@angular/core';
+
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { FormsModule } from '@angular/forms';
 
@@ -156,6 +160,14 @@ const ROLE_LABELS: Record<string, string> = {
 
 
 
+function timeOfDayGreeting(now: Date = new Date()): string {
+  const hour = now.getHours();
+  if (hour < 12) {
+    return 'Good morning';
+  }
+  return hour < 18 ? 'Good afternoon' : 'Good evening';
+}
+
 @Component({
 
   selector: 'app-main-layout',
@@ -216,6 +228,8 @@ export class MainLayoutComponent implements OnInit {
 
   private readonly dialog = inject(MatDialog);
 
+  private readonly destroyRef = inject(DestroyRef);
+
   private pendingNavKey: string | null = null;
 
   private pendingNavTimer: ReturnType<typeof setTimeout> | null = null;
@@ -236,9 +250,9 @@ export class MainLayoutComponent implements OnInit {
 
   readonly notificationCount = signal(0);
 
-  readonly companyName = signal('Zenith Enterprises');
+  readonly companyName = signal(environment.appName);
 
-  readonly greetingMessage = signal('Good morning');
+  readonly greetingMessage = signal(`${timeOfDayGreeting()} 👋`);
 
   readonly pageTitle = signal<string | null>(null);
 
@@ -352,17 +366,11 @@ export class MainLayoutComponent implements OnInit {
     },
 
     {
-
       label: 'AI Assistant',
-
-      route: '/ai',
-
+      route: '/ai/assistant',
       icon: 'auto_awesome',
-
       permissions: ['ai:view'],
-
       badge: 'NEW',
-
     },
 
     { label: 'Settings', route: '/settings', icon: 'settings', permissions: ['settings:view'] },
@@ -407,6 +415,15 @@ export class MainLayoutComponent implements OnInit {
 
 
 
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.pendingNavTimer) {
+        clearTimeout(this.pendingNavTimer);
+        this.pendingNavTimer = null;
+      }
+    });
+  }
+
   ngOnInit(): void {
 
     this.updateBreadcrumbs(this.router.url);
@@ -419,7 +436,10 @@ export class MainLayoutComponent implements OnInit {
 
     this.router.events
 
-      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
 
       .subscribe((event) => {
 
@@ -437,7 +457,7 @@ export class MainLayoutComponent implements OnInit {
 
     if (this.auth.isAuthenticated()) {
       // Refresh session so JWT permissions stay in sync with role changes (e.g. new modules).
-      this.auth.refresh().subscribe({
+      this.auth.refresh().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         error: () => this.auth.me().subscribe({ error: () => undefined }),
       });
 
@@ -647,12 +667,11 @@ export class MainLayoutComponent implements OnInit {
 
   private loadGreeting(): void {
 
-    this.dashboard.getSummary().subscribe({
+    this.dashboard.getGreeting().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
 
       next: (data) => {
 
-        this.greetingMessage.set(`${data.greeting.message.replace(',', '')} 👋`);
-
+        
         this.companyName.set(data.company.name);
 
       },
@@ -666,7 +685,10 @@ export class MainLayoutComponent implements OnInit {
 
 
   private loadNotifications(): void {
-    this.notificationsApi.getFeed(8).subscribe({
+    this.notificationsApi
+      .getFeed(8)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (data) => {
         this.notifications.set(data.items);
         this.notificationCount.set(data.unreadCount);
@@ -687,7 +709,8 @@ export class MainLayoutComponent implements OnInit {
   }
 
   onNotificationClick(item: DashboardNotificationItem | NotificationFeedItem): void {
-    if (!item.read) {
+    const isFeedItem = 'category' in item;
+    if (!item.read && isFeedItem) {
       this.notificationsApi.markRead(item.id).subscribe({
         next: () => {
           this.notifications.update((list) =>
@@ -698,7 +721,7 @@ export class MainLayoutComponent implements OnInit {
         error: () => undefined,
       });
     }
-    void this.router.navigate(['/notifications']);
+    void this.router.navigate(['/notifications/inbox']);
   }
 
   markAllNotificationsRead(): void {

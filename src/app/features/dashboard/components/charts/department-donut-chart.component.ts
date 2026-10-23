@@ -19,17 +19,8 @@ echarts.use([PieChart, LegendComponent, TooltipComponent, CanvasRenderer]);
 @Component({
   selector: 'app-department-donut-chart',
   standalone: true,
-  template: `<div #host class="chart-host" role="img" aria-label="Department distribution"></div>`,
-  styles: `
-    :host {
-      display: block;
-      width: 100%;
-    }
-    .chart-host {
-      width: 100%;
-      height: 17.5rem;
-    }
-  `,
+  templateUrl: './department-donut-chart.component.html',
+  styleUrl: './department-donut-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DepartmentDonutChartComponent implements AfterViewInit, OnDestroy {

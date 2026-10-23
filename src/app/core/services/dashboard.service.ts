@@ -120,7 +120,7 @@ export interface DashboardSummary {
 
   company: { id: string | null; name: string };
 
-  previewMode: boolean;
+  previewMode?: boolean;
 
   kpis: DashboardKpi[];
 
@@ -230,6 +230,19 @@ export class DashboardService {
 
       .pipe(map((res) => this.unwrap(res)));
 
+  }
+
+
+
+  getGreeting(): Observable<{
+    greeting: DashboardSummary['greeting'];
+    company: DashboardSummary['company'];
+  }> {
+    return this.api
+      .get<{ greeting: DashboardSummary['greeting']; company: DashboardSummary['company'] }>(
+        '/dashboard/greeting',
+      )
+      .pipe(map((res) => this.unwrap(res)));
   }
 
 

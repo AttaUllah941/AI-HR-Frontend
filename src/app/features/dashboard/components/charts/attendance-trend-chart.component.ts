@@ -19,17 +19,8 @@ echarts.use([LineChart, GridComponent, LegendComponent, TooltipComponent, Canvas
 @Component({
   selector: 'app-attendance-trend-chart',
   standalone: true,
-  template: `<div #host class="chart-host" role="img" aria-label="Attendance trend"></div>`,
-  styles: `
-    :host {
-      display: block;
-      width: 100%;
-    }
-    .chart-host {
-      width: 100%;
-      height: 16.5rem;
-    }
-  `,
+  templateUrl: './attendance-trend-chart.component.html',
+  styleUrl: './attendance-trend-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AttendanceTrendChartComponent implements AfterViewInit, OnDestroy {
@@ -65,7 +56,8 @@ export class AttendanceTrendChartComponent implements AfterViewInit, OnDestroy {
     const labels = data.map((p) => p.label);
     const present = data.map((p) => p.present);
     const absent = data.map((p) => p.absent);
-    const maxY = Math.max(1400, ...present.map((v, i) => v + absent[i]));
+    const maxY = Math.max(4, ...present.map((v, i) => v + absent[i]));
+    const step = maxY >= 200 ? 50 : maxY >= 20 ? 5 : 1;
 
     return {
       animation: true,
@@ -107,7 +99,7 @@ export class AttendanceTrendChartComponent implements AfterViewInit, OnDestroy {
         type: 'value',
         min: 0,
         max: maxY,
-        interval: Math.ceil(maxY / 4 / 50) * 50,
+        interval: Math.ceil(maxY / 4 / step) * step,
         axisLine: { show: false },
         axisTick: { show: false },
         axisLabel: { color: '#64748b', fontSize: 11 },

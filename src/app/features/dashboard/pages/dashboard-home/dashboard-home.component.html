@@ -69,7 +69,11 @@
           <p>{{ data.attendanceTrend.period }}</p>
         </div>
       </header>
-      <app-attendance-trend-chart [series]="data.attendanceTrend.series" />
+      @if (hasAttendanceData(data)) {
+        <app-attendance-trend-chart [series]="data.attendanceTrend.series" />
+      } @else {
+        <p class="state-msg state-msg--panel">No attendance recorded for this period yet.</p>
+      }
     </mat-card>
 
     <mat-card class="panel panel--departments">
@@ -79,7 +83,11 @@
           <p>{{ data.departmentDistribution.total | number }} employees</p>
         </div>
       </header>
-      <app-department-donut-chart [slices]="data.departmentDistribution.slices" />
+      @if (data.departmentDistribution.total > 0) {
+        <app-department-donut-chart [slices]="data.departmentDistribution.slices" />
+      } @else {
+        <p class="state-msg state-msg--panel">No employees assigned to departments yet.</p>
+      }
     </mat-card>
 
     <mat-card class="panel panel--funnel">
@@ -89,7 +97,11 @@
           <p>{{ data.hiringFunnel.period }}</p>
         </div>
       </header>
-      <app-hiring-funnel-chart [stages]="data.hiringFunnel.stages" />
+      @if (hasFunnelData(data)) {
+        <app-hiring-funnel-chart [stages]="data.hiringFunnel.stages" />
+      } @else {
+        <p class="state-msg state-msg--panel">No candidates in the hiring pipeline yet.</p>
+      }
     </mat-card>
 
     <mat-card class="panel panel--growth">
@@ -99,7 +111,11 @@
           <p>{{ data.employeeGrowth.period }}</p>
         </div>
       </header>
-      <app-employee-growth-chart [points]="data.employeeGrowth.points" />
+      @if (hasGrowthData(data)) {
+        <app-employee-growth-chart [points]="data.employeeGrowth.points" />
+      } @else {
+        <p class="state-msg state-msg--panel">No employee growth data yet.</p>
+      }
     </mat-card>
   </section>
 }

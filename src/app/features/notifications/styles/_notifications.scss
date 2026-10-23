@@ -70,6 +70,17 @@
   border: 1px solid var(--zh-border);
   border-radius: calc(var(--zh-radius) - 2px);
   background: var(--zh-card);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  &:hover,
+  &--active {
+    border-color: color-mix(in srgb, var(--zh-primary) 40%, var(--zh-border));
+    background: color-mix(in srgb, var(--zh-primary) 6%, var(--zh-card));
+  }
 
   &__label {
     font-size: 0.75rem;

@@ -43,6 +43,21 @@ export class ReportsPayrollPageComponent implements OnInit {
 
   readonly currentYear = new Date().getFullYear();
   readonly yearOptions = [this.currentYear - 1, this.currentYear, this.currentYear + 1];
+  readonly monthOptions = [
+    { value: null as number | null, label: 'All months' },
+    { value: 1, label: 'Jan' },
+    { value: 2, label: 'Feb' },
+    { value: 3, label: 'Mar' },
+    { value: 4, label: 'Apr' },
+    { value: 5, label: 'May' },
+    { value: 6, label: 'Jun' },
+    { value: 7, label: 'Jul' },
+    { value: 8, label: 'Aug' },
+    { value: 9, label: 'Sep' },
+    { value: 10, label: 'Oct' },
+    { value: 11, label: 'Nov' },
+    { value: 12, label: 'Dec' },
+  ];
 
   readonly report = signal<PayrollAnalyticsReport | null>(null);
   readonly loading = signal(true);
@@ -51,16 +66,19 @@ export class ReportsPayrollPageComponent implements OnInit {
 
   readonly canExport = this.auth.hasPermission('reports:export');
   readonly yearControl = new FormControl(this.currentYear, { nonNullable: true });
+  readonly monthControl = new FormControl<number | null>(null);
 
   ngOnInit(): void {
     this.yearControl.valueChanges.subscribe(() => this.reload());
+    this.monthControl.valueChanges.subscribe(() => this.reload());
     this.reload();
   }
 
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.reports.getPayroll({ year: this.yearControl.value }).subscribe({
+    const month = this.monthControl.value ?? undefined;
+    this.reports.getPayroll({ year: this.yearControl.value, month }).subscribe({
       next: (report) => {
         this.report.set(report);
         this.loading.set(false);
@@ -82,10 +100,11 @@ export class ReportsPayrollPageComponent implements OnInit {
         reportType: 'PAYROLL',
         format,
         year: this.yearControl.value,
+        month: this.monthControl.value ?? undefined,
       })
       .subscribe({
         next: () => {
-          this.toast.success(`${format} export started.`);
+          this.toast.success(`${format} download ready.`);
           this.exporting.set(false);
         },
         error: (err: { error?: { message?: string }; message?: string }) => {

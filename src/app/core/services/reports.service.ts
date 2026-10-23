@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
 import { ApiService } from './api.service';
 import { ApiResponse } from '../models/api.models';
+import { downloadBlob } from '../../shared/utils/download-blob';
 
 export type ReportType =
   | 'OVERVIEW'
@@ -36,6 +37,7 @@ export interface ReportsModuleLink {
   key: string;
   label: string;
   path: string;
+  description?: string;
 }
 
 export interface ReportExportLog {
@@ -112,6 +114,7 @@ export interface PayrollReportMonth {
 
 export interface PayrollAnalyticsReport {
   year: number;
+  month?: number | null;
   byStatus: Record<string, number>;
   byMonth: PayrollReportMonth[];
   charts: {
@@ -251,7 +254,7 @@ export class ReportsService {
     const ext = body.format.toLowerCase();
     const fileName = `zenith-${body.reportType.toLowerCase()}-${stamp}.${ext}`;
     return this.api.postBlob('/reports/export', body).pipe(
-      tap((blob) => this.triggerDownload(blob, fileName)),
+      tap((blob) => downloadBlob(blob, fileName)),
     );
   }
 
@@ -315,18 +318,6 @@ export class ReportsService {
       return 'error';
     }
     return 'info';
-  }
-
-  private triggerDownload(blob: Blob, fileName: string): void {
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = fileName;
-    anchor.rel = 'noopener';
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    URL.revokeObjectURL(url);
   }
 
   private cleanParams(

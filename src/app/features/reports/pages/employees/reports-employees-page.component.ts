@@ -68,7 +68,7 @@ export class ReportsEmployeesPageComponent implements OnInit {
     this.exporting.set(true);
     this.reports.exportReport({ reportType: 'EMPLOYEES', format }).subscribe({
       next: () => {
-        this.toast.success(`${format} export started.`);
+        this.toast.success(`${format} download ready.`);
         this.exporting.set(false);
       },
       error: (err: { error?: { message?: string }; message?: string }) => {

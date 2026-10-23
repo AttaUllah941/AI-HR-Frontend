@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { LeaveBalance, LeaveService } from '../../../../core/services/leave.service';
 import { EmployeeListItem, EmployeeService } from '../../../../core/services/employee.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -56,8 +57,10 @@ export class LeaveBalancesPageComponent implements OnInit {
         next: (res) => this.employees.set(res.items),
       });
     }
-    this.yearControl.valueChanges.subscribe(() => this.reload());
-    this.employeeControl.valueChanges.subscribe(() => this.reload());
+    this.yearControl.valueChanges.pipe(debounceTime(200), distinctUntilChanged()).subscribe(() => this.reload());
+    this.employeeControl.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged())
+      .subscribe(() => this.reload());
     this.reload();
   }
 

@@ -1,6 +1,6 @@
 <app-page-header
   title="Search"
-  subtitle="Global search with filters, sorting, bookmarks, and recent queries"
+  subtitle="Find people, jobs, files, and more — or press Ctrl/⌘ K anywhere"
 />
 
 <section class="search-page" aria-label="Global search">
@@ -46,11 +46,19 @@
     <div class="search-page__extra" [formGroup]="form">
       <mat-form-field appearance="outline">
         <mat-label>Employee status</mat-label>
-        <input matInput formControlName="status" placeholder="ACTIVE, DRAFT…" />
+        <mat-select formControlName="status">
+          @for (opt of statusOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>File category</mat-label>
-        <input matInput formControlName="category" placeholder="RESUME, POLICY…" />
+        <mat-select formControlName="category">
+          @for (opt of categoryOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
       </mat-form-field>
       <button mat-stroked-button type="button" (click)="applyQueryToUrl()">Apply filters</button>
     </div>
@@ -70,13 +78,21 @@
         } @else {
           <ul class="search-list">
             @for (item of recent(); track item.id) {
-              <li>
+              <li class="search-list__row">
                 <button type="button" class="search-list__btn" (click)="useRecent(item)">
                   <mat-icon aria-hidden="true">history</mat-icon>
                   <span>
                     <strong>{{ item.query }}</strong>
                     <small>{{ item.resultCount }} results</small>
                   </span>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  (click)="removeRecent(item.id, $event)"
+                  aria-label="Remove recent search"
+                >
+                  <mat-icon>close</mat-icon>
                 </button>
               </li>
             }
@@ -145,7 +161,7 @@
                       <strong>{{ hit.title }}</strong>
                       <small>{{ hit.subtitle }}</small>
                     </span>
-                    <span class="search-badge">{{ hit.type }}</span>
+                    <span class="search-badge">{{ typeLabel(hit.type) }}</span>
                   </a>
                   <button mat-icon-button type="button" (click)="bookmarkHit(hit)" aria-label="Bookmark">
                     <mat-icon>bookmark_border</mat-icon>

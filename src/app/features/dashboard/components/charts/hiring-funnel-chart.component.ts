@@ -19,17 +19,8 @@ echarts.use([BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 @Component({
   selector: 'app-hiring-funnel-chart',
   standalone: true,
-  template: `<div #host class="chart-host" role="img" aria-label="Hiring funnel"></div>`,
-  styles: `
-    :host {
-      display: block;
-      width: 100%;
-    }
-    .chart-host {
-      width: 100%;
-      height: 16.5rem;
-    }
-  `,
+  templateUrl: './hiring-funnel-chart.component.html',
+  styleUrl: './hiring-funnel-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HiringFunnelChartComponent implements AfterViewInit, OnDestroy {

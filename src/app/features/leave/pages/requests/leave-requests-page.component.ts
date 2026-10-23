@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { filter } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -70,10 +70,12 @@ export class LeaveRequestsPageComponent implements OnInit {
   readonly statusControl = new FormControl<LeaveRequestStatus | ''>('', { nonNullable: true });
 
   ngOnInit(): void {
-    this.statusControl.valueChanges.subscribe(() => {
-      this.page.set(1);
-      this.reload();
-    });
+    this.statusControl.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged())
+      .subscribe(() => {
+        this.page.set(1);
+        this.reload();
+      });
     this.reload();
   }
 

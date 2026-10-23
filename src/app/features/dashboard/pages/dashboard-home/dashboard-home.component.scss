@@ -264,3 +264,12 @@
     grid-template-columns: 1fr;
   }
 }
+
+.state-msg--panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+  margin: 0;
+  text-align: center;
+}

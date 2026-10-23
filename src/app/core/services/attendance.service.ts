@@ -292,7 +292,11 @@ export class AttendanceService {
 
   listOvertime(status?: OvertimeStatus | ''): Observable<OvertimeRequest[]> {
     return this.api
-      .get<{ items: OvertimeRequest[] }>('/attendance/overtime', { status: status || undefined })
+      .get<{ items: OvertimeRequest[] }>('/attendance/overtime', {
+        status: status || undefined,
+        page: 1,
+        pageSize: 50,
+      })
       .pipe(map((res) => this.unwrap(res).items));
   }
 

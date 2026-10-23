@@ -60,28 +60,73 @@
       <div class="reports-chart-grid">
         <mat-card class="reports-chart-card">
           <app-reports-bar-chart
-            [points]="s.charts.attendanceByStatus"
+            [points]="s.charts.attendanceByStatus ?? []"
             title="Attendance by status"
           />
         </mat-card>
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart [points]="s.charts.leaveByStatus" title="Leave by status" />
+          <app-reports-bar-chart
+            [points]="s.charts.leaveByStatus ?? []"
+            title="Leave by status"
+          />
         </mat-card>
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart [points]="s.charts.jobsByStatus" title="Jobs by status" />
+          <app-reports-bar-chart
+            [points]="s.charts.payrollByStatus ?? []"
+            title="Payroll by status"
+          />
+        </mat-card>
+        <mat-card class="reports-chart-card">
+          <app-reports-bar-chart
+            [points]="s.charts.jobsByStatus ?? []"
+            title="Jobs by status"
+          />
+        </mat-card>
+        <mat-card class="reports-chart-card">
+          <app-reports-bar-chart
+            [points]="s.charts.applicationsByStatus ?? []"
+            title="Applications by status"
+          />
         </mat-card>
       </div>
 
       <div>
         <div class="reports-action-bar">
-          <h3 class="reports-heading">Modules</h3>
+          <h3 class="reports-heading">Report catalog</h3>
         </div>
         <div class="reports-module-grid">
           @for (mod of s.modules; track mod.key) {
-            <a class="reports-module-link" [routerLink]="['/reports', mod.path]">
-              <mat-icon aria-hidden="true">{{ moduleIcons[mod.key] || 'insights' }}</mat-icon>
-              {{ mod.label }}
-            </a>
+            <article class="reports-module-card">
+              <a class="reports-module-card__body" [routerLink]="['/reports', mod.path]">
+                <span class="reports-module-card__icon" aria-hidden="true">
+                  <mat-icon>{{ moduleIcons[mod.key] || 'insights' }}</mat-icon>
+                </span>
+                <div>
+                  <h4>{{ mod.label }}</h4>
+                  <p>{{ moduleDescription(mod.key, mod.description) }}</p>
+                </div>
+              </a>
+              @if (canExport) {
+                <div class="reports-module-card__actions">
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="exporting()"
+                    (click)="exportModule(mod.key, 'PDF', $event)"
+                  >
+                    {{ exportingKey() === mod.key ? '…' : 'PDF' }}
+                  </button>
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="exporting()"
+                    (click)="exportModule(mod.key, 'CSV', $event)"
+                  >
+                    Excel
+                  </button>
+                </div>
+              }
+            </article>
           }
         </div>
       </div>

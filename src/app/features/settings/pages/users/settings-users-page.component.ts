@@ -6,8 +6,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import {
   SettingsRole,
   SettingsService,
@@ -44,6 +45,7 @@ export class SettingsUsersPageComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
+  private readonly confirm = inject(ConfirmDialogService);
 
   readonly items = signal<SettingsUser[]>([]);
   readonly roles = signal<SettingsRole[]>([]);
@@ -134,16 +136,25 @@ export class SettingsUsersPageComponent implements OnInit {
 
   remove(user: SettingsUser): void {
     if (!this.canDelete) return;
-    if (!confirm(`Delete user ${user.email}?`)) return;
-    this.settings.deleteUser(user.id).subscribe({
-      next: () => {
-        this.toast.success('User deleted.');
-        this.reload();
-      },
-      error: (err: { error?: { message?: string }; message?: string }) => {
-        this.toast.error(err?.error?.message || err?.message || 'Unable to delete user.');
-      },
-    });
+    this.confirm
+      .open({
+        title: 'Delete user?',
+        message: `Remove ${user.email} from this company? This soft-deletes the account.`,
+        confirmLabel: 'Delete',
+        destructive: true,
+      })
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        this.settings.deleteUser(user.id).subscribe({
+          next: () => {
+            this.toast.success('User deleted.');
+            this.reload();
+          },
+          error: (err: { error?: { message?: string }; message?: string }) => {
+            this.toast.error(err?.error?.message || err?.message || 'Unable to delete user.');
+          },
+        });
+      });
   }
 
   formatDate(iso: string | null | undefined): string {

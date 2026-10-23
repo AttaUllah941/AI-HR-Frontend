@@ -18,7 +18,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { OvertimeFormDialogComponent } from '../../dialogs/overtime-form-dialog.component';
-import { filter } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
 
 const STATUS_OPTIONS: Array<{ value: OvertimeStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -64,7 +64,9 @@ export class AttendanceOvertimePageComponent implements OnInit {
   readonly statusControl = new FormControl<OvertimeStatus | ''>('', { nonNullable: true });
 
   ngOnInit(): void {
-    this.statusControl.valueChanges.subscribe(() => this.reload());
+    this.statusControl.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged())
+      .subscribe(() => this.reload());
     this.reload();
   }
 

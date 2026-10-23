@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { permissionGuard } from '../../core/guards/permission.guard';
 
 export const SETTINGS_ROUTES: Routes = [
   {
@@ -25,6 +26,7 @@ export const SETTINGS_ROUTES: Routes = [
       },
       {
         path: 'users',
+        canActivate: [permissionGuard('users:view')],
         loadComponent: () =>
           import('./pages/users/settings-users-page.component').then(
             (m) => m.SettingsUsersPageComponent,
@@ -32,6 +34,7 @@ export const SETTINGS_ROUTES: Routes = [
       },
       {
         path: 'roles',
+        canActivate: [permissionGuard('roles:view')],
         loadComponent: () =>
           import('./pages/roles/settings-roles-page.component').then(
             (m) => m.SettingsRolesPageComponent,

@@ -87,13 +87,23 @@ export class ProfileSecurityPageComponent implements OnInit {
         newPassword: raw.newPassword,
       })
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.form.reset({
             currentPassword: '',
             newPassword: '',
             confirmPassword: '',
           });
-          this.toast.success('Password changed. Other sessions were revoked.');
+          const revoked =
+            typeof res.otherSessionsRevoked === 'number'
+              ? res.otherSessionsRevoked
+              : res.otherSessionsRevoked
+                ? 1
+                : 0;
+          this.toast.success(
+            revoked > 0
+              ? `Password changed. Revoked ${revoked} other session${revoked === 1 ? '' : 's'}.`
+              : 'Password changed.',
+          );
           this.saving.set(false);
           this.reload();
         },

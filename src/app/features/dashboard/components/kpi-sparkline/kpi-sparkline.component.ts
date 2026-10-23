@@ -21,20 +21,8 @@ echarts.use([LineChart, GridComponent, TooltipComponent, CanvasRenderer]);
 @Component({
   selector: 'app-kpi-sparkline',
   standalone: true,
-  template: `<div #chartHost class="kpi-sparkline" role="img" [attr.aria-label]="label() + ' trend'"></div>`,
-  styles: `
-    :host {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    .kpi-sparkline {
-      width: 100%;
-      height: 100%;
-      min-height: 2.75rem;
-    }
-  `,
+  templateUrl: './kpi-sparkline.component.html',
+  styleUrl: './kpi-sparkline.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KpiSparklineComponent implements AfterViewInit, OnDestroy {

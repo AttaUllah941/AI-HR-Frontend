@@ -142,6 +142,64 @@
   background: color-mix(in srgb, var(--zh-muted) 40%, transparent);
 }
 
+.files-doc-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.files-doc-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--zh-border);
+  border-radius: calc(var(--zh-radius) - 2px);
+  background: var(--zh-card);
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: calc(var(--zh-radius) - 4px);
+    background: color-mix(in srgb, var(--zh-muted) 40%, transparent);
+    color: var(--zh-muted-foreground);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  &__meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: var(--zh-muted-foreground);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 720px) {
+  .files-doc-card {
+    grid-template-columns: auto 1fr;
+
+    &__actions {
+      grid-column: 1 / -1;
+      justify-content: flex-start;
+    }
+  }
+}
+
 .files-quick-links {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));

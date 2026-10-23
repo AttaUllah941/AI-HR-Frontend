@@ -5,6 +5,7 @@ import { catchError, finalize, throwError } from 'rxjs';
 import { LoadingService } from '../services/loading.service';
 import { ToastService } from '../services/toast.service';
 import { AuthService } from '../services/auth.service';
+import { isPublicAuthEndpoint } from './auth-endpoints';
 
 /**
  * Global loading + user-facing error toasts.
@@ -29,7 +30,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       const message = extractErrorMessage(error);
 
-      const isAuthRoute = req.url.includes('/auth/');
+      const isAuthRoute = isPublicAuthEndpoint(req.url);
 
       if (error.status === 401 && !isAuthRoute) {
         if (auth.isAuthenticated()) {

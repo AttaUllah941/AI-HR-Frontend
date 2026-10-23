@@ -74,6 +74,18 @@ export class DashboardHomeComponent implements OnInit {
     return value;
   }
 
+  hasAttendanceData(data: DashboardSummary): boolean {
+    return data.attendanceTrend.series.some((p) => p.present > 0 || p.absent > 0);
+  }
+
+  hasFunnelData(data: DashboardSummary): boolean {
+    return data.hiringFunnel.stages.some((stage) => stage.value > 0);
+  }
+
+  hasGrowthData(data: DashboardSummary): boolean {
+    return data.employeeGrowth.points.some((point) => point.value > 0);
+  }
+
   trendIcon(trend?: DashboardKpiTrend): string | null {
     if (!trend || trend.direction === 'neutral') {
       return null;

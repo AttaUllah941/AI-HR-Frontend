@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   FILE_CATEGORIES,
+  FILE_CATEGORY_LABELS,
   FileCategory,
   FilesService,
 } from '../../../core/services/files.service';
@@ -43,6 +44,7 @@ export class UploadFileDialogComponent {
   readonly data = inject<UploadFileDialogData>(MAT_DIALOG_DATA, { optional: true });
 
   readonly categories = FILE_CATEGORIES;
+  readonly categoryLabels = FILE_CATEGORY_LABELS;
   readonly saving = signal(false);
   readonly selectedFile = signal<File | null>(null);
 

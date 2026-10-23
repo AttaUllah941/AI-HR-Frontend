@@ -165,11 +165,11 @@
   margin-left: auto;
   font-size: 0.7rem;
   font-weight: 650;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   padding: 0.15rem 0.45rem;
   border-radius: 999px;
   border: 1px solid var(--zh-border);
+  white-space: nowrap;
 }
 
 @media (max-width: 900px) {

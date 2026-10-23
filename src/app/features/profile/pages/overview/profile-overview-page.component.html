@@ -105,9 +105,25 @@
 
             <mat-form-field appearance="outline" class="profile-form__full">
               <mat-label>Avatar URL</mat-label>
-              <input matInput formControlName="avatarUrl" placeholder="https://…" />
+              <input
+                matInput
+                formControlName="avatarUrl"
+                placeholder="https://… or /files/…"
+              />
             </mat-form-field>
           </div>
+
+          @if (form.controls.avatarUrl.value?.trim()?.startsWith('https://')) {
+            <div class="profile-avatar-preview">
+              <img
+                [src]="form.controls.avatarUrl.value!.trim()"
+                alt="Avatar preview"
+                width="72"
+                height="72"
+              />
+              <span>Preview</span>
+            </div>
+          }
         </form>
       </div>
     </section>

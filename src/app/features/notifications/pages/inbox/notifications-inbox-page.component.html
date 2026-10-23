@@ -10,7 +10,7 @@
       <div>
         <h2 class="notifications-page-heading">Inbox</h2>
         <p class="notifications-page-sub">
-          {{ unreadCount() }} unread · filter by category or show unread only
+          {{ unreadCount() }} unread in-app · filter by category or show unread only
         </p>
       </div>
       <div class="notifications-action-bar__actions">
@@ -37,10 +37,15 @@
     @if (categoryChips().length) {
       <div class="notifications-kpi-grid" aria-label="Unread by category">
         @for (chip of categoryChips(); track chip.category) {
-          <div class="notifications-kpi-chip">
+          <button
+            type="button"
+            class="notifications-kpi-chip"
+            [class.notifications-kpi-chip--active]="category.value === chip.category"
+            (click)="filterByCategory(chip.category)"
+          >
             <span class="notifications-kpi-chip__label">{{ chip.label }}</span>
             <span class="notifications-kpi-chip__value">{{ chip.unread }}</span>
-          </div>
+          </button>
         }
       </div>
     }

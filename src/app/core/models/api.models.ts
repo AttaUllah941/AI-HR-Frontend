@@ -46,6 +46,7 @@ export interface AuthSessionData extends AuthTokens {
 
 export interface LoginSuccessData extends AuthSessionData {
   mfaRequired: false;
+  securityWarnings?: string[];
 }
 
 export interface LoginMfaChallengeData {

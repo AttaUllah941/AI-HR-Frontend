@@ -9,7 +9,9 @@
     <div class="profile-action-bar">
       <div>
         <h2 class="profile-page-heading">Preferences</h2>
-        <p class="profile-page-sub">Theme, locale, timezone, and date/time display options.</p>
+        <p class="profile-page-sub">
+          Locale, timezone, and display formats. Theme is stored for upcoming theming support.
+        </p>
       </div>
       <div class="profile-action-bar__actions">
         <button
@@ -37,24 +39,36 @@
             <mat-label>Theme</mat-label>
             <mat-select formControlName="theme">
               @for (theme of themes; track theme) {
-                <mat-option [value]="theme">{{ theme }}</mat-option>
+                <mat-option [value]="theme">{{ themeLabels[theme] }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Locale</mat-label>
-            <input matInput formControlName="locale" placeholder="en-US" />
+            <mat-select formControlName="locale">
+              @for (locale of locales(); track locale) {
+                <mat-option [value]="locale">{{ locale }}</mat-option>
+              }
+            </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Timezone</mat-label>
-            <input matInput formControlName="timezone" placeholder="UTC" />
+            <mat-select formControlName="timezone">
+              @for (tz of timezones(); track tz) {
+                <mat-option [value]="tz">{{ tz }}</mat-option>
+              }
+            </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Date format</mat-label>
-            <input matInput formControlName="dateFormat" placeholder="DD MMM YYYY" />
+            <mat-select formControlName="dateFormat">
+              @for (fmt of dateFormats(); track fmt) {
+                <mat-option [value]="fmt">{{ fmt }}</mat-option>
+              }
+            </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline">

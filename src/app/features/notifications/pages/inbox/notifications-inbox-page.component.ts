@@ -89,6 +89,7 @@ export class NotificationsInboxPageComponent implements OnInit {
     this.notifications
       .list({
         category: this.category.value || undefined,
+        channel: 'IN_APP',
         unreadOnly: this.unreadOnly.value || undefined,
         page: this.page(),
         pageSize: this.pageSize,
@@ -112,6 +113,11 @@ export class NotificationsInboxPageComponent implements OnInit {
   applyFilters(): void {
     this.page.set(1);
     this.reload();
+  }
+
+  filterByCategory(category: string): void {
+    this.category.setValue(category);
+    this.applyFilters();
   }
 
   prevPage(): void {

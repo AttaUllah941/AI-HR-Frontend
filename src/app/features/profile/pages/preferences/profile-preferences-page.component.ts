@@ -7,8 +7,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
+  PROFILE_DATE_FORMAT_OPTIONS,
+  PROFILE_LOCALE_OPTIONS,
   PROFILE_THEMES,
+  PROFILE_THEME_LABELS,
   PROFILE_TIME_FORMATS,
+  PROFILE_TIMEZONE_OPTIONS,
   ProfileTheme,
   ProfileTimeFormat,
   ProfileService,
@@ -44,7 +48,11 @@ export class ProfilePreferencesPageComponent implements OnInit {
   readonly error = signal<string | null>(null);
 
   readonly themes = PROFILE_THEMES;
+  readonly themeLabels = PROFILE_THEME_LABELS;
   readonly timeFormats = PROFILE_TIME_FORMATS;
+  readonly locales = signal<string[]>([...PROFILE_LOCALE_OPTIONS]);
+  readonly timezones = signal<string[]>([...PROFILE_TIMEZONE_OPTIONS]);
+  readonly dateFormats = signal<string[]>([...PROFILE_DATE_FORMAT_OPTIONS]);
   readonly weekStartsOnOptions = WEEK_START_OPTIONS;
 
   readonly form = this.fb.nonNullable.group({
@@ -68,11 +76,17 @@ export class ProfilePreferencesPageComponent implements OnInit {
     this.error.set(null);
     this.profile.getPreferences().subscribe({
       next: (prefs) => {
+        const locale = prefs.locale || 'en-US';
+        const timezone = prefs.timezone || 'UTC';
+        const dateFormat = prefs.dateFormat || 'DD MMM YYYY';
+        this.locales.set(this.withOption(PROFILE_LOCALE_OPTIONS, locale));
+        this.timezones.set(this.withOption(PROFILE_TIMEZONE_OPTIONS, timezone));
+        this.dateFormats.set(this.withOption(PROFILE_DATE_FORMAT_OPTIONS, dateFormat));
         this.form.reset({
           theme: (prefs.theme as ProfileTheme) || 'system',
-          locale: prefs.locale || 'en-US',
-          timezone: prefs.timezone || 'UTC',
-          dateFormat: prefs.dateFormat || 'DD MMM YYYY',
+          locale,
+          timezone,
+          dateFormat,
           timeFormat: (prefs.timeFormat as ProfileTimeFormat) || '24h',
           weekStartsOn: prefs.weekStartsOn ?? 1,
         });
@@ -103,11 +117,17 @@ export class ProfilePreferencesPageComponent implements OnInit {
       })
       .subscribe({
         next: (prefs) => {
+          const locale = prefs.locale || 'en-US';
+          const timezone = prefs.timezone || 'UTC';
+          const dateFormat = prefs.dateFormat || 'DD MMM YYYY';
+          this.locales.set(this.withOption(PROFILE_LOCALE_OPTIONS, locale));
+          this.timezones.set(this.withOption(PROFILE_TIMEZONE_OPTIONS, timezone));
+          this.dateFormats.set(this.withOption(PROFILE_DATE_FORMAT_OPTIONS, dateFormat));
           this.form.reset({
             theme: (prefs.theme as ProfileTheme) || 'system',
-            locale: prefs.locale || 'en-US',
-            timezone: prefs.timezone || 'UTC',
-            dateFormat: prefs.dateFormat || 'DD MMM YYYY',
+            locale,
+            timezone,
+            dateFormat,
             timeFormat: (prefs.timeFormat as ProfileTimeFormat) || '24h',
             weekStartsOn: prefs.weekStartsOn ?? 1,
           });
@@ -119,5 +139,9 @@ export class ProfilePreferencesPageComponent implements OnInit {
           this.saving.set(false);
         },
       });
+  }
+
+  private withOption(options: string[], value: string): string[] {
+    return options.includes(value) ? [...options] : [value, ...options];
   }
 }

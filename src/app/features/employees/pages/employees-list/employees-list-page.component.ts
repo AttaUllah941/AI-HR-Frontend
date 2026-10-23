@@ -21,6 +21,7 @@ import {
 import { Department, OrganizationService } from '../../../../core/services/organization.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { EmployeeFormDialogComponent } from '../../dialogs/employee-form-dialog.component';
+import { downloadBlob } from '../../../../shared/utils/download-blob';
 
 const STATUS_OPTIONS: Array<{ value: EmployeeStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -217,12 +218,7 @@ export class EmployeesListPageComponent implements OnInit {
     const blob = new Blob([[header.join(','), ...lines].join('\n')], {
       type: 'text/csv;charset=utf-8;',
     });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'employees.csv';
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadBlob(blob, 'employees.csv');
     this.toast.success('Employees exported');
   }
 

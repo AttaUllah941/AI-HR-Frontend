@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter, map, startWith } from 'rxjs';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '../../../../core/services/auth.service';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import {
   BreadcrumbComponent,
@@ -28,18 +29,21 @@ import {
 })
 export class SettingsShellComponent {
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
 
-  readonly tabs = [
-    { label: 'Overview', route: 'overview', icon: 'dashboard' },
-    { label: 'Company', route: 'company', icon: 'business' },
-    { label: 'Users', route: 'users', icon: 'group' },
-    { label: 'Roles', route: 'roles', icon: 'admin_panel_settings' },
-    { label: 'Email', route: 'email', icon: 'mail' },
-    { label: 'Storage', route: 'storage', icon: 'cloud' },
-    { label: 'System', route: 'system', icon: 'tune' },
-    { label: 'Security', route: 'security', icon: 'security' },
-    { label: 'Audit', route: 'audit', icon: 'history' },
-  ];
+  private readonly allTabs = [
+    { label: 'Overview', route: 'overview', icon: 'dashboard', permission: 'settings:view' },
+    { label: 'Company', route: 'company', icon: 'business', permission: 'settings:view' },
+    { label: 'Users', route: 'users', icon: 'group', permission: 'users:view' },
+    { label: 'Roles', route: 'roles', icon: 'admin_panel_settings', permission: 'roles:view' },
+    { label: 'Email', route: 'email', icon: 'mail', permission: 'settings:view' },
+    { label: 'Storage', route: 'storage', icon: 'cloud', permission: 'settings:view' },
+    { label: 'System', route: 'system', icon: 'tune', permission: 'settings:view' },
+    { label: 'Security', route: 'security', icon: 'security', permission: 'settings:view' },
+    { label: 'Audit', route: 'audit', icon: 'history', permission: 'settings:view' },
+  ] as const;
+
+  readonly tabs = this.allTabs.filter((tab) => this.auth.hasPermission(tab.permission));
 
   private readonly activeRoute = toSignal(
     this.router.events.pipe(

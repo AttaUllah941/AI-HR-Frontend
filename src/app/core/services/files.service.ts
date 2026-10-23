@@ -21,6 +21,15 @@ export const FILE_CATEGORIES: FileCategory[] = [
   'OTHER',
 ];
 
+export const FILE_CATEGORY_LABELS: Record<FileCategory, string> = {
+  GENERAL: 'General',
+  EMPLOYEE_DOCUMENT: 'Employee document',
+  RESUME: 'Resume',
+  AVATAR: 'Avatar',
+  POLICY: 'Policy',
+  OTHER: 'Other',
+};
+
 export interface FilesSummary {
   totalFiles: number;
   totalBytes: number;
