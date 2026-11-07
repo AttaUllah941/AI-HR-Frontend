@@ -56,6 +56,7 @@ import {
 
 import { ToastService } from '../../core/services/toast.service';
 
+import { PreloadOnHoverDirective } from '../../core/routing/preload-on-hover.directive';
 import { TopProgressBarComponent } from '../../shared/top-progress-bar/top-progress-bar.component';
 
 import {
@@ -201,6 +202,7 @@ function timeOfDayGreeting(now: Date = new Date()): string {
     MatDialogModule,
 
     TopProgressBarComponent,
+    PreloadOnHoverDirective,
     BreadcrumbComponent,
 
   ],
