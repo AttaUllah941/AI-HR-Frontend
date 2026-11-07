@@ -21,6 +21,93 @@
         <mat-icon aria-hidden="true">filter_list</mat-icon>
         Filter
       </button>
+      <button
+        mat-stroked-button
+        type="button"
+        class="emp-action-btn"
+        [matMenuTriggerFor]="viewMenu"
+        aria-label="Table view options"
+      >
+        <mat-icon aria-hidden="true">view_column</mat-icon>
+        View
+      </button>
+      <button
+        mat-stroked-button
+        type="button"
+        class="emp-action-btn"
+        [matMenuTriggerFor]="filtersMenu"
+        aria-label="Saved filters"
+      >
+        <mat-icon aria-hidden="true">bookmarks</mat-icon>
+        Saved
+      </button>
+      <mat-menu #viewMenu="matMenu" xPosition="before">
+        <div class="emp-view-menu" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          <p class="emp-view-menu__title">Row density</p>
+          <div class="emp-view-menu__row" role="radiogroup" aria-label="Row density">
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="prefs.density() === 'comfortable'"
+              [class.is-on]="prefs.density() === 'comfortable'"
+              (click)="prefs.setDensity('comfortable')"
+            >
+              Comfortable
+            </button>
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="prefs.density() === 'compact'"
+              [class.is-on]="prefs.density() === 'compact'"
+              (click)="prefs.setDensity('compact')"
+            >
+              Compact
+            </button>
+          </div>
+          <p class="emp-view-menu__title">Columns</p>
+          @for (col of columnOptions; track col.id) {
+            <label class="emp-view-menu__check">
+              <input
+                type="checkbox"
+                [checked]="prefs.isVisible(col.id)"
+                (change)="prefs.toggleColumn(col.id)"
+              />
+              {{ col.label }}
+            </label>
+          }
+          <button type="button" class="emp-view-menu__reset" (click)="prefs.reset()">Reset view</button>
+        </div>
+      </mat-menu>
+      <mat-menu #filtersMenu="matMenu" xPosition="before">
+        <div class="emp-view-menu" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          <p class="emp-view-menu__title">Saved filters</p>
+          @for (preset of savedFilters.filters(); track preset.name) {
+            <div class="emp-view-menu__preset">
+              <button type="button" (click)="applyPreset(preset.value)">{{ preset.name }}</button>
+              <button
+                type="button"
+                class="emp-view-menu__remove"
+                [attr.aria-label]="'Delete saved filter ' + preset.name"
+                (click)="savedFilters.remove(preset.name)"
+              >
+                <mat-icon aria-hidden="true">close</mat-icon>
+              </button>
+            </div>
+          } @empty {
+            <p class="emp-view-menu__empty">Nothing saved yet.</p>
+          }
+          <div class="emp-view-menu__save">
+            <input
+              #presetName
+              type="text"
+              placeholder="Name current filters"
+              aria-label="Saved filter name"
+              (keydown.enter)="savePreset(presetName)"
+            />
+            <button type="button" (click)="savePreset(presetName)">Save</button>
+          </div>
+        </div>
+      </mat-menu>
 
       @if (canExport) {
         <button mat-stroked-button type="button" class="emp-action-btn" (click)="exportCsv()">
@@ -75,16 +162,20 @@
       (action)="openForm()"
     />
     } @else {
-      <div class="emp-table-wrap">
+      <div
+        class="emp-table-wrap"
+        [attr.data-density]="prefs.density()"
+        [attr.data-hide]="prefs.hiddenAttr()"
+      >
         <table class="emp-table" data-responsive>
           <thead>
             <tr>
               <th scope="col">Employee</th>
-              <th scope="col">Department</th>
-              <th scope="col">Position</th>
-              <th scope="col">Manager</th>
-              <th scope="col">Status</th>
-              <th scope="col">Joined</th>
+              <th scope="col" data-col="department">Department</th>
+              <th scope="col" data-col="position">Position</th>
+              <th scope="col" data-col="manager">Manager</th>
+              <th scope="col" data-col="status">Status</th>
+              <th scope="col" data-col="joined">Joined</th>
               <th scope="col" class="emp-table__actions-col"><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
@@ -102,16 +193,16 @@
                     </div>
                   </div>
                 </td>
-                <td data-label="Department">{{ item.department?.name ?? '—' }}</td>
-                <td data-label="Position">{{ item.designation?.name ?? '—' }}</td>
-                <td data-label="Manager">{{ managerName(item) }}</td>
-                <td data-label="Status">
+                <td data-col="department" data-label="Department">{{ item.department?.name ?? '—' }}</td>
+                <td data-col="position" data-label="Position">{{ item.designation?.name ?? '—' }}</td>
+                <td data-col="manager" data-label="Manager">{{ managerName(item) }}</td>
+                <td data-col="status" data-label="Status">
                   <span [class]="statusClass(item)">
                     <span class="emp-status-pill__dot" aria-hidden="true"></span>
                     {{ statusLabel(item) }}
                   </span>
                 </td>
-                <td data-label="Joined">{{ formatJoined(item.joinDate) }}</td>
+                <td data-col="joined" data-label="Joined">{{ formatJoined(item.joinDate) }}</td>
                 <td class="emp-table__actions-col" data-label="">
                   <button
                     mat-icon-button

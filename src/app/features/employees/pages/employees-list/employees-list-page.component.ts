@@ -23,6 +23,7 @@ import { ErrorStateComponent } from '../../../../shared/error-state/error-state.
 import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { EmployeeFormDialogComponent } from '../../dialogs/employee-form-dialog.component';
 import { downloadBlob } from '../../../../shared/utils/download-blob';
+import { SavedFilters, TablePrefs } from '../../../../core/utils/table-prefs';
 
 const STATUS_OPTIONS: Array<{ value: EmployeeStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -45,6 +46,12 @@ const AVATAR_COLORS = [
   { bg: '#fce7f3', color: '#db2777' },
   { bg: '#f3f4f6', color: '#4b5563' },
 ];
+
+interface EmployeeFilterPreset {
+  search: string;
+  status: EmployeeStatus | '';
+  departmentId: string;
+}
 
 @Component({
   selector: 'app-employees-list-page',
@@ -74,6 +81,16 @@ export class EmployeesListPageComponent implements OnInit {
   private readonly confirm = inject(ConfirmDialogService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+
+  readonly prefs = new TablePrefs('employees');
+  readonly savedFilters = new SavedFilters<EmployeeFilterPreset>('employees');
+  readonly columnOptions = [
+    { id: 'department', label: 'Department' },
+    { id: 'position', label: 'Position' },
+    { id: 'manager', label: 'Manager' },
+    { id: 'status', label: 'Status' },
+    { id: 'joined', label: 'Joined' },
+  ];
 
   readonly items = signal<EmployeeListItem[]>([]);
   readonly loading = signal(true);
@@ -140,6 +157,27 @@ export class EmployeesListPageComponent implements OnInit {
           this.loading.set(false);
         },
       });
+  }
+
+  savePreset(input: HTMLInputElement): void {
+    const saved = this.savedFilters.save(input.value, {
+      search: this.searchControl.value,
+      status: this.statusControl.value,
+      departmentId: this.departmentControl.value,
+    });
+    if (saved) {
+      input.value = '';
+      this.toast.success('Filters saved.');
+    }
+  }
+
+  applyPreset(preset: EmployeeFilterPreset): void {
+    // Set quietly, then reload once instead of once per control.
+    this.searchControl.setValue(preset.search, { emitEvent: false });
+    this.statusControl.setValue(preset.status, { emitEvent: false });
+    this.departmentControl.setValue(preset.departmentId, { emitEvent: false });
+    this.page.set(1);
+    this.reload();
   }
 
   toggleFilters(): void {

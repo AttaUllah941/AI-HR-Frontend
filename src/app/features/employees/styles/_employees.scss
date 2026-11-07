@@ -302,3 +302,102 @@
 .emp-dialog-grid__full {
   grid-column: 1 / -1;
 }
+
+.emp-view-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 14rem;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.emp-view-menu__title {
+  margin: 0.25rem 0 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--zh-muted-foreground);
+}
+
+.emp-view-menu__empty {
+  margin: 0;
+  color: var(--zh-muted-foreground);
+}
+
+.emp-view-menu__row {
+  display: flex;
+  gap: 0.35rem;
+
+  button {
+    flex: 1;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--zh-border);
+    border-radius: 0.5rem;
+    background: var(--zh-card);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    &.is-on {
+      border-color: var(--zh-primary);
+      background: var(--zh-primary-soft);
+    }
+  }
+}
+
+.emp-view-menu__check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.emp-view-menu__reset,
+.emp-view-menu__save button,
+.emp-view-menu__preset > button:first-child {
+  border: 0;
+  background: transparent;
+  color: var(--zh-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.emp-view-menu__preset {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.emp-view-menu__remove {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--zh-muted-foreground);
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.emp-view-menu__save {
+  display: flex;
+  gap: 0.4rem;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--zh-border);
+    border-radius: 0.5rem;
+    background: var(--zh-card);
+    color: inherit;
+    font: inherit;
+  }
+}

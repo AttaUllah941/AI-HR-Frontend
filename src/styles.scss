@@ -202,3 +202,30 @@ select {
     font-size: 1.05rem;
   }
 }
+
+/* ---- Tables: sticky headers, density and column visibility (see TablePrefs) ---- */
+@media (min-width: 601px) {
+  [class$='-table-wrap'] {
+    max-height: 70vh;
+    overflow: auto;
+  }
+
+  [class$='-table-wrap'] table[data-responsive] thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+}
+
+[data-density='compact'] table[data-responsive] thead th,
+[data-density='compact'] table[data-responsive] tbody td {
+  padding-block: 0.4rem;
+}
+
+[data-hide~='department'] [data-col='department'],
+[data-hide~='position'] [data-col='position'],
+[data-hide~='manager'] [data-col='manager'],
+[data-hide~='status'] [data-col='status'],
+[data-hide~='joined'] [data-col='joined'] {
+  display: none;
+}
