@@ -1,3 +1,4 @@
+import { ActivatedRoute } from '@angular/router';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, filter, Subscription, Observable } from 'rxjs';
@@ -50,6 +51,7 @@ const STATUS_OPTIONS: Array<{ value: LeaveRequestStatus | ''; label: string }> =
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeaveRequestsPageComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
   private inflight: Subscription | null = null;
   private readonly leave = inject(LeaveService);
   private readonly auth = inject(AuthService);
@@ -74,6 +76,10 @@ export class LeaveRequestsPageComponent implements OnInit {
   readonly statusControl = new FormControl<LeaveRequestStatus | ''>('', { nonNullable: true });
 
   ngOnInit(): void {
+    if (this.canCreate && this.route.snapshot.queryParamMap.get('action') === 'apply') {
+      // Deep link from the command palette ("Request leave").
+      queueMicrotask(() => this.openApply());
+    }
     this.statusControl.valueChanges
       .pipe(debounceTime(200), distinctUntilChanged())
       .subscribe(() => {
