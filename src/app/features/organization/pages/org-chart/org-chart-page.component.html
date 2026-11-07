@@ -30,10 +30,16 @@
         </div>
       </header>
 
-      <div class="chart-panel__canvas" role="tree" aria-label="Organization chart">
-        <ul class="chart-roots">
-          @for (node of tree(); track node.id) {
-            <app-org-chart-node [node]="node" />
+      <div
+        class="chart-panel__canvas"
+        role="tree"
+        aria-label="Organization chart. Use arrow keys to move, left and right to collapse or expand."
+        (keydown)="onTreeKeydown($event)"
+        (focusin)="onTreeFocusIn($event)"
+      >
+        <ul class="chart-roots" role="presentation">
+          @for (node of tree(); track node.id; let isFirst = $first) {
+            <app-org-chart-node [node]="node" [first]="isFirst" />
           }
         </ul>
       </div>

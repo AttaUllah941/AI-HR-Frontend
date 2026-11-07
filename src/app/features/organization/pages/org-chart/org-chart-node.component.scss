@@ -84,3 +84,25 @@ p {
   flex-direction: column;
   gap: 0.9rem;
 }
+
+.org-node:focus-visible {
+  outline: none;
+}
+
+.org-node:focus-visible > .org-node__card {
+  outline: 2px solid var(--zh-ring);
+  outline-offset: 2px;
+}
+
+.org-node__toggle {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--zh-muted-foreground);
+  cursor: pointer;
+  border-radius: 999px;
+  width: 1.75rem;
+  height: 1.75rem;
+}
