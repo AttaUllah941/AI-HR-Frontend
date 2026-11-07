@@ -8,6 +8,7 @@ import {
   withComponentInputBinding,
   withInMemoryScrolling,
   withPreloading,
+  withViewTransitions,
 } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -27,6 +28,15 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding(),
       withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
       withPreloading(AppPreloadingStrategy),
+      // Cross-fade between routes (Chromium/Safari 18+; others navigate normally). Skipped for reduced motion.
+      withViewTransitions({
+        skipInitialTransition: true,
+        onViewTransitionCreated: ({ transition }) => {
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            transition.skipTransition();
+          }
+        },
+      }),
     ),
     // Order matters: refresh must wrap the HTTP call before error handles residual 401s.
     provideHttpClient(withInterceptors([loadingInterceptor, authInterceptor, errorInterceptor, refreshInterceptor])),

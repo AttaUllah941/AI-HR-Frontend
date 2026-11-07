@@ -122,3 +122,17 @@ select {
   border-radius: var(--zh-radius, 0.875rem);
   background: var(--mat-sys-surface-container-lowest, var(--zh-card, #fff));
 }
+
+/* Route transitions (View Transitions API): quick cross-fade, none for reduced motion. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 160ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
