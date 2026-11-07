@@ -56,7 +56,7 @@ import {
 
 import { ToastService } from '../../core/services/toast.service';
 
-import { LoadingOverlayComponent } from '../../shared/components/loading-overlay/loading-overlay.component';
+import { TopProgressBarComponent } from '../../shared/top-progress-bar/top-progress-bar.component';
 
 import {
 
@@ -200,8 +200,7 @@ function timeOfDayGreeting(now: Date = new Date()): string {
 
     MatDialogModule,
 
-    LoadingOverlayComponent,
-
+    TopProgressBarComponent,
     BreadcrumbComponent,
 
   ],

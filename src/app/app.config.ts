@@ -10,6 +10,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { refreshInterceptor } from './core/interceptors/refresh.interceptor';
+import { loadingInterceptor } from './core/interceptors/loading.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -21,7 +22,7 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
     ),
     // Order matters: refresh must wrap the HTTP call before error handles residual 401s.
-    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, refreshInterceptor])),
+    provideHttpClient(withInterceptors([loadingInterceptor, authInterceptor, errorInterceptor, refreshInterceptor])),
     provideAnimationsAsync(),
   ],
 };

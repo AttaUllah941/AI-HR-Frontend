@@ -1,39 +1,27 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, finalize, from, of, switchMap, throwError } from 'rxjs';
-import { LoadingService } from '../services/loading.service';
+import { catchError, from, of, switchMap, throwError } from 'rxjs';
 import { ToastService } from '../services/toast.service';
 import { AuthService } from '../services/auth.service';
 import { isPublicAuthEndpoint } from './auth-endpoints';
 
 /**
- * Global loading + user-facing error toasts.
+ * User-facing error toasts.
  * 401 session clearing is handled by refreshInterceptor after a failed refresh;
  * this interceptor only redirects when a 401 still surfaces (refresh already failed
  * or no refresh token was available).
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-  const loading = inject(LoadingService);
   const toast = inject(ToastService);
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  const skipLoading = req.headers.has('X-Skip-Loading');
   const skipErrorToast = req.headers.has('X-Skip-Error-Toast');
-
-  if (!skipLoading) {
-    loading.show();
-  }
 
   return next(req).pipe(
     catchError((raw: HttpErrorResponse) =>
       parseBlobError(raw).pipe(switchMap((error) => handleError(error)))),
-    finalize(() => {
-      if (!skipLoading) {
-        loading.hide();
-      }
-    }),
   );
 
   function handleError(error: HttpErrorResponse) {
