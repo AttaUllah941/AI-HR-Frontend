@@ -31,6 +31,9 @@
 </app-organization-section-header>
 
 <div class="payroll-table-card" [class.is-refetching]="loading() && items().length > 0" [attr.aria-busy]="loading()">
+  @if (processing()) {
+    <app-smart-loader class="long-op" [messages]="payrollMessages" />
+  }
   @if (loading() && items().length === 0) {
     <app-table-skeleton [rows]="6" [cols]="5" />
   } @else if (error()) {

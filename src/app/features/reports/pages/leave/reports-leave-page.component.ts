@@ -16,6 +16,8 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ReportsBarChartComponent } from '../../components/reports-bar-chart.component';
+import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
+import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
 
 @Component({
   selector: 'app-reports-leave-page',
@@ -31,12 +33,14 @@ import { ReportsBarChartComponent } from '../../components/reports-bar-chart.com
     EmptyStateComponent,
     OrganizationStatusComponent,
     ReportsBarChartComponent,
+    SmartLoaderComponent,
   ],
   templateUrl: './reports-leave-page.component.html',
   styleUrl: './reports-leave-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportsLeavePageComponent implements OnInit {
+  protected readonly exportMessages = LOADER_MESSAGES.export;
   private readonly reports = inject(ReportsService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);

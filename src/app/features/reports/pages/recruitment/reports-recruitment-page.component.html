@@ -5,6 +5,9 @@
   errorTitle="Recruitment report unavailable"
   (retry)="reload()"
 >
+  @if (exporting()) {
+    <app-smart-loader class="long-op" [messages]="exportMessages" [diameter]="28" />
+  }
   <section class="reports-page" aria-label="Recruitment report">
     <div class="reports-action-bar">
       <div>

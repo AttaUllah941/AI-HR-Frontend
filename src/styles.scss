@@ -113,3 +113,12 @@ select {
     transition: none;
   }
 }
+
+/* Inline long-running operation banner (SmartLoader). */
+.long-op {
+  display: block;
+  margin-bottom: 1rem;
+  border: 1px solid var(--mat-sys-outline-variant, var(--zh-border, #e5e7eb));
+  border-radius: var(--zh-radius, 0.875rem);
+  background: var(--mat-sys-surface-container-lowest, var(--zh-card, #fff));
+}

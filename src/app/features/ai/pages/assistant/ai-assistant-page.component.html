@@ -88,7 +88,7 @@
             @if (sending()) {
               <div class="ai-chat-bubble ai-chat-bubble--assistant">
                 <span class="ai-chat-bubble__meta">Nova</span>
-                Thinking…
+                <app-smart-loader [messages]="novaMessages" [diameter]="20" />
               </div>
             }
           }

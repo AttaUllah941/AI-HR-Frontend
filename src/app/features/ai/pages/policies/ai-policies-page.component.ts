@@ -19,6 +19,8 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
+import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
 
 @Component({
   selector: 'app-ai-policies-page',
@@ -34,12 +36,14 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationStatusComponent,
+    SmartLoaderComponent,
   ],
   templateUrl: './ai-policies-page.component.html',
   styleUrl: './ai-policies-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AiPoliciesPageComponent implements OnInit {
+  protected readonly generationMessages = LOADER_MESSAGES.generation;
   private readonly fb = inject(FormBuilder);
   private readonly ai = inject(AiService);
   private readonly auth = inject(AuthService);

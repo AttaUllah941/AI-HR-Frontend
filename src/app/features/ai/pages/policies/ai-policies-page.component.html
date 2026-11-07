@@ -62,6 +62,9 @@
             </button>
           </div>
         </form>
+        @if (generating()) {
+          <app-smart-loader class="long-op" [messages]="generationMessages" [diameter]="28" />
+        }
       </mat-card>
     }
 

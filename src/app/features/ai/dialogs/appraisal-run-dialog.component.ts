@@ -14,6 +14,8 @@ import {
   PerformanceService,
 } from '../../../core/services/performance.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { SmartLoaderComponent } from '../../../shared/smart-loader/smart-loader.component';
+import { LOADER_MESSAGES } from '../../../shared/smart-loader/loader-messages';
 
 export interface AppraisalRunDialogData {
   employeeId?: string;
@@ -32,12 +34,14 @@ export interface AppraisalRunDialogData {
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    SmartLoaderComponent,
   ],
   templateUrl: './appraisal-run-dialog.component.html',
   styleUrl: './appraisal-run-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppraisalRunDialogComponent {
+  protected readonly generationMessages = LOADER_MESSAGES.generation;
   private readonly fb = inject(FormBuilder);
   private readonly ai = inject(AiService);
   private readonly employeesApi = inject(EmployeeService);

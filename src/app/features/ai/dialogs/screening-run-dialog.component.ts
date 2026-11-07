@@ -14,6 +14,8 @@ import {
   RecruitmentService,
 } from '../../../core/services/recruitment.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { SmartLoaderComponent } from '../../../shared/smart-loader/smart-loader.component';
+import { LOADER_MESSAGES } from '../../../shared/smart-loader/loader-messages';
 
 export interface ScreeningRunDialogData {
   candidateId?: string;
@@ -32,12 +34,14 @@ export interface ScreeningRunDialogData {
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    SmartLoaderComponent,
   ],
   templateUrl: './screening-run-dialog.component.html',
   styleUrl: './screening-run-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScreeningRunDialogComponent {
+  protected readonly resumeMessages = LOADER_MESSAGES.resume;
   private readonly fb = inject(FormBuilder);
   private readonly ai = inject(AiService);
   private readonly recruitment = inject(RecruitmentService);
