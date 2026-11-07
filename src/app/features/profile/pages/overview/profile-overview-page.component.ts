@@ -9,6 +9,7 @@ import { ProfileService, UserProfile } from '../../../../core/services/profile.s
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-profile-overview-page',
@@ -26,7 +27,7 @@ import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button
   styleUrl: './profile-overview-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProfileOverviewPageComponent implements OnInit {
+export class ProfileOverviewPageComponent implements OnInit, HasUnsavedChanges {
   private readonly fb = inject(FormBuilder);
   private readonly profile = inject(ProfileService);
   private readonly auth = inject(AuthService);
@@ -106,4 +107,9 @@ export class ProfileOverviewPageComponent implements OnInit {
   formatDate(iso: string | null | undefined): string {
     return this.profile.formatDateTime(iso);
   }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
 }

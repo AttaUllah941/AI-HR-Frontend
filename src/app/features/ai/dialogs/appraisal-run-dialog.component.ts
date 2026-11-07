@@ -16,6 +16,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { SmartLoaderComponent } from '../../../shared/smart-loader/smart-loader.component';
 import { LOADER_MESSAGES } from '../../../shared/smart-loader/loader-messages';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface AppraisalRunDialogData {
   employeeId?: string;
@@ -61,6 +62,7 @@ export class AppraisalRunDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     this.employeesApi.list({ page: 1, pageSize: 100, sortBy: 'lastName', sortDir: 'asc' }).subscribe({
       next: (res) => this.employees.set(res.items),
       error: () => this.employees.set([]),

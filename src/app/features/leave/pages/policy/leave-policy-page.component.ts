@@ -12,6 +12,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-leave-policy-page',
@@ -32,7 +33,7 @@ import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button
   styleUrl: './leave-policy-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LeavePolicyPageComponent implements OnInit {
+export class LeavePolicyPageComponent implements OnInit, HasUnsavedChanges {
   private readonly leave = inject(LeaveService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -97,6 +98,7 @@ export class LeavePolicyPageComponent implements OnInit {
       })
       .subscribe({
         next: (policy) => {
+          this.form.markAsPristine();
           this.policy.set(policy);
           this.saving.set(false);
           this.toast.success('Leave policy saved');
@@ -107,4 +109,9 @@ export class LeavePolicyPageComponent implements OnInit {
         },
       });
   }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
 }

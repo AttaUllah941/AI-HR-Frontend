@@ -27,6 +27,7 @@ import {
 
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 
 
@@ -72,6 +73,10 @@ export class TeamFormDialogComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
   private readonly dialogRef = inject(MatDialogRef<TeamFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
 
   readonly data = inject<{ team: Team | null }>(MAT_DIALOG_DATA);
 

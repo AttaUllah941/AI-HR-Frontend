@@ -9,6 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { PayrollRun, PayrollService } from '../../../core/services/payroll.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface PayrollRunFormDialogData {
   run?: PayrollRun | null;
@@ -61,6 +62,7 @@ export class PayrollRunFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     if (this.isEdit) {
       this.form.controls.year.disable();
       this.form.controls.month.disable();

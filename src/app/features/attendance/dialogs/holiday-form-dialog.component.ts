@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { AttendanceService, Holiday } from '../../../core/services/attendance.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-holiday-form-dialog',
@@ -32,6 +33,10 @@ export class HolidayFormDialogComponent {
   private readonly attendance = inject(AttendanceService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<HolidayFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<{ holiday: Holiday | null }>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);

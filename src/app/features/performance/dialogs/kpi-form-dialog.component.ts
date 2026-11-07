@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { PerformanceKpi, PerformanceService } from '../../../core/services/performance.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface KpiFormDialogData {
   kpi?: PerformanceKpi | null;
@@ -51,6 +52,7 @@ export class KpiFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     if (this.isEdit) {
       this.form.controls.code.disable();
     }

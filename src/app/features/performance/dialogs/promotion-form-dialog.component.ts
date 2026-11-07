@@ -11,6 +11,7 @@ import { EmployeeListItem, EmployeeService } from '../../../core/services/employ
 import { Designation, OrganizationService } from '../../../core/services/organization.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface PromotionFormDialogData {
   promotion?: PromotionRequest | null;
@@ -56,6 +57,7 @@ export class PromotionFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     this.employeesApi.list({ page: 1, pageSize: 100, sortBy: 'lastName', sortDir: 'asc' }).subscribe({
       next: (res) => this.employees.set(res.items),
       error: () => this.employees.set([]),

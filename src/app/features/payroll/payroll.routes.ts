@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
 
 export const PAYROLL_ROUTES: Routes = [
   {
@@ -48,6 +49,7 @@ export const PAYROLL_ROUTES: Routes = [
       },
       {
         path: 'tax',
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./pages/tax/payroll-tax-page.component').then((m) => m.PayrollTaxPageComponent),
       },

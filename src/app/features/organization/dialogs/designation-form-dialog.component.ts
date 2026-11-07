@@ -17,6 +17,7 @@ import { Designation, OrganizationService } from '../../../core/services/organiz
 
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 
 
@@ -60,6 +61,10 @@ export class DesignationFormDialogComponent {
   private readonly toast = inject(ToastService);
 
   private readonly dialogRef = inject(MatDialogRef<DesignationFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
 
   readonly data = inject<{ designation: Designation | null }>(MAT_DIALOG_DATA);
 

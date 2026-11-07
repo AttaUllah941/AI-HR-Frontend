@@ -11,6 +11,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-payroll-tax-page',
@@ -30,7 +31,7 @@ import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button
   styleUrl: './payroll-tax-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PayrollTaxPageComponent implements OnInit {
+export class PayrollTaxPageComponent implements OnInit, HasUnsavedChanges {
   private readonly payroll = inject(PayrollService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -110,4 +111,9 @@ export class PayrollTaxPageComponent implements OnInit {
         },
       });
   }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
 }

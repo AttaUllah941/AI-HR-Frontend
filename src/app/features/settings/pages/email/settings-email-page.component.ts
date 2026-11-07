@@ -10,6 +10,7 @@ import { SettingsService } from '../../../../core/services/settings.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-settings-email-page',
@@ -28,7 +29,7 @@ import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button
   styleUrl: './settings-email-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SettingsEmailPageComponent implements OnInit {
+export class SettingsEmailPageComponent implements OnInit, HasUnsavedChanges {
   private readonly fb = inject(FormBuilder);
   private readonly settings = inject(SettingsService);
   private readonly auth = inject(AuthService);
@@ -90,6 +91,7 @@ export class SettingsEmailPageComponent implements OnInit {
       })
       .subscribe({
         next: (cfg) => {
+          this.form.markAsPristine();
           this.apiKeySet.set(cfg.email.apiKeySet);
           this.maskedSmtpUrl.set(cfg.email.smtpUrl ?? null);
           this.form.patchValue({ emailSmtpUrl: '' });
@@ -102,4 +104,9 @@ export class SettingsEmailPageComponent implements OnInit {
         },
       });
   }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
 }

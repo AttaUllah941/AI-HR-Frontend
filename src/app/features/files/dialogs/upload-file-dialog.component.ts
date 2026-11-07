@@ -15,6 +15,7 @@ import {
 } from '../../../core/services/files.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface UploadFileDialogData {
   defaultCategory?: FileCategory;
@@ -43,6 +44,10 @@ export class UploadFileDialogComponent {
   private readonly toast = inject(ToastService);
   private readonly auth = inject(AuthService);
   private readonly dialogRef = inject(MatDialogRef<UploadFileDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<UploadFileDialogData>(MAT_DIALOG_DATA, { optional: true });
 
   /** Attaching to an employee or candidate needs write access to that record type. */

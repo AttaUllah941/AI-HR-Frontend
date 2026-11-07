@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
 
 export const PROFILE_ROUTES: Routes = [
   {
@@ -15,6 +16,7 @@ export const PROFILE_ROUTES: Routes = [
       },
       {
         path: 'overview',
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./pages/overview/profile-overview-page.component').then(
             (m) => m.ProfileOverviewPageComponent,
@@ -36,6 +38,7 @@ export const PROFILE_ROUTES: Routes = [
       },
       {
         path: 'preferences',
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./pages/preferences/profile-preferences-page.component').then(
             (m) => m.ProfilePreferencesPageComponent,

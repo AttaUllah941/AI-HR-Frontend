@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { AttendanceService, Shift } from '../../../core/services/attendance.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-shift-form-dialog',
@@ -32,6 +33,10 @@ export class ShiftFormDialogComponent {
   private readonly attendance = inject(AttendanceService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<ShiftFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<{ shift: Shift | null }>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);

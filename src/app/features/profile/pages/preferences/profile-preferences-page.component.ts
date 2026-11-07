@@ -21,6 +21,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 import { ThemeService, isThemeMode } from '../../../../core/services/theme.service';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-profile-preferences-page',
@@ -39,7 +40,7 @@ import { ThemeService, isThemeMode } from '../../../../core/services/theme.servi
   styleUrl: './profile-preferences-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProfilePreferencesPageComponent implements OnInit {
+export class ProfilePreferencesPageComponent implements OnInit, HasUnsavedChanges {
   private readonly themeService = inject(ThemeService);
   private readonly fb = inject(FormBuilder);
   private readonly profile = inject(ProfileService);
@@ -149,4 +150,9 @@ export class ProfilePreferencesPageComponent implements OnInit {
   private withOption(options: string[], value: string): string[] {
     return options.includes(value) ? [...options] : [value, ...options];
   }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
 }

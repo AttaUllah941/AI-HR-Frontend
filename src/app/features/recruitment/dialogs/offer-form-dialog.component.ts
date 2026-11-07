@@ -13,6 +13,7 @@ import {
 } from '../../../core/services/recruitment.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface OfferFormDialogData {
   offer?: JobOffer | null;
@@ -61,6 +62,7 @@ export class OfferFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     if (!this.isEdit) {
       this.recruitment.listApplications({ page: 1, pageSize: 100 }).subscribe({
         next: (res) =>

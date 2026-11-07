@@ -11,6 +11,7 @@ import { EmployeeListItem, EmployeeService } from '../../../core/services/employ
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface LeaveRequestFormDialogData {
   request?: LeaveRequest | null;
@@ -99,6 +100,7 @@ export class LeaveRequestFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     if (this.viewOnly) {
       this.form.disable();
     }

@@ -13,6 +13,7 @@ import {
 } from '../../../core/services/recruitment.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface ApplicationFormDialogData {
   jobOpeningId?: string;
@@ -54,6 +55,7 @@ export class ApplicationFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     this.recruitment.listJobs({ status: 'OPEN', page: 1, pageSize: 100 }).subscribe({
       next: (res) => this.jobs.set(res.items),
       error: () => this.jobs.set([]),

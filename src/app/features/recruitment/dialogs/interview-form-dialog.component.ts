@@ -15,6 +15,7 @@ import {
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface InterviewFormDialogData {
   interview?: Interview | null;
@@ -80,6 +81,7 @@ export class InterviewFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     if (!this.isEdit) {
       this.recruitment
         .listApplications({ page: 1, pageSize: 100 })

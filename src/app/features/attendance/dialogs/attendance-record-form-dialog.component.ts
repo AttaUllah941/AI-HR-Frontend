@@ -16,6 +16,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface AttendanceRecordDialogData {
   record: AttendanceRecord | null;
@@ -106,6 +107,7 @@ export class AttendanceRecordFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     if (this.canPickEmployee) {
       this.employeesApi
         .list({ page: 1, pageSize: 100, sortBy: 'lastName', sortDir: 'asc' })

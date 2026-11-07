@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { permissionGuard } from '../../core/guards/permission.guard';
+import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
 
 export const SETTINGS_ROUTES: Routes = [
   {
@@ -19,6 +20,7 @@ export const SETTINGS_ROUTES: Routes = [
       },
       {
         path: 'company',
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./pages/company/settings-company-page.component').then(
             (m) => m.SettingsCompanyPageComponent,
@@ -42,6 +44,7 @@ export const SETTINGS_ROUTES: Routes = [
       },
       {
         path: 'email',
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./pages/email/settings-email-page.component').then(
             (m) => m.SettingsEmailPageComponent,
@@ -49,6 +52,7 @@ export const SETTINGS_ROUTES: Routes = [
       },
       {
         path: 'storage',
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./pages/storage/settings-storage-page.component').then(
             (m) => m.SettingsStoragePageComponent,
@@ -63,6 +67,7 @@ export const SETTINGS_ROUTES: Routes = [
       },
       {
         path: 'security',
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./pages/security/settings-security-page.component').then(
             (m) => m.SettingsSecurityPageComponent,

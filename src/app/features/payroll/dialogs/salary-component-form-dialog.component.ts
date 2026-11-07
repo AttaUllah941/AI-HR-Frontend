@@ -15,6 +15,7 @@ import {
 } from '../../../core/services/payroll.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface SalaryComponentFormDialogData {
   component?: SalaryComponent | null;
@@ -55,6 +56,10 @@ export class SalaryComponentFormDialogComponent {
   private readonly payroll = inject(PayrollService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<SalaryComponentFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<SalaryComponentFormDialogData>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);

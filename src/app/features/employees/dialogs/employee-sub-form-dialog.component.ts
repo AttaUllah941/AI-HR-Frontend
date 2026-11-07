@@ -15,6 +15,7 @@ import { EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import type { SubResourceType } from '../models/employee-sub-resource.types';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-employee-sub-form-dialog',
@@ -38,6 +39,10 @@ export class EmployeeSubFormDialogComponent implements OnInit {
   private readonly employees = inject(EmployeeService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<EmployeeSubFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<{
     type: SubResourceType;
     employeeId: string;

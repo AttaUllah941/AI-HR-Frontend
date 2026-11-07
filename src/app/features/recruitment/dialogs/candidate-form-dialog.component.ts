@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { Candidate, RecruitmentService } from '../../../core/services/recruitment.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface CandidateFormDialogData {
   candidate?: Candidate | null;
@@ -34,6 +35,10 @@ export class CandidateFormDialogComponent {
   private readonly recruitment = inject(RecruitmentService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<CandidateFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<CandidateFormDialogData>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);

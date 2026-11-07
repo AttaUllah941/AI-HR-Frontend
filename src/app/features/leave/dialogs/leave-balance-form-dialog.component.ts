@@ -10,6 +10,7 @@ import { LeaveBalance, LeaveService, LeaveType } from '../../../core/services/le
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface LeaveBalanceFormDialogData {
   balance?: LeaveBalance | null;
@@ -61,6 +62,7 @@ export class LeaveBalanceFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     this.leave.listTypes().subscribe({
       next: (items) => this.leaveTypes.set(items),
     });

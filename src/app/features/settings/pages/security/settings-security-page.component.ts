@@ -19,6 +19,7 @@ import {
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-settings-security-page',
@@ -39,7 +40,7 @@ import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button
   styleUrl: './settings-security-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SettingsSecurityPageComponent implements OnInit {
+export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges {
   private readonly fb = inject(FormBuilder);
   private readonly security = inject(SecurityService);
   private readonly auth = inject(AuthService);
@@ -165,6 +166,7 @@ export class SettingsSecurityPageComponent implements OnInit {
       })
       .subscribe({
         next: () => {
+          this.form.markAsPristine();
           this.toast.success('Security policy saved.');
           this.saving.set(false);
           this.reload();
@@ -181,4 +183,9 @@ export class SettingsSecurityPageComponent implements OnInit {
     if (status === 'fail') return 'Fail';
     return 'Warn';
   }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
 }

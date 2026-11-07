@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { Branch, OrganizationService } from '../../../core/services/organization.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-branch-form-dialog',
@@ -32,6 +33,10 @@ export class BranchFormDialogComponent {
   private readonly org = inject(OrganizationService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<BranchFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<{ branch: Branch | null }>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);

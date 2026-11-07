@@ -16,6 +16,7 @@ import {
 import { EmployeeListItem, EmployeeService, EmploymentType } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface JobFormDialogData {
   job?: JobOpening | null;
@@ -84,6 +85,7 @@ export class JobFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     this.org.listDepartments().subscribe({
       next: (items) => this.departments.set(items),
       error: () => this.departments.set([]),
