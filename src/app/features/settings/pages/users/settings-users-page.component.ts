@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import {
@@ -41,6 +41,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsUsersPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly settings = inject(SettingsService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -83,7 +84,8 @@ export class SettingsUsersPageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.settings
+    this.inflight?.unsubscribe();
+    this.inflight = this.settings
       .listUsers({
         search: this.search.value.trim() || undefined,
         status: this.status.value || undefined,

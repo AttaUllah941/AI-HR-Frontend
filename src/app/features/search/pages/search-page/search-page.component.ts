@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import {
   GlobalSearchHit,
@@ -54,6 +54,7 @@ const TYPE_LABELS: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -135,7 +136,7 @@ export class SearchPageComponent implements OnInit {
     });
 
     this.form.controls.q.valueChanges
-      .pipe(debounceTime(400), distinctUntilChanged())
+      .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe((q) => {
         if (q.trim().length >= 2) {
           this.applyQueryToUrl();
@@ -178,7 +179,8 @@ export class SearchPageComponent implements OnInit {
     if (!q) return;
     this.loading.set(true);
     this.error.set(null);
-    this.global
+    this.inflight?.unsubscribe();
+    this.inflight = this.global
       .search({
         q,
         types: raw.types.length ? raw.types.join(',') : undefined,

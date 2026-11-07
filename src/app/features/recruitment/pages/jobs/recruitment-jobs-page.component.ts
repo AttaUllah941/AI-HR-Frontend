@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { filter } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -50,6 +50,7 @@ const STATUS_OPTIONS: Array<{ value: JobOpeningStatus | ''; label: string }> = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecruitmentJobsPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly recruitment = inject(RecruitmentService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -84,7 +85,8 @@ export class RecruitmentJobsPageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.recruitment
+    this.inflight?.unsubscribe();
+    this.inflight = this.recruitment
       .listJobs({
         status: this.statusControl.value || undefined,
         page: this.page(),

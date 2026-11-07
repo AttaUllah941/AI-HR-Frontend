@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -65,6 +65,7 @@ const AVATAR_COLORS = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AttendanceDailyPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly attendance = inject(AttendanceService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -112,7 +113,8 @@ export class AttendanceDailyPageComponent implements OnInit {
     this.error.set(null);
     const date = this.dateControl.value;
 
-    this.attendance
+    this.inflight?.unsubscribe();
+    this.inflight = this.attendance
       .listRecords({
         page: this.page(),
         pageSize: 10,

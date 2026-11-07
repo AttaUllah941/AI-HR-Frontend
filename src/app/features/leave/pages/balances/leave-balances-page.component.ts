@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subscription } from 'rxjs';
 import { LeaveBalance, LeaveService } from '../../../../core/services/leave.service';
 import { EmployeeListItem, EmployeeService } from '../../../../core/services/employee.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -34,6 +34,7 @@ import { LeaveBalanceFormDialogComponent } from '../../dialogs/leave-balance-for
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeaveBalancesPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly leave = inject(LeaveService);
   private readonly employeesApi = inject(EmployeeService);
   private readonly auth = inject(AuthService);
@@ -69,7 +70,8 @@ export class LeaveBalancesPageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.leave
+    this.inflight?.unsubscribe();
+    this.inflight = this.leave
       .listBalances({
         year: this.yearControl.value,
         employeeId: this.employeeControl.value || undefined,

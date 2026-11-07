@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { filter } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -51,6 +51,7 @@ const STATUS_OPTIONS: Array<{ value: PromotionStatus | ''; label: string }> = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PerformancePromotionsPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly api = inject(PerformanceService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -86,7 +87,8 @@ export class PerformancePromotionsPageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.api
+    this.inflight?.unsubscribe();
+    this.inflight = this.api
       .listPromotions({
         status: this.statusControl.value || undefined,
         page: this.page(),

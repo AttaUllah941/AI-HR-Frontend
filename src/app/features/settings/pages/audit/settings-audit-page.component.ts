@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subscription } from 'rxjs';
 import { AuditLogItem, SettingsService } from '../../../../core/services/settings.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
@@ -26,6 +26,7 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsAuditPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly settings = inject(SettingsService);
 
   readonly items = signal<AuditLogItem[]>([]);
@@ -45,7 +46,8 @@ export class SettingsAuditPageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.settings
+    this.inflight?.unsubscribe();
+    this.inflight = this.settings
       .listAuditLogs({
         search: this.search.value.trim() || undefined,
         page: 1,

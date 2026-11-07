@@ -14,6 +14,7 @@ import { EmployeeListItem, EmployeeService } from '../../../../core/services/emp
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { Subscription } from 'rxjs';
 
 function monthStart(): string {
   const now = new Date();
@@ -43,6 +44,7 @@ function today(): string {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AttendanceTimesheetPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly attendance = inject(AttendanceService);
   private readonly employeesApi = inject(EmployeeService);
 
@@ -76,7 +78,8 @@ export class AttendanceTimesheetPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.attendance
+    this.inflight?.unsubscribe();
+    this.inflight = this.attendance
       .getTimesheet({
         employeeId: this.employeeControl.value,
         dateFrom: this.dateFromControl.value,

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { filter } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -57,6 +57,7 @@ const PRIORITY_OPTIONS: Array<{ value: GoalPriority | ''; label: string }> = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PerformanceGoalsPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly api = inject(PerformanceService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -97,7 +98,8 @@ export class PerformanceGoalsPageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.api
+    this.inflight?.unsubscribe();
+    this.inflight = this.api
       .listGoals({
         status: this.statusControl.value || undefined,
         priority: this.priorityControl.value || undefined,

@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import {
@@ -41,6 +41,7 @@ import { downloadBlob } from '../../../../shared/utils/download-blob';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilesBrowserPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly filesApi = inject(FilesService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -82,7 +83,8 @@ export class FilesBrowserPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     const locked = this.lockedCategory();
-    this.filesApi
+    this.inflight?.unsubscribe();
+    this.inflight = this.filesApi
       .list({
         search: this.search.value.trim() || undefined,
         category: locked || this.category.value || undefined,

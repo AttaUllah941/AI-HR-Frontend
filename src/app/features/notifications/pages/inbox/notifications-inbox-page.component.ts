@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { filter } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
@@ -40,6 +40,7 @@ import { SendNotificationDialogComponent } from '../../dialogs/send-notification
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotificationsInboxPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly notifications = inject(NotificationsService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -86,7 +87,8 @@ export class NotificationsInboxPageComponent implements OnInit {
       next: (summary) => this.summary.set(summary),
       error: () => this.summary.set(null),
     });
-    this.notifications
+    this.inflight?.unsubscribe();
+    this.inflight = this.notifications
       .list({
         category: this.category.value || undefined,
         channel: 'IN_APP',

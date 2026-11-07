@@ -19,6 +19,7 @@ import { ReportsBarChartComponent } from '../../components/reports-bar-chart.com
 import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
 import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
 import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
+import { Subscription } from 'rxjs';
 
 function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -53,6 +54,7 @@ function defaultRange(): { from: string; to: string } {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportsAttendancePageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   protected readonly exportMessages = LOADER_MESSAGES.export;
   private readonly reports = inject(ReportsService);
   private readonly auth = inject(AuthService);
@@ -77,7 +79,8 @@ export class ReportsAttendancePageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.reports
+    this.inflight?.unsubscribe();
+    this.inflight = this.reports
       .getAttendance({
         dateFrom: this.dateFrom.value,
         dateTo: this.dateTo.value,

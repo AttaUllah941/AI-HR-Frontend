@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -66,6 +66,7 @@ const AVATAR_COLORS = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmployeesListPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly employees = inject(EmployeeService);
   private readonly org = inject(OrganizationService);
   private readonly auth = inject(AuthService);
@@ -116,7 +117,8 @@ export class EmployeesListPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.employees
+    this.inflight?.unsubscribe();
+    this.inflight = this.employees
       .list({
         page: this.page(),
         pageSize: 10,
