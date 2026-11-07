@@ -89,7 +89,11 @@
         </div>
       </header>
       @if (hasAttendanceData(data)) {
-        <app-attendance-trend-chart [series]="data.attendanceTrend.series" />
+        @defer (on viewport) {
+          <app-attendance-trend-chart [series]="data.attendanceTrend.series" />
+        } @placeholder {
+          <app-chart-skeleton />
+        }
       } @else {
         <p class="state-msg state-msg--panel">No attendance recorded for this period yet.</p>
       }
@@ -103,7 +107,11 @@
         </div>
       </header>
       @if (data.departmentDistribution.total > 0) {
-        <app-department-donut-chart [slices]="data.departmentDistribution.slices" />
+        @defer (on viewport) {
+          <app-department-donut-chart [slices]="data.departmentDistribution.slices" />
+        } @placeholder {
+          <app-chart-skeleton />
+        }
       } @else {
         <p class="state-msg state-msg--panel">No employees assigned to departments yet.</p>
       }
@@ -117,7 +125,11 @@
         </div>
       </header>
       @if (hasFunnelData(data)) {
-        <app-hiring-funnel-chart [stages]="data.hiringFunnel.stages" />
+        @defer (on viewport) {
+          <app-hiring-funnel-chart [stages]="data.hiringFunnel.stages" />
+        } @placeholder {
+          <app-chart-skeleton />
+        }
       } @else {
         <p class="state-msg state-msg--panel">No candidates in the hiring pipeline yet.</p>
       }
@@ -131,7 +143,11 @@
         </div>
       </header>
       @if (hasGrowthData(data)) {
-        <app-employee-growth-chart [points]="data.employeeGrowth.points" />
+        @defer (on viewport) {
+          <app-employee-growth-chart [points]="data.employeeGrowth.points" />
+        } @placeholder {
+          <app-chart-skeleton />
+        }
       } @else {
         <p class="state-msg state-msg--panel">No employee growth data yet.</p>
       }

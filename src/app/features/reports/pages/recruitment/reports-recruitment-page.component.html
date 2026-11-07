@@ -51,22 +51,38 @@
       } @else {
         <div class="reports-chart-grid">
           <mat-card class="reports-chart-card">
-            <app-reports-bar-chart [points]="r.charts.jobsByStatus" title="Jobs by status" />
+            @defer (on viewport) {
+              <app-reports-bar-chart [points]="r.charts.jobsByStatus" title="Jobs by status" />
+            } @placeholder {
+              <app-chart-skeleton />
+            }
           </mat-card>
           <mat-card class="reports-chart-card">
-            <app-reports-bar-chart
-              [points]="r.charts.applicationsByStatus"
-              title="Applications by status"
-            />
+            @defer (on viewport) {
+              <app-reports-bar-chart
+                [points]="r.charts.applicationsByStatus"
+                title="Applications by status"
+              />
+            } @placeholder {
+              <app-chart-skeleton />
+            }
           </mat-card>
           <mat-card class="reports-chart-card">
-            <app-reports-bar-chart
-              [points]="r.charts.interviewsByStatus"
-              title="Interviews by status"
-            />
+            @defer (on viewport) {
+              <app-reports-bar-chart
+                [points]="r.charts.interviewsByStatus"
+                title="Interviews by status"
+              />
+            } @placeholder {
+              <app-chart-skeleton />
+            }
           </mat-card>
           <mat-card class="reports-chart-card">
-            <app-reports-bar-chart [points]="r.charts.offersByStatus" title="Offers by status" />
+            @defer (on viewport) {
+              <app-reports-bar-chart [points]="r.charts.offersByStatus" title="Offers by status" />
+            } @placeholder {
+              <app-chart-skeleton />
+            }
           </mat-card>
         </div>
       }

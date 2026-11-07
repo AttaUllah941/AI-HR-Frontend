@@ -62,22 +62,38 @@
       } @else {
         <div class="reports-chart-grid">
           <mat-card class="reports-chart-card">
-            <app-reports-bar-chart [points]="r.charts.byStatus" title="By status" />
+            @defer (on viewport) {
+              <app-reports-bar-chart [points]="r.charts.byStatus" title="By status" />
+            } @placeholder {
+              <app-chart-skeleton />
+            }
           </mat-card>
           <mat-card class="reports-chart-card">
-            <app-reports-bar-chart
-              [points]="r.charts.byEmploymentType"
-              title="By employment type"
-            />
+            @defer (on viewport) {
+              <app-reports-bar-chart
+                [points]="r.charts.byEmploymentType"
+                title="By employment type"
+              />
+            } @placeholder {
+              <app-chart-skeleton />
+            }
           </mat-card>
           <mat-card class="reports-chart-card">
-            <app-reports-bar-chart [points]="r.charts.byDepartment" title="By department" />
+            @defer (on viewport) {
+              <app-reports-bar-chart [points]="r.charts.byDepartment" title="By department" />
+            } @placeholder {
+              <app-chart-skeleton />
+            }
           </mat-card>
           <mat-card class="reports-chart-card">
-            <app-reports-bar-chart
-              [points]="r.charts.activeHeadcount"
-              title="Active headcount trend"
-            />
+            @defer (on viewport) {
+              <app-reports-bar-chart
+                [points]="r.charts.activeHeadcount"
+                title="Active headcount trend"
+              />
+            } @placeholder {
+              <app-chart-skeleton />
+            }
           </mat-card>
         </div>
 

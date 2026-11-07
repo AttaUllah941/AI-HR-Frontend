@@ -8,13 +8,9 @@ import {
   input,
   viewChild,
 } from '@angular/core';
-import * as echarts from 'echarts/core';
-import { LineChart } from 'echarts/charts';
-import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
+import { echarts } from '../../../../shared/charts/echarts-setup';
 import { DashboardAttendancePoint } from '../../../../core/services/dashboard.service';
 
-echarts.use([LineChart, GridComponent, LegendComponent, TooltipComponent, CanvasRenderer]);
 
 @Component({
   selector: 'app-attendance-trend-chart',

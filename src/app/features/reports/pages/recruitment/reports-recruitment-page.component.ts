@@ -15,6 +15,7 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
 import { ReportsBarChartComponent } from '../../components/reports-bar-chart.component';
 import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
 import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
+import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
 
 @Component({
   selector: 'app-reports-recruitment-page',
@@ -28,6 +29,7 @@ import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages
     OrganizationStatusComponent,
     ReportsBarChartComponent,
     SmartLoaderComponent,
+    ChartSkeletonComponent,
   ],
   templateUrl: './reports-recruitment-page.component.html',
   styleUrl: './reports-recruitment-page.component.scss',

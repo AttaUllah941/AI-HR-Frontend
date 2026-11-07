@@ -8,13 +8,9 @@ import {
   input,
   viewChild,
 } from '@angular/core';
-import * as echarts from 'echarts/core';
-import { PieChart } from 'echarts/charts';
-import { LegendComponent, TooltipComponent } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
+import { echarts } from '../../../../shared/charts/echarts-setup';
 import { DashboardDepartmentSlice } from '../../../../core/services/dashboard.service';
 
-echarts.use([PieChart, LegendComponent, TooltipComponent, CanvasRenderer]);
 
 @Component({
   selector: 'app-department-donut-chart',

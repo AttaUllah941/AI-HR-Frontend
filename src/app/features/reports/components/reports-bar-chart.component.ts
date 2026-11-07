@@ -8,13 +8,9 @@ import {
   input,
   viewChild,
 } from '@angular/core';
-import * as echarts from 'echarts/core';
-import { BarChart } from 'echarts/charts';
-import { GridComponent, TooltipComponent } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
+import { echarts } from '../../../shared/charts/echarts-setup';
 import { ChartPoint } from '../../../core/services/reports.service';
 
-echarts.use([BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
 @Component({
   selector: 'app-reports-bar-chart',

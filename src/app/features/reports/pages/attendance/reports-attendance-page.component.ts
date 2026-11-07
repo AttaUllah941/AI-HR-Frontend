@@ -18,6 +18,7 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
 import { ReportsBarChartComponent } from '../../components/reports-bar-chart.component';
 import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
 import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
+import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
 
 function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -45,6 +46,7 @@ function defaultRange(): { from: string; to: string } {
     OrganizationStatusComponent,
     ReportsBarChartComponent,
     SmartLoaderComponent,
+    ChartSkeletonComponent,
   ],
   templateUrl: './reports-attendance-page.component.html',
   styleUrl: './reports-attendance-page.component.scss',

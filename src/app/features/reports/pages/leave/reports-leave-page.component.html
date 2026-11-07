@@ -48,10 +48,18 @@
     @if (report(); as r) {
       <div class="reports-chart-grid">
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart [points]="r.charts.byStatus" title="By status" />
+          @defer (on viewport) {
+            <app-reports-bar-chart [points]="r.charts.byStatus" title="By status" />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart [points]="r.charts.byType" title="By leave type (days)" />
+          @defer (on viewport) {
+            <app-reports-bar-chart [points]="r.charts.byType" title="By leave type (days)" />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
       </div>
 

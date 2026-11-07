@@ -63,34 +63,54 @@
     @if (summary(); as s) {
       <div class="reports-chart-grid">
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart
-            [points]="s.charts.attendanceByStatus ?? []"
-            title="Attendance by status"
-          />
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.attendanceByStatus ?? []"
+              title="Attendance by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart
-            [points]="s.charts.leaveByStatus ?? []"
-            title="Leave by status"
-          />
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.leaveByStatus ?? []"
+              title="Leave by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart
-            [points]="s.charts.payrollByStatus ?? []"
-            title="Payroll by status"
-          />
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.payrollByStatus ?? []"
+              title="Payroll by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart
-            [points]="s.charts.jobsByStatus ?? []"
-            title="Jobs by status"
-          />
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.jobsByStatus ?? []"
+              title="Jobs by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart
-            [points]="s.charts.applicationsByStatus ?? []"
-            title="Applications by status"
-          />
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.applicationsByStatus ?? []"
+              title="Applications by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
       </div>
 
