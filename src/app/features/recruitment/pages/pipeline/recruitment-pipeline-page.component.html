@@ -21,21 +21,10 @@
   }
 </app-organization-section-header>
 
-@if (loading()) {
-  <div class="recruitment-table-card">
-    <div class="recruitment-table-state">
-      <mat-spinner diameter="32" />
-      <span>Loading pipeline…</span>
-    </div>
-  </div>
+@if (loading() && columns().every((c) => c.applications.length === 0)) {
+  <app-table-skeleton [rows]="6" [cols]="5" />
 } @else if (error()) {
-  <div class="recruitment-table-card">
-    <div class="recruitment-table-state recruitment-table-state--error">
-      <mat-icon>error_outline</mat-icon>
-      <p>{{ error() }}</p>
-      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
-    </div>
-  </div>
+  <app-error-state [message]="error() ?? ''" (retry)="reload()" />
 } @else if (columns().every((c) => c.applications.length === 0)) {
   <app-empty-state
     title="Pipeline is empty"

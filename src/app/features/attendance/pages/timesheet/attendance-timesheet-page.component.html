@@ -27,18 +27,11 @@
     </button>
   </div>
 
-  <div class="att-table-card">
-    @if (loading()) {
-      <div class="att-table-state">
-        <mat-spinner diameter="32" />
-        <span>Loading timesheet…</span>
-      </div>
+  <div class="att-table-card" [class.is-refetching]="loading() && !!timesheet()" [attr.aria-busy]="loading()">
+    @if (loading() && !timesheet()) {
+      <app-table-skeleton [rows]="6" [cols]="7" />
     } @else if (error()) {
-      <div class="att-table-state att-table-state--error">
-        <mat-icon>error_outline</mat-icon>
-        <p>{{ error() }}</p>
-        <button mat-stroked-button type="button" (click)="load()">Try again</button>
-      </div>
+      <app-error-state [message]="error() ?? ''" (retry)="load()" />
     } @else if (!loaded()) {
       <app-empty-state
         title="Select a range"

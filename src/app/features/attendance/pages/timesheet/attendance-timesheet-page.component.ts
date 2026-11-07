@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   AttendanceRecord,
@@ -13,6 +12,8 @@ import {
 } from '../../../../core/services/attendance.service';
 import { EmployeeListItem, EmployeeService } from '../../../../core/services/employee.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
 
 function monthStart(): string {
   const now = new Date();
@@ -33,8 +34,9 @@ function today(): string {
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
+    TableSkeletonComponent,
+    ErrorStateComponent,
   ],
   templateUrl: './attendance-timesheet-page.component.html',
   styleUrl: './attendance-timesheet-page.component.scss',
