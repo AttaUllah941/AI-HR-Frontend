@@ -1,0 +1,30 @@
+<button
+  mat-icon-button
+  type="button"
+  class="topbar__avatar-btn"
+  [matMenuTriggerFor]="userMenu"
+  aria-label="User menu"
+>
+  <span class="topbar__avatar" aria-hidden="true">{{ initials() }}</span>
+</button>
+<mat-menu #userMenu="matMenu" class="zh-menu" xPosition="before">
+  <a mat-menu-item routerLink="/profile/overview">
+    <mat-icon>person</mat-icon>
+    <span>Profile</span>
+  </a>
+  <a mat-menu-item routerLink="/mfa-setup">
+    <mat-icon>security</mat-icon>
+    <span>Security / MFA</span>
+  </a>
+  @if (user()?.permissions?.includes('settings:view')) {
+    <a mat-menu-item routerLink="/settings">
+      <mat-icon>settings</mat-icon>
+      <span>Settings</span>
+    </a>
+  }
+  <mat-divider />
+  <button mat-menu-item type="button" (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    <span>Sign out</span>
+  </button>
+</mat-menu>

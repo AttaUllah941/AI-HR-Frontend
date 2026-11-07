@@ -214,9 +214,9 @@ export class NotificationsService {
       .pipe(map((res) => this.unwrap(res)));
   }
 
-  getFeed(limit = 8): Observable<NotificationsFeed> {
+  getFeed(limit = 8, options?: { background?: boolean }): Observable<NotificationsFeed> {
     return this.api
-      .get<NotificationsFeed>('/notifications/feed', { limit })
+      .get<NotificationsFeed>('/notifications/feed', { limit }, { skipLoading: options?.background })
       .pipe(map((res) => this.unwrap(res)));
   }
 
