@@ -69,7 +69,7 @@
         }
       </div>
       <div class="settings-table-wrap">
-        <table class="settings-table">
+        <table class="settings-table" data-responsive>
           <thead>
             <tr>
               <th scope="col">Check</th>
@@ -80,8 +80,8 @@
           <tbody>
             @for (check of checks(); track check.id) {
               <tr>
-                <td>{{ check.title }}</td>
-                <td>
+                <td data-label="Check">{{ check.title }}</td>
+                <td data-label="Status">
                   <span
                     class="settings-badge"
                     [class.settings-badge--ok]="check.status === 'pass'"
@@ -90,7 +90,7 @@
                     >{{ statusLabel(check.status) }}</span
                   >
                 </td>
-                <td>{{ check.detail }}</td>
+                <td data-label="Detail">{{ check.detail }}</td>
               </tr>
             }
           </tbody>

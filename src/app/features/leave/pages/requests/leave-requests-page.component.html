@@ -36,7 +36,7 @@
     />
   } @else {
     <div class="leave-table-wrap">
-      <table class="leave-table">
+      <table class="leave-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Employee</th>
@@ -50,13 +50,13 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="leave-table__row">
-              <td>
+              <td data-label="Employee">
                 <div class="leave-table__employee-text">
                   <strong>{{ item.employee?.firstName }} {{ item.employee?.lastName }}</strong>
                   <span>{{ item.employee?.employeeCode || '—' }}</span>
                 </div>
               </td>
-              <td>
+              <td data-label="Type">
                 <span class="leave-table__type">
                   <span
                     class="leave-table__type-dot"
@@ -66,21 +66,21 @@
                   {{ item.leaveType?.name || '—' }}
                 </span>
               </td>
-              <td>
+              <td data-label="Dates">
                 {{ formatDate(item.startDate) }}
                 @if (item.startDate.slice(0, 10) !== item.endDate.slice(0, 10)) {
                   – {{ formatDate(item.endDate) }}
                 }
                 <div class="leave-day-type">{{ dayTypeLabel(item.dayType) }}</div>
               </td>
-              <td>{{ item.days }}</td>
-              <td>
+              <td data-label="Days">{{ item.days }}</td>
+              <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="leave-status-pill__dot" aria-hidden="true"></span>
                   {{ statusLabel(item.status) }}
                 </span>
               </td>
-              <td class="leave-table__actions-col">
+              <td class="leave-table__actions-col" data-label="">
                 @if (canShowMenu(item)) {
                   <button
                     mat-icon-button

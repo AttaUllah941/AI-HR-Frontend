@@ -76,7 +76,7 @@
     />
     } @else {
       <div class="emp-table-wrap">
-        <table class="emp-table">
+        <table class="emp-table" data-responsive>
           <thead>
             <tr>
               <th scope="col">Employee</th>
@@ -91,7 +91,7 @@
           <tbody>
             @for (item of items(); track item.id) {
               <tr class="emp-table__row" (click)="view(item)">
-                <td>
+                <td data-label="Employee">
                   <div class="emp-table__employee">
                     <span class="emp-table__avatar" [style.background]="avatarStyle(item).background" [style.color]="avatarStyle(item).color">
                       {{ initials(item) }}
@@ -102,17 +102,17 @@
                     </div>
                   </div>
                 </td>
-                <td>{{ item.department?.name ?? '—' }}</td>
-                <td>{{ item.designation?.name ?? '—' }}</td>
-                <td>{{ managerName(item) }}</td>
-                <td>
+                <td data-label="Department">{{ item.department?.name ?? '—' }}</td>
+                <td data-label="Position">{{ item.designation?.name ?? '—' }}</td>
+                <td data-label="Manager">{{ managerName(item) }}</td>
+                <td data-label="Status">
                   <span [class]="statusClass(item)">
                     <span class="emp-status-pill__dot" aria-hidden="true"></span>
                     {{ statusLabel(item) }}
                   </span>
                 </td>
-                <td>{{ formatJoined(item.joinDate) }}</td>
-                <td class="emp-table__actions-col">
+                <td data-label="Joined">{{ formatJoined(item.joinDate) }}</td>
+                <td class="emp-table__actions-col" data-label="">
                   <button
                     mat-icon-button
                     type="button"

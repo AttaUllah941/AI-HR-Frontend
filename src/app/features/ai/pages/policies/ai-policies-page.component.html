@@ -82,7 +82,7 @@
     } @else if (items().length) {
       <div class="ai-table-card">
         <div class="ai-table-wrap">
-          <table class="ai-table">
+          <table class="ai-table" data-responsive>
             <thead>
               <tr>
                 <th scope="col">Topic</th>
@@ -98,10 +98,10 @@
                   style="cursor: pointer"
                   (click)="selectGeneration(item)"
                 >
-                  <td>{{ topicPreview(item) }}</td>
-                  <td>{{ createdLabel(item.createdAt) }}</td>
-                  <td>{{ item.status }}</td>
-                  <td class="ai-table__actions-col" (click)="$event.stopPropagation()">
+                  <td data-label="Topic">{{ topicPreview(item) }}</td>
+                  <td data-label="Created">{{ createdLabel(item.createdAt) }}</td>
+                  <td data-label="Status">{{ item.status }}</td>
+                  <td class="ai-table__actions-col" (click)="$event.stopPropagation()" data-label="">
                     @if (canDelete) {
                       <button
                         mat-icon-button

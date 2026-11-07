@@ -36,7 +36,7 @@
     />
   } @else {
     <div class="att-table-wrap">
-      <table class="att-table">
+      <table class="att-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Employee</th>
@@ -50,19 +50,19 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr>
-              <td>
+              <td data-label="Employee">
                 <strong>{{ item.employee?.firstName }} {{ item.employee?.lastName }}</strong>
               </td>
-              <td>{{ formatDate(item.date) }}</td>
-              <td>{{ formatHours(item.minutes) }} ({{ item.minutes }}m)</td>
-              <td>{{ item.reason || '—' }}</td>
-              <td>
+              <td data-label="Date">{{ formatDate(item.date) }}</td>
+              <td data-label="Duration">{{ formatHours(item.minutes) }} ({{ item.minutes }}m)</td>
+              <td data-label="Reason">{{ item.reason || '—' }}</td>
+              <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="att-status-pill__dot" aria-hidden="true"></span>
                   {{ statusLabel(item.status) }}
                 </span>
               </td>
-              <td class="att-table__actions-col">
+              <td class="att-table__actions-col" data-label="">
                 @if (canApprove && item.status === 'PENDING') {
                   <button
                     mat-icon-button

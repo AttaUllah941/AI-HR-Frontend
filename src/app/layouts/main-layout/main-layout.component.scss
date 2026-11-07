@@ -57,6 +57,7 @@
 
 @media (max-width: 640px) {
   .page-content {
-    padding: 0.85rem;
+    // Leave room for the fixed bottom navigation.
+    padding: 0.85rem 0.85rem calc(4.75rem + env(safe-area-inset-bottom));
   }
 }

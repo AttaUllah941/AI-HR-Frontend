@@ -27,7 +27,7 @@
     />
   } @else {
     <div class="payroll-table-wrap">
-      <table class="payroll-table">
+      <table class="payroll-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Employee</th>
@@ -41,7 +41,7 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="payroll-table__row">
-              <td>
+              <td data-label="Employee">
                 <div class="payroll-table__employee-text">
                   <strong>
                     {{ item.employee?.firstName }} {{ item.employee?.lastName }}
@@ -49,15 +49,15 @@
                   <span>{{ item.employee?.employeeCode || '—' }}</span>
                 </div>
               </td>
-              <td>{{ formatMoney(item.basicSalary, item.currency) }}</td>
-              <td>
+              <td data-label="Basic">{{ formatMoney(item.basicSalary, item.currency) }}</td>
+              <td data-label="Effective">
                 {{ formatDate(item.effectiveFrom) }}
                 @if (item.effectiveTo) {
                   – {{ formatDate(item.effectiveTo) }}
                 }
               </td>
-              <td>{{ item.bankName || '—' }}</td>
-              <td>
+              <td data-label="Bank">{{ item.bankName || '—' }}</td>
+              <td data-label="Status">
                 <span
                   [class]="
                     item.isActive
@@ -69,7 +69,7 @@
                   {{ item.isActive ? 'Active' : 'Inactive' }}
                 </span>
               </td>
-              <td class="payroll-table__actions-col">
+              <td class="payroll-table__actions-col" data-label="">
                 @if (canUpdate) {
                   <button
                     mat-icon-button

@@ -64,7 +64,7 @@
     />
     } @else {
       <div class="att-table-wrap">
-        <table class="att-table">
+        <table class="att-table" data-responsive>
           <thead>
             <tr>
               <th scope="col">Employee</th>
@@ -80,7 +80,7 @@
           <tbody>
             @for (item of items(); track item.id) {
               <tr class="att-table__row">
-                <td>
+                <td data-label="Employee">
                   <div class="att-table__employee">
                     <span
                       class="att-table__avatar"
@@ -97,18 +97,18 @@
                     </div>
                   </div>
                 </td>
-                <td>{{ item.employee?.department?.name ?? '—' }}</td>
-                <td>
+                <td data-label="Department">{{ item.employee?.department?.name ?? '—' }}</td>
+                <td data-label="Status">
                   <span [class]="statusClass(item.status)">
                     <span class="att-status-pill__dot" aria-hidden="true"></span>
                     {{ statusLabel(item.status) }}
                   </span>
                 </td>
-                <td>{{ formatTime(item.checkInAt) }}</td>
-                <td>{{ formatTime(item.checkOutAt) }}</td>
-                <td>{{ formatHours(item.workMinutes) }}</td>
-                <td>{{ formatLate(item.lateMinutes) }}</td>
-                <td class="att-table__actions-col">
+                <td data-label="Check-in">{{ formatTime(item.checkInAt) }}</td>
+                <td data-label="Check-out">{{ formatTime(item.checkOutAt) }}</td>
+                <td data-label="Work hrs">{{ formatHours(item.workMinutes) }}</td>
+                <td data-label="Late">{{ formatLate(item.lateMinutes) }}</td>
+                <td class="att-table__actions-col" data-label="">
                   <button
                     mat-icon-button
                     type="button"

@@ -16,6 +16,7 @@ import {
   BreadcrumbItem,
 } from '../../shared/components/breadcrumb/breadcrumb.component';
 import { environment } from '../../../environments/environment';
+import { BottomNavComponent } from './bottom-nav/bottom-nav.component';
 import { AppHeaderComponent } from './header/app-header.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 
@@ -58,7 +59,13 @@ function timeOfDayGreeting(now: Date = new Date()): string {
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent, AppHeaderComponent, BreadcrumbComponent],
+  imports: [
+    RouterOutlet,
+    SidebarComponent,
+    AppHeaderComponent,
+    BottomNavComponent,
+    BreadcrumbComponent,
+  ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

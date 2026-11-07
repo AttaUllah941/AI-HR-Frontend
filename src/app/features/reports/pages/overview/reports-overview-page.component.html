@@ -168,7 +168,7 @@
         } @else {
           <div class="reports-table-card">
             <div class="reports-table-wrap">
-              <table class="reports-table">
+              <table class="reports-table" data-responsive>
                 <thead>
                   <tr>
                     <th scope="col">Report</th>
@@ -180,15 +180,15 @@
                 <tbody>
                   @for (row of s.recentExports; track row.id) {
                     <tr class="reports-table__row">
-                      <td>{{ reportTypeLabel(row.reportType) }}</td>
-                      <td>
+                      <td data-label="Report">{{ reportTypeLabel(row.reportType) }}</td>
+                      <td data-label="Format">
                         <span [class]="statusClass('info')">
                           <span class="reports-status-pill__dot" aria-hidden="true"></span>
                           {{ row.format }}
                         </span>
                       </td>
-                      <td>{{ row.fileName || '—' }}</td>
-                      <td>{{ row.createdAt | date: 'short' }}</td>
+                      <td data-label="File">{{ row.fileName || '—' }}</td>
+                      <td data-label="When">{{ row.createdAt | date: 'short' }}</td>
                     </tr>
                   }
                 </tbody>

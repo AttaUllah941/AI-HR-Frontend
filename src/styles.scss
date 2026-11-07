@@ -136,3 +136,69 @@ select {
     animation: none !important;
   }
 }
+
+/* ---- Mobile: tables become stacked cards below 600px (cells carry data-label) ---- */
+@media (max-width: 600px) {
+  table[data-responsive] {
+    display: block;
+    width: 100%;
+    border: 0;
+  }
+
+  /* Header row stays available to assistive tech but is not painted. */
+  table[data-responsive] thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  table[data-responsive] tbody,
+  table[data-responsive] tr {
+    display: block;
+  }
+
+  table[data-responsive] tr {
+    margin-bottom: 0.75rem;
+    padding: 0.35rem 0.85rem;
+    border: 1px solid var(--zh-border);
+    border-radius: var(--zh-radius);
+    background: var(--zh-card);
+  }
+
+  table[data-responsive] td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0;
+    border: 0;
+    text-align: right;
+  }
+
+  table[data-responsive] td::before {
+    content: attr(data-label);
+    flex: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--zh-muted-foreground);
+    text-align: left;
+  }
+
+  table[data-responsive] td[data-label='']::before {
+    display: none;
+  }
+
+  table[data-responsive] td[data-label=''] {
+    justify-content: flex-end;
+  }
+
+  /* Big, thumb-friendly clock in / out button. */
+  .att-clock-card__actions button {
+    width: 100%;
+    min-height: 3.5rem;
+    font-size: 1.05rem;
+  }
+}

@@ -45,7 +45,7 @@
     />
   } @else {
     <div class="performance-table-wrap">
-      <table class="performance-table">
+      <table class="performance-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">From</th>
@@ -59,17 +59,17 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="performance-table__row">
-              <td>{{ fromLabel(item) }}</td>
-              <td>{{ toLabel(item) }}</td>
-              <td>
+              <td data-label="From">{{ fromLabel(item) }}</td>
+              <td data-label="To">{{ toLabel(item) }}</td>
+              <td data-label="Type">
                 <span [class]="statusClass(item.type)">
                   <span class="performance-status-pill__dot" aria-hidden="true"></span>
                   {{ statusLabel(item.type) }}
                 </span>
               </td>
-              <td>{{ item.rating ?? '—' }}</td>
-              <td>{{ excerpt(item.content) }}</td>
-              <td class="performance-table__actions-col">
+              <td data-label="Rating">{{ item.rating ?? '—' }}</td>
+              <td data-label="Content">{{ excerpt(item.content) }}</td>
+              <td class="performance-table__actions-col" data-label="">
                 @if (canDelete) {
                   <button
                     mat-icon-button

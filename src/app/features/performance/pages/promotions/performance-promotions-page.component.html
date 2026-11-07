@@ -36,7 +36,7 @@
     />
   } @else {
     <div class="performance-table-wrap">
-      <table class="performance-table">
+      <table class="performance-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Employee</th>
@@ -49,16 +49,16 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="performance-table__row">
-              <td>{{ employeeLabel(item) }}</td>
-              <td>{{ proposedLabel(item) }}</td>
-              <td>{{ item.effectiveDate ? item.effectiveDate.substring(0, 10) : '—' }}</td>
-              <td>
+              <td data-label="Employee">{{ employeeLabel(item) }}</td>
+              <td data-label="Proposed">{{ proposedLabel(item) }}</td>
+              <td data-label="Effective">{{ item.effectiveDate ? item.effectiveDate.substring(0, 10) : '—' }}</td>
+              <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="performance-status-pill__dot" aria-hidden="true"></span>
                   {{ statusLabel(item.status) }}
                 </span>
               </td>
-              <td class="performance-table__actions-col">
+              <td class="performance-table__actions-col" data-label="">
                 <button
                   mat-icon-button
                   type="button"

@@ -106,7 +106,7 @@
       } @else {
         <div class="reports-table-card">
           <div class="reports-table-wrap">
-            <table class="reports-table">
+            <table class="reports-table" data-responsive>
               <thead>
                 <tr>
                   <th scope="col">Month</th>
@@ -121,18 +121,18 @@
               <tbody>
                 @for (row of r.byMonth; track row.month + '-' + row.title) {
                   <tr class="reports-table__row">
-                    <td>{{ monthLabel(row.month) }}</td>
-                    <td>{{ row.title }}</td>
-                    <td>
+                    <td data-label="Month">{{ monthLabel(row.month) }}</td>
+                    <td data-label="Title">{{ row.title }}</td>
+                    <td data-label="Status">
                       <span [class]="statusClass(row.status)">
                         <span class="reports-status-pill__dot" aria-hidden="true"></span>
                         {{ statusLabel(row.status) }}
                       </span>
                     </td>
-                    <td>{{ formatNumber(row.entryCount) }}</td>
-                    <td>{{ formatNumber(row.grossPay, 2) }}</td>
-                    <td>{{ formatNumber(row.netPay, 2) }}</td>
-                    <td>{{ formatNumber(row.totalTax, 2) }}</td>
+                    <td data-label="Entries">{{ formatNumber(row.entryCount) }}</td>
+                    <td data-label="Gross">{{ formatNumber(row.grossPay, 2) }}</td>
+                    <td data-label="Net">{{ formatNumber(row.netPay, 2) }}</td>
+                    <td data-label="Tax">{{ formatNumber(row.totalTax, 2) }}</td>
                   </tr>
                 }
               </tbody>

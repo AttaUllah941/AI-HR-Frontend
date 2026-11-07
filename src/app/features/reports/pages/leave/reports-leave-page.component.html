@@ -73,7 +73,7 @@
         <div class="reports-chart-grid">
           <div class="reports-table-card">
             <div class="reports-table-wrap">
-              <table class="reports-table">
+              <table class="reports-table" data-responsive>
                 <thead>
                   <tr>
                     <th scope="col">Status</th>
@@ -84,14 +84,14 @@
                 <tbody>
                   @for (row of r.rows; track row.status) {
                     <tr class="reports-table__row">
-                      <td>
+                      <td data-label="Status">
                         <span [class]="statusClass(row.status)">
                           <span class="reports-status-pill__dot" aria-hidden="true"></span>
                           {{ statusLabel(row.status) }}
                         </span>
                       </td>
-                      <td>{{ formatNumber(row.count) }}</td>
-                      <td>{{ formatNumber(row.days) }}</td>
+                      <td data-label="Requests">{{ formatNumber(row.count) }}</td>
+                      <td data-label="Days">{{ formatNumber(row.days) }}</td>
                     </tr>
                   }
                 </tbody>
@@ -101,7 +101,7 @@
 
           <div class="reports-table-card">
             <div class="reports-table-wrap">
-              <table class="reports-table">
+              <table class="reports-table" data-responsive>
                 <thead>
                   <tr>
                     <th scope="col">Leave type</th>
@@ -112,9 +112,9 @@
                 <tbody>
                   @for (row of r.byLeaveType; track row.leaveTypeId) {
                     <tr class="reports-table__row">
-                      <td>{{ row.leaveTypeName }}</td>
-                      <td>{{ formatNumber(row.count) }}</td>
-                      <td>{{ formatNumber(row.days) }}</td>
+                      <td data-label="Leave type">{{ row.leaveTypeName }}</td>
+                      <td data-label="Requests">{{ formatNumber(row.count) }}</td>
+                      <td data-label="Days">{{ formatNumber(row.days) }}</td>
                     </tr>
                   }
                 </tbody>

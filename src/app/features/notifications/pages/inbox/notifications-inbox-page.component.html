@@ -82,7 +82,7 @@
     } @else {
       <div class="notifications-table-card">
         <div class="notifications-table-wrap">
-          <table class="notifications-table">
+          <table class="notifications-table" data-responsive>
             <thead>
               <tr>
                 <th scope="col">Notification</th>
@@ -99,20 +99,20 @@
                   class="notifications-table__row"
                   [class.notifications-table__row--unread]="!isRead(item)"
                 >
-                  <td>
+                  <td data-label="Notification">
                     <span class="notifications-table__title">{{ item.title }}</span>
                     <span class="notifications-table__body">{{ item.body }}</span>
                   </td>
-                  <td>{{ categoryLabel(item.category) }}</td>
-                  <td>{{ channelLabel(item.channel) }}</td>
-                  <td>
+                  <td data-label="Category">{{ categoryLabel(item.category) }}</td>
+                  <td data-label="Channel">{{ channelLabel(item.channel) }}</td>
+                  <td data-label="Status">
                     <span [class]="statusClass(item.status)">
                       <span class="notifications-status-pill__dot" aria-hidden="true"></span>
                       {{ isRead(item) ? 'Read' : statusLabel(item.status) }}
                     </span>
                   </td>
-                  <td>{{ relativeTime(item.createdAt) }}</td>
-                  <td class="notifications-table__actions-col">
+                  <td data-label="When">{{ relativeTime(item.createdAt) }}</td>
+                  <td class="notifications-table__actions-col" data-label="">
                     @if (!isRead(item)) {
                       <button
                         mat-icon-button

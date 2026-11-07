@@ -35,7 +35,7 @@
     } @else {
       <div class="settings-table-card">
         <div class="settings-table-wrap">
-          <table class="settings-table">
+          <table class="settings-table" data-responsive>
             <thead>
               <tr>
                 <th scope="col">Action</th>
@@ -47,14 +47,14 @@
             <tbody>
               @for (item of items(); track item.id) {
                 <tr>
-                  <td>
+                  <td data-label="Action">
                     <span class="settings-table__title">{{ item.action }}</span>
                     @if (item.ipAddress) {
                       <span class="settings-table__body">{{ item.ipAddress }}</span>
                     }
                   </td>
-                  <td>{{ actorLabel(item) }}</td>
-                  <td>
+                  <td data-label="Actor">{{ actorLabel(item) }}</td>
+                  <td data-label="Entity">
                     @if (item.entityType) {
                       {{ item.entityType }}
                       @if (item.entityId) {
@@ -64,7 +64,7 @@
                       —
                     }
                   </td>
-                  <td>
+                  <td data-label="When">
                     <span class="settings-table__title">{{ relative(item.createdAt) }}</span>
                     <span class="settings-table__body">{{ formatDate(item.createdAt) }}</span>
                   </td>

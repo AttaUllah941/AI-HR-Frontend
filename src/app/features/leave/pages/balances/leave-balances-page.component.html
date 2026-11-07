@@ -48,7 +48,7 @@
     />
   } @else {
     <div class="leave-table-wrap">
-      <table class="leave-table">
+      <table class="leave-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Employee</th>
@@ -65,10 +65,10 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="leave-table__row">
-              <td>
+              <td data-label="Employee">
                 <strong>{{ item.employee?.firstName }} {{ item.employee?.lastName }}</strong>
               </td>
-              <td>
+              <td data-label="Leave type">
                 <span class="leave-table__type">
                   <span
                     class="leave-table__type-dot"
@@ -78,13 +78,13 @@
                   {{ item.leaveType?.name || '—' }}
                 </span>
               </td>
-              <td>{{ item.year }}</td>
-              <td>{{ item.entitled }}</td>
-              <td>{{ item.carriedForward }}</td>
-              <td>{{ item.used }}</td>
-              <td>{{ item.pending }}</td>
-              <td><strong>{{ available(item) }}</strong></td>
-              <td class="leave-table__actions-col">
+              <td data-label="Year">{{ item.year }}</td>
+              <td data-label="Entitled">{{ item.entitled }}</td>
+              <td data-label="Carried">{{ item.carriedForward }}</td>
+              <td data-label="Used">{{ item.used }}</td>
+              <td data-label="Pending">{{ item.pending }}</td>
+              <td data-label="Available"><strong>{{ available(item) }}</strong></td>
+              <td class="leave-table__actions-col" data-label="">
                 @if (canUpdate) {
                   <button
                     mat-icon-button

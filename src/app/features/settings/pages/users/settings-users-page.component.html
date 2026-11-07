@@ -78,7 +78,7 @@
     } @else {
       <div class="settings-table-card">
         <div class="settings-table-wrap">
-          <table class="settings-table">
+          <table class="settings-table" data-responsive>
             <thead>
               <tr>
                 <th scope="col">User</th>
@@ -91,18 +91,18 @@
             <tbody>
               @for (user of items(); track user.id) {
                 <tr>
-                  <td>
+                  <td data-label="User">
                     <span class="settings-table__title"
                       >{{ user.firstName }} {{ user.lastName }}</span
                     >
                     <span class="settings-table__body">{{ user.email }}</span>
                   </td>
-                  <td>
+                  <td data-label="Roles">
                     @for (role of user.roles; track role.id) {
                       <span class="settings-badge">{{ role.code }}</span>
                     }
                   </td>
-                  <td>
+                  <td data-label="Status">
                     <span
                       class="settings-badge"
                       [class.settings-badge--ok]="user.status === 'ACTIVE'"
@@ -110,8 +110,8 @@
                       >{{ user.status }}</span
                     >
                   </td>
-                  <td>{{ formatDate(user.lastLoginAt) }}</td>
-                  <td>
+                  <td data-label="Last login">{{ formatDate(user.lastLoginAt) }}</td>
+                  <td data-label="Actions">
                     @if (canUpdate) {
                       <button mat-button type="button" (click)="openEdit(user)">Edit</button>
                     }

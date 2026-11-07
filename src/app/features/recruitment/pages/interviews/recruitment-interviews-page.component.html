@@ -45,7 +45,7 @@
     />
   } @else {
     <div class="recruitment-table-wrap">
-      <table class="recruitment-table">
+      <table class="recruitment-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">When</th>
@@ -62,18 +62,18 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="recruitment-table__row">
-              <td>{{ formatWhen(item.scheduledAt) }}</td>
-              <td>{{ candidateName(item) }}</td>
-              <td>{{ jobTitle(item) }}</td>
-              <td>{{ statusLabel(item.type) }}</td>
-              <td>{{ interviewerName(item) }}</td>
-              <td>
+              <td data-label="When">{{ formatWhen(item.scheduledAt) }}</td>
+              <td data-label="Candidate">{{ candidateName(item) }}</td>
+              <td data-label="Job">{{ jobTitle(item) }}</td>
+              <td data-label="Type">{{ statusLabel(item.type) }}</td>
+              <td data-label="Interviewer">{{ interviewerName(item) }}</td>
+              <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="recruitment-status-pill__dot" aria-hidden="true"></span>
                   {{ statusLabel(item.status) }}
                 </span>
               </td>
-              <td class="recruitment-table__actions-col">
+              <td class="recruitment-table__actions-col" data-label="">
                 <button
                   mat-icon-button
                   type="button"

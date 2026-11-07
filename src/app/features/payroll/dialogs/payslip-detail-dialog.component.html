@@ -65,7 +65,7 @@
     @if (lines().length > 0) {
       <h3 class="payslip-lines-heading">Breakdown</h3>
       <div class="payroll-table-wrap">
-        <table class="payroll-table">
+        <table class="payroll-table" data-responsive>
           <thead>
             <tr>
               <th scope="col">Line</th>
@@ -76,9 +76,9 @@
           <tbody>
             @for (line of lines(); track line.id) {
               <tr class="payroll-table__row">
-                <td>{{ line.label }}</td>
-                <td>{{ statusLabel(line.kind) }}</td>
-                <td>{{ formatMoney(line.amount) }}</td>
+                <td data-label="Line">{{ line.label }}</td>
+                <td data-label="Kind">{{ statusLabel(line.kind) }}</td>
+                <td data-label="Amount">{{ formatMoney(line.amount) }}</td>
               </tr>
             }
           </tbody>

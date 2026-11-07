@@ -36,7 +36,7 @@
     />
   } @else {
     <div class="recruitment-table-wrap">
-      <table class="recruitment-table">
+      <table class="recruitment-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Role</th>
@@ -52,22 +52,22 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="recruitment-table__row">
-              <td>
+              <td data-label="Role">
                 <div class="recruitment-table__employee-text">
                   <strong>{{ item.title }}</strong>
                   <span>{{ item.code }} · {{ item.location || 'Remote / unspecified' }}</span>
                 </div>
               </td>
-              <td>{{ statusLabel(item.employmentType) }}</td>
-              <td>{{ item.openings }}</td>
-              <td>{{ applicationCount(item) }}</td>
-              <td>
+              <td data-label="Type">{{ statusLabel(item.employmentType) }}</td>
+              <td data-label="Openings">{{ item.openings }}</td>
+              <td data-label="Applications">{{ applicationCount(item) }}</td>
+              <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="recruitment-status-pill__dot" aria-hidden="true"></span>
                   {{ statusLabel(item.status) }}
                 </span>
               </td>
-              <td class="recruitment-table__actions-col">
+              <td class="recruitment-table__actions-col" data-label="">
                 <button
                   mat-icon-button
                   type="button"

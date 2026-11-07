@@ -46,7 +46,7 @@
       />
     } @else if (timesheet(); as sheet) {
       <div class="att-table-wrap">
-        <table class="att-table">
+        <table class="att-table" data-responsive>
           <thead>
             <tr>
               <th scope="col">Day</th>
@@ -61,13 +61,13 @@
           <tbody>
             @for (item of sheet.items; track item.id) {
               <tr>
-                <td>{{ formatDate(item.date) }}</td>
-                <td>{{ statusLabel(item) }}</td>
-                <td>{{ formatTime(item.checkInAt) }}</td>
-                <td>{{ formatTime(item.checkOutAt) }}</td>
-                <td>{{ formatHours(item.workMinutes) }}</td>
-                <td>{{ formatHours(item.overtimeMinutes) }}</td>
-                <td>{{ formatHours(item.lateMinutes) }}</td>
+                <td data-label="Day">{{ formatDate(item.date) }}</td>
+                <td data-label="Status">{{ statusLabel(item) }}</td>
+                <td data-label="Check-in">{{ formatTime(item.checkInAt) }}</td>
+                <td data-label="Check-out">{{ formatTime(item.checkOutAt) }}</td>
+                <td data-label="Work">{{ formatHours(item.workMinutes) }}</td>
+                <td data-label="Overtime">{{ formatHours(item.overtimeMinutes) }}</td>
+                <td data-label="Late">{{ formatHours(item.lateMinutes) }}</td>
               </tr>
             }
           </tbody>

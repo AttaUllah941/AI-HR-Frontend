@@ -37,7 +37,7 @@
     />
   } @else {
     <div class="recruitment-table-wrap">
-      <table class="recruitment-table">
+      <table class="recruitment-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Candidate</th>
@@ -53,13 +53,13 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="recruitment-table__row">
-              <td>
+              <td data-label="Candidate">
                 <div class="recruitment-table__employee-text">
                   <strong>{{ fullName(item) }}</strong>
                   <span>{{ item.email }}</span>
                 </div>
               </td>
-              <td>
+              <td data-label="Current role">
                 {{ item.currentTitle || '—' }}
                 @if (item.currentCompany) {
                   <div class="recruitment-table__employee-text">
@@ -67,10 +67,10 @@
                   </div>
                 }
               </td>
-              <td>{{ item.source || '—' }}</td>
-              <td>{{ item.screeningScore != null ? item.screeningScore : '—' }}</td>
-              <td>{{ item.resumeFileName || (item.resumeUrl ? 'Linked' : '—') }}</td>
-              <td class="recruitment-table__actions-col">
+              <td data-label="Source">{{ item.source || '—' }}</td>
+              <td data-label="Screening">{{ item.screeningScore != null ? item.screeningScore : '—' }}</td>
+              <td data-label="Resume">{{ item.resumeFileName || (item.resumeUrl ? 'Linked' : '—') }}</td>
+              <td class="recruitment-table__actions-col" data-label="">
                 <button
                   mat-icon-button
                   type="button"

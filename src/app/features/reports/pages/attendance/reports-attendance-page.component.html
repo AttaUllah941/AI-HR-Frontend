@@ -96,7 +96,7 @@
       } @else {
         <div class="reports-table-card">
           <div class="reports-table-wrap">
-            <table class="reports-table">
+            <table class="reports-table" data-responsive>
               <thead>
                 <tr>
                   <th scope="col">Status</th>
@@ -108,15 +108,15 @@
               <tbody>
                 @for (row of r.rows; track row.status) {
                   <tr class="reports-table__row">
-                    <td>
+                    <td data-label="Status">
                       <span [class]="statusClass(row.status)">
                         <span class="reports-status-pill__dot" aria-hidden="true"></span>
                         {{ statusLabel(row.status) }}
                       </span>
                     </td>
-                    <td>{{ formatNumber(row.count) }}</td>
-                    <td>{{ formatNumber(row.workMinutes) }}</td>
-                    <td>{{ formatNumber(row.overtimeMinutes) }}</td>
+                    <td data-label="Count">{{ formatNumber(row.count) }}</td>
+                    <td data-label="Work minutes">{{ formatNumber(row.workMinutes) }}</td>
+                    <td data-label="Overtime">{{ formatNumber(row.overtimeMinutes) }}</td>
                   </tr>
                 }
               </tbody>

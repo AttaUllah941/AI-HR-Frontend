@@ -52,7 +52,7 @@
     />
   } @else {
     <div class="payroll-table-wrap">
-      <table class="payroll-table">
+      <table class="payroll-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Period</th>
@@ -65,18 +65,18 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="payroll-table__row" (click)="openEntries(item)" style="cursor: pointer">
-              <td>
+              <td data-label="Period">
                 <strong>{{ monthLabel(item.month) }} {{ item.year }}</strong>
               </td>
-              <td>{{ item.title || '—' }}</td>
-              <td>{{ entryCount(item) }}</td>
-              <td>
+              <td data-label="Title">{{ item.title || '—' }}</td>
+              <td data-label="Entries">{{ entryCount(item) }}</td>
+              <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="payroll-status-pill__dot" aria-hidden="true"></span>
                   {{ statusLabel(item.status) }}
                 </span>
               </td>
-              <td class="payroll-table__actions-col" (click)="$event.stopPropagation()">
+              <td class="payroll-table__actions-col" (click)="$event.stopPropagation()" data-label="">
                 <button
                   mat-icon-button
                   type="button"
