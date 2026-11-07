@@ -39,6 +39,10 @@
   --zh-warning-foreground: oklch(20% 0.04 60);
   --zh-destructive: oklch(63% 0.24 25);
   --zh-destructive-foreground: oklch(99% 0 0);
+  /* Text-safe variants (>= 4.5:1 on card/background); the base colours are for fills and borders. */
+  --zh-success-text: oklch(48% 0.13 145);
+  --zh-warning-text: oklch(48% 0.12 70);
+  --zh-destructive-text: oklch(52% 0.2 25);
 
   /* Shape & type */
   --zh-radius: 0.875rem;
@@ -77,6 +81,10 @@
   --zh-warning: oklch(80% 0.15 75);
   --zh-destructive: oklch(68% 0.2 25);
   --zh-destructive-foreground: oklch(16% 0.02 25);
+
+  --zh-success-text: var(--zh-success);
+  --zh-warning-text: var(--zh-warning);
+  --zh-destructive-text: var(--zh-destructive);
 
   --zh-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
   --zh-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.55);

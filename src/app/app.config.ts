@@ -16,6 +16,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 import { routes } from './app.routes';
+import { DialogFocusService } from './core/services/dialog-focus.service';
 import { ThemeService } from './core/services/theme.service';
 import { AppPreloadingStrategy } from './core/routing/app-preloading.strategy';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
@@ -28,6 +29,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     // Apply the saved light/dark choice before the first render.
     provideAppInitializer(() => inject(ThemeService).init()),
+    provideAppInitializer(() => inject(DialogFocusService).start()),
     provideRouter(
       routes,
       withComponentInputBinding(),

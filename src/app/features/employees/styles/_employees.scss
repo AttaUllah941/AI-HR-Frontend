@@ -101,12 +101,12 @@
 
   &--active {
     background: color-mix(in srgb, var(--zh-success) 15%, transparent);
-    color: var(--zh-success);
+    color: var(--zh-success-text);
   }
 
   &--probation {
     background: color-mix(in srgb, var(--zh-warning) 15%, transparent);
-    color: var(--zh-warning);
+    color: var(--zh-warning-text);
   }
 
   &--draft,
