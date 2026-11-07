@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
+import { TtlCache } from '../utils/ttl-cache';
 import { ApiService } from './api.service';
 import { ApiResponse } from '../models/api.models';
 
@@ -97,6 +98,24 @@ export interface OrgChartNode {
 export class OrganizationService {
   private readonly api = inject(ApiService);
 
+  private readonly branchesCache = new TtlCache<Branch[]>(() =>
+    this.api
+      .get<{ items: Branch[] }>('/organization/branches')
+      .pipe(map((res) => this.unwrap(res).items)),
+  );
+
+  private readonly departmentsCache = new TtlCache<Department[]>(() =>
+    this.api
+      .get<{ items: Department[] }>('/organization/departments')
+      .pipe(map((res) => this.unwrap(res).items)),
+  );
+
+  private readonly designationsCache = new TtlCache<Designation[]>(() =>
+    this.api
+      .get<{ items: Designation[] }>('/organization/designations')
+      .pipe(map((res) => this.unwrap(res).items)),
+  );
+
   getOverview(): Observable<{
     company: OrgCompany;
     counts: { branches: number; departments: number; teams: number; designations: number };
@@ -116,49 +135,63 @@ export class OrganizationService {
   }
 
   listBranches(): Observable<Branch[]> {
-    return this.api
-      .get<{ items: Branch[] }>('/organization/branches')
-      .pipe(map((res) => this.unwrap(res).items));
+    return this.branchesCache.get();
   }
 
   createBranch(body: BranchInput): Observable<Branch> {
-    return this.api.post<Branch>('/organization/branches', body).pipe(map((res) => this.unwrap(res)));
+    return this.api.post<Branch>('/organization/branches', body).pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.branchesCache.invalidate()),
+      );
   }
 
   updateBranch(id: string, body: BranchInput): Observable<Branch> {
     return this.api
       .patch<Branch>(`/organization/branches/${id}`, body)
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.branchesCache.invalidate()),
+      );
   }
 
   deleteBranch(id: string): Observable<{ deleted: boolean }> {
     return this.api
       .delete<{ deleted: boolean }>(`/organization/branches/${id}`)
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.branchesCache.invalidate()),
+      );
   }
 
   listDepartments(): Observable<Department[]> {
-    return this.api
-      .get<{ items: Department[] }>('/organization/departments')
-      .pipe(map((res) => this.unwrap(res).items));
+    return this.departmentsCache.get();
   }
 
   createDepartment(body: Record<string, unknown>): Observable<Department> {
     return this.api
       .post<Department>('/organization/departments', body)
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.departmentsCache.invalidate()),
+      );
   }
 
   updateDepartment(id: string, body: Record<string, unknown>): Observable<Department> {
     return this.api
       .patch<Department>(`/organization/departments/${id}`, body)
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.departmentsCache.invalidate()),
+      );
   }
 
   deleteDepartment(id: string): Observable<{ deleted: boolean }> {
     return this.api
       .delete<{ deleted: boolean }>(`/organization/departments/${id}`)
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.departmentsCache.invalidate()),
+      );
   }
 
   listTeams(): Observable<Team[]> {
@@ -184,27 +217,34 @@ export class OrganizationService {
   }
 
   listDesignations(): Observable<Designation[]> {
-    return this.api
-      .get<{ items: Designation[] }>('/organization/designations')
-      .pipe(map((res) => this.unwrap(res).items));
+    return this.designationsCache.get();
   }
 
   createDesignation(body: Record<string, unknown>): Observable<Designation> {
     return this.api
       .post<Designation>('/organization/designations', body)
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.designationsCache.invalidate()),
+      );
   }
 
   updateDesignation(id: string, body: Record<string, unknown>): Observable<Designation> {
     return this.api
       .patch<Designation>(`/organization/designations/${id}`, body)
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.designationsCache.invalidate()),
+      );
   }
 
   deleteDesignation(id: string): Observable<{ deleted: boolean }> {
     return this.api
       .delete<{ deleted: boolean }>(`/organization/designations/${id}`)
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.designationsCache.invalidate()),
+      );
   }
 
   private unwrap<T>(res: ApiResponse<T>): T {

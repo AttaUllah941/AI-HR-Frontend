@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, finalize, map, shareReplay, tap, throwError } from 'rxjs';
 import { ApiService } from './api.service';
+import { clearAllTtlCaches } from '../utils/ttl-cache';
 import {
   ApiResponse,
   AuthTokens,
@@ -66,6 +67,9 @@ export class AuthService {
    * currently holds the session is reused (e.g. token refresh), defaulting to localStorage.
    */
   setSession(user: AuthUser, tokens: AuthTokens, remember?: boolean): void {
+    if (this.userSignal()?.id !== user.id) {
+      clearAllTtlCaches();
+    }
     const persistent = remember ?? this.isPersistentSession();
     const target = persistent ? localStorage : sessionStorage;
     this.removeStoredSession();
@@ -79,6 +83,7 @@ export class AuthService {
   }
 
   clearSession(): void {
+    clearAllTtlCaches();
     this.removeStoredSession();
     this.clearMfaChallengeToken();
     this.refreshInFlight$ = null;

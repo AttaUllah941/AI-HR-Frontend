@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
+import { TtlCache } from '../utils/ttl-cache';
 import { ApiService } from './api.service';
 import { ApiResponse } from '../models/api.models';
 
@@ -178,6 +179,12 @@ export interface OvertimeRequest {
 export class AttendanceService {
   private readonly api = inject(ApiService);
 
+  private readonly shiftsCache = new TtlCache<Shift[]>(() =>
+    this.api
+      .get<{ items: Shift[] }>('/attendance/shifts')
+      .pipe(map((res) => this.unwrap(res).items)),
+  );
+
   getSummary(date?: string): Observable<AttendanceSummary> {
     return this.api
       .get<AttendanceSummary>('/attendance/summary', { date })
@@ -245,25 +252,32 @@ export class AttendanceService {
   }
 
   listShifts(): Observable<Shift[]> {
-    return this.api
-      .get<{ items: Shift[] }>('/attendance/shifts')
-      .pipe(map((res) => this.unwrap(res).items));
+    return this.shiftsCache.get();
   }
 
   createShift(body: Record<string, unknown>): Observable<Shift> {
-    return this.api.post<Shift>('/attendance/shifts', body).pipe(map((res) => this.unwrap(res)));
+    return this.api.post<Shift>('/attendance/shifts', body).pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.shiftsCache.invalidate()),
+      );
   }
 
   updateShift(id: string, body: Record<string, unknown>): Observable<Shift> {
     return this.api
       .patch<Shift>(`/attendance/shifts/${id}`, body)
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.shiftsCache.invalidate()),
+      );
   }
 
   deleteShift(id: string): Observable<{ id: string; deleted: boolean }> {
     return this.api
       .delete<{ id: string; deleted: boolean }>(`/attendance/shifts/${id}`)
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.shiftsCache.invalidate()),
+      );
   }
 
   listHolidays(year?: number): Observable<Holiday[]> {
