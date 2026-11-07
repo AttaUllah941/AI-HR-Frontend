@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, Subscription, Observable } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,6 +20,7 @@ import { ErrorStateComponent } from '../../../../shared/error-state/error-state.
 import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { LeaveRequestFormDialogComponent } from '../../dialogs/leave-request-form-dialog.component';
+import { optimistic } from '../../../../core/utils/optimistic';
 
 const STATUS_OPTIONS: Array<{ value: LeaveRequestStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -161,18 +162,13 @@ export class LeaveRequestsPageComponent implements OnInit {
       })
       .pipe(filter((confirmed) => confirmed === true))
       .subscribe(() => {
-        this.actionId.set(item.id);
-        this.leave.approveRequest(item.id).subscribe({
-          next: () => {
-            this.toast.success('Leave approved');
-            this.actionId.set(null);
-            this.reload();
-          },
-          error: (err: Error) => {
-            this.actionId.set(null);
-            this.toast.error(err.message || 'Unable to approve leave');
-          },
-        });
+        this.decide(
+          item,
+          'APPROVED',
+          this.leave.approveRequest(item.id),
+          'Leave approved',
+          'Unable to approve leave',
+        );
       });
   }
 
@@ -187,19 +183,43 @@ export class LeaveRequestsPageComponent implements OnInit {
       })
       .pipe(filter((confirmed) => confirmed === true))
       .subscribe(() => {
-        this.actionId.set(item.id);
-        this.leave.rejectRequest(item.id).subscribe({
-          next: () => {
-            this.toast.success('Leave rejected');
-            this.actionId.set(null);
-            this.reload();
-          },
-          error: (err: Error) => {
-            this.actionId.set(null);
-            this.toast.error(err.message || 'Unable to reject leave');
-          },
-        });
+        this.decide(
+          item,
+          'REJECTED',
+          this.leave.rejectRequest(item.id),
+          'Leave rejected',
+          'Unable to reject leave',
+        );
       });
+  }
+
+  /** Optimistically marks the request, then confirms with the server (rolls back on failure). */
+  private decide(
+    item: LeaveRequest,
+    status: LeaveRequest['status'],
+    request$: Observable<LeaveRequest>,
+    success: string,
+    failure: string,
+  ): void {
+    this.actionId.set(item.id);
+    optimistic({
+      apply: () => this.patchItem(item.id, { status }),
+      rollback: () => this.patchItem(item.id, item),
+      request$,
+      onSuccess: (updated) => {
+        this.patchItem(item.id, updated);
+        this.actionId.set(null);
+        this.toast.success(success);
+      },
+      onError: (err) => {
+        this.actionId.set(null);
+        this.toast.error((err as Error).message || failure);
+      },
+    });
+  }
+
+  private patchItem(id: string, patch: Partial<LeaveRequest>): void {
+    this.items.update((list) => list.map((i) => (i.id === id ? { ...i, ...patch } : i)));
   }
 
   cancel(item: LeaveRequest): void {

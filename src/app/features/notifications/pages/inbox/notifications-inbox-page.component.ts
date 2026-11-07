@@ -20,6 +20,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { SendNotificationDialogComponent } from '../../dialogs/send-notification-dialog.component';
+import { optimistic } from '../../../../core/utils/optimistic';
 
 @Component({
   selector: 'app-notifications-inbox-page',
@@ -142,12 +143,15 @@ export class NotificationsInboxPageComponent implements OnInit {
     if (this.notifications.isRead(item)) {
       return;
     }
-    this.notifications.markRead(item.id).subscribe({
-      next: () => {
-        this.toast.success('Marked as read.');
-        this.reload();
-      },
-      error: () => this.toast.error('Unable to mark as read.'),
+    const patch = (changes: Partial<NotificationItem>) =>
+      this.items.update((list) => list.map((n) => (n.id === item.id ? { ...n, ...changes } : n)));
+    optimistic({
+      apply: () => patch({ status: 'READ', readAt: new Date().toISOString() }),
+      rollback: () => patch({ status: item.status, readAt: item.readAt }),
+      request$: this.notifications.markRead(item.id),
+      // Refetch quietly so unread counters stay accurate.
+      onSuccess: () => this.reload(),
+      onError: () => this.toast.error('Unable to mark as read.'),
     });
   }
 

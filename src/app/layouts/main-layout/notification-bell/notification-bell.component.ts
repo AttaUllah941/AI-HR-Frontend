@@ -24,6 +24,7 @@ import {
   NotificationsService,
 } from '../../../core/services/notifications.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { optimistic } from '../../../core/utils/optimistic';
 
 @Component({
   selector: 'app-notification-bell',
@@ -88,14 +89,20 @@ export class NotificationBellComponent implements OnInit {
   onNotificationClick(item: DashboardNotificationItem | NotificationFeedItem): void {
     const isFeedItem = 'category' in item;
     if (!item.read && isFeedItem) {
-      this.notificationsApi.markRead(item.id).subscribe({
-        next: () => {
+      const before = { notifications: this.notifications(), count: this.notificationCount() };
+      optimistic({
+        apply: () => {
           this.notifications.update((list) =>
             list.map((n) => (n.id === item.id ? { ...n, read: true } : n)),
           );
           this.notificationCount.update((count) => Math.max(0, count - 1));
         },
-        error: () => undefined,
+        rollback: () => {
+          this.notifications.set(before.notifications);
+          this.notificationCount.set(before.count);
+        },
+        request$: this.notificationsApi.markRead(item.id),
+        onError: () => this.toast.error('Unable to mark notification as read.'),
       });
     }
     void this.router.navigate(['/notifications/inbox']);
@@ -105,15 +112,19 @@ export class NotificationBellComponent implements OnInit {
     if (!this.notificationCount()) {
       return;
     }
-    this.notificationsApi.markAllRead().subscribe({
-      next: () => {
+    const before = { notifications: this.notifications(), count: this.notificationCount() };
+    optimistic({
+      apply: () => {
         this.notifications.update((list) => list.map((n) => ({ ...n, read: true })));
         this.notificationCount.set(0);
-        this.toast.success('All notifications marked read.');
       },
-      error: () => {
-        this.toast.error('Unable to mark notifications as read.');
+      rollback: () => {
+        this.notifications.set(before.notifications);
+        this.notificationCount.set(before.count);
       },
+      request$: this.notificationsApi.markAllRead(),
+      onSuccess: () => this.toast.success('All notifications marked read.'),
+      onError: () => this.toast.error('Unable to mark notifications as read.'),
     });
   }
 }
