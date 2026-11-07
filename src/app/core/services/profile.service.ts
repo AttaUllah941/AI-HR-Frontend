@@ -114,7 +114,7 @@ export const PROFILE_TIME_FORMATS: ProfileTimeFormat[] = ['12h', '24h'];
 export const PROFILE_THEME_LABELS: Record<ProfileTheme, string> = {
   system: 'System',
   light: 'Light',
-  dark: 'Dark (saved for future theming)',
+  dark: 'Dark',
 };
 export const PROFILE_LOCALE_OPTIONS = ['en-US', 'en-GB', 'fr-FR', 'de-DE', 'ar-SA', 'ur-PK'];
 export const PROFILE_TIMEZONE_OPTIONS = [

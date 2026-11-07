@@ -20,6 +20,7 @@ import {
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { ThemeService, isThemeMode } from '../../../../core/services/theme.service';
 
 @Component({
   selector: 'app-profile-preferences-page',
@@ -39,6 +40,7 @@ import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfilePreferencesPageComponent implements OnInit {
+  private readonly themeService = inject(ThemeService);
   private readonly fb = inject(FormBuilder);
   private readonly profile = inject(ProfileService);
   private readonly toast = inject(ToastService);
@@ -117,6 +119,9 @@ export class ProfilePreferencesPageComponent implements OnInit {
       })
       .subscribe({
         next: (prefs) => {
+          if (isThemeMode(prefs.theme)) {
+            this.themeService.setMode(prefs.theme, { persist: false });
+          }
           const locale = prefs.locale || 'en-US';
           const timezone = prefs.timezone || 'UTC';
           const dateFormat = prefs.dateFormat || 'DD MMM YYYY';

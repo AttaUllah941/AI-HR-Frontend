@@ -23,6 +23,22 @@
     </a>
   }
   <mat-divider />
+  @for (option of themeOptions; track option.mode) {
+    <button
+      mat-menu-item
+      type="button"
+      role="menuitemradio"
+      [attr.aria-checked]="themeMode() === option.mode"
+      (click)="setTheme(option.mode)"
+    >
+      <mat-icon>{{ option.icon }}</mat-icon>
+      <span>{{ option.label }}</span>
+      @if (themeMode() === option.mode) {
+        <mat-icon class="user-menu__check" aria-hidden="true">check</mat-icon>
+      }
+    </button>
+  }
+  <mat-divider />
   <button mat-menu-item type="button" (click)="logout()">
     <mat-icon>logout</mat-icon>
     <span>Sign out</span>
