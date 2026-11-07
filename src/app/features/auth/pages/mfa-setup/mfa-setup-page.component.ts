@@ -8,11 +8,14 @@ import QRCode from 'qrcode';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { MfaSetupData } from '../../../../core/models/api.models';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-mfa-setup-page',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule,
+    ButtonSpinnerDirective,
+  ],
   templateUrl: './mfa-setup-page.component.html',
   styleUrl: './mfa-setup-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

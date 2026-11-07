@@ -6,7 +6,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   NOTIFICATION_CATEGORIES,
@@ -17,6 +16,7 @@ import {
   NotificationsService,
 } from '../../../core/services/notifications.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-template-form-dialog',
@@ -30,7 +30,7 @@ import { ToastService } from '../../../core/services/toast.service';
     MatCheckboxModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './template-form-dialog.component.html',
   styleUrl: './template-form-dialog.component.scss',

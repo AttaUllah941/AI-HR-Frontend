@@ -64,10 +64,8 @@
     type="submit"
     form="interview-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : data.interview ? 'Save changes' : 'Schedule' }}
   </button>
 </mat-dialog-actions>

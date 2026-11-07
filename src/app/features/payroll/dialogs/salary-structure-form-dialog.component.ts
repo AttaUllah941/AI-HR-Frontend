@@ -6,7 +6,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   PayrollService,
@@ -15,6 +14,7 @@ import {
 } from '../../../core/services/payroll.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface SalaryStructureFormDialogData {
   structure?: SalaryStructure | null;
@@ -32,7 +32,7 @@ export interface SalaryStructureFormDialogData {
     MatCheckboxModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './salary-structure-form-dialog.component.html',
   styleUrl: './salary-structure-form-dialog.component.scss',

@@ -97,12 +97,8 @@
               type="submit"
               class="profile-add-btn"
               [disabled]="form.invalid || saving()"
-            >
-              @if (saving()) {
-                <mat-spinner diameter="16" />
-              } @else {
-                <mat-icon aria-hidden="true">lock</mat-icon>
-              }
+              [appButtonSpinner]="saving()">
+              @if (!saving()) { <mat-icon aria-hidden="true">lock</mat-icon> }
               {{ saving() ? 'Updating…' : 'Update password' }}
             </button>
           </div>

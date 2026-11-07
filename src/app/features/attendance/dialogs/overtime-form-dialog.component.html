@@ -50,10 +50,8 @@
     type="submit"
     form="overtime-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : 'Submit request' }}
   </button>
 </mat-dialog-actions>

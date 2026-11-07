@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   CreateUserResult,
@@ -14,6 +13,7 @@ import {
   SettingsUser,
 } from '../../../core/services/settings.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface UserFormDialogData {
   user?: SettingsUser | null;
@@ -36,7 +36,7 @@ export type UserFormDialogResult =
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './user-form-dialog.component.html',
   styleUrl: './user-form-dialog.component.scss',

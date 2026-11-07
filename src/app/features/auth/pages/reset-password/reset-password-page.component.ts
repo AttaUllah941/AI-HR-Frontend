@@ -10,11 +10,14 @@ import {
   passwordErrorMessage,
   passwordValidators,
 } from '../../../../core/validators/password.validators';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-reset-password-page',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule,
+    ButtonSpinnerDirective,
+  ],
   templateUrl: './reset-password-page.component.html',
   styleUrl: './reset-password-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

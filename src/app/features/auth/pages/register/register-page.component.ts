@@ -10,11 +10,14 @@ import {
   passwordErrorMessage,
   passwordValidators,
 } from '../../../../core/validators/password.validators';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-register-page',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule,
+    ButtonSpinnerDirective,
+  ],
   templateUrl: './register-page.component.html',
   styleUrl: './register-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

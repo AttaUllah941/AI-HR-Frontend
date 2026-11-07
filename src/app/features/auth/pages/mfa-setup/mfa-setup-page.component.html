@@ -25,7 +25,7 @@
         class="full"
         type="submit"
         [disabled]="disableForm.invalid || submitting()"
-      >
+        [appButtonSpinner]="submitting()">
         {{ submitting() ? 'Disabling…' : 'Disable MFA' }}
       </button>
       <button
@@ -70,7 +70,7 @@
           class="full"
           type="submit"
           [disabled]="enableForm.invalid || submitting()"
-        >
+          [appButtonSpinner]="submitting()">
           {{ submitting() ? 'Enabling…' : 'Enable MFA' }}
         </button>
       </form>

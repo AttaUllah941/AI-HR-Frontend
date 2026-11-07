@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   PROFILE_DATE_FORMAT_OPTIONS,
@@ -20,6 +19,7 @@ import {
 } from '../../../../core/services/profile.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-profile-preferences-page',
@@ -31,8 +31,8 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './profile-preferences-page.component.html',
   styleUrl: './profile-preferences-page.component.scss',

@@ -5,9 +5,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Candidate, RecruitmentService } from '../../../core/services/recruitment.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface ResumeAttachDialogData {
   candidate: Candidate;
@@ -23,7 +23,7 @@ export interface ResumeAttachDialogData {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './resume-attach-dialog.component.html',
   styleUrl: './resume-attach-dialog.component.scss',

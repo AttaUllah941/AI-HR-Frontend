@@ -20,12 +20,8 @@
             class="settings-add-btn"
             [disabled]="savingSystem()"
             (click)="saveSystem()"
-          >
-            @if (savingSystem()) {
-              <mat-spinner diameter="16" />
-            } @else {
-              <mat-icon aria-hidden="true">save</mat-icon>
-            }
+            [appButtonSpinner]="savingSystem()">
+            @if (!savingSystem()) { <mat-icon aria-hidden="true">save</mat-icon> }
             Save system
           </button>
         </div>
@@ -69,12 +65,8 @@
             class="settings-add-btn"
             [disabled]="savingIntegrations()"
             (click)="saveIntegrations()"
-          >
-            @if (savingIntegrations()) {
-              <mat-spinner diameter="16" />
-            } @else {
-              <mat-icon aria-hidden="true">save</mat-icon>
-            }
+            [appButtonSpinner]="savingIntegrations()">
+            @if (!savingIntegrations()) { <mat-icon aria-hidden="true">save</mat-icon> }
             Save integrations
           </button>
         </div>

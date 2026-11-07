@@ -22,12 +22,8 @@
             class="settings-add-btn"
             [disabled]="form.invalid || saving()"
             (click)="save()"
-          >
-            @if (saving()) {
-              <mat-spinner diameter="16" />
-            } @else {
-              <mat-icon aria-hidden="true">save</mat-icon>
-            }
+            [appButtonSpinner]="saving()">
+            @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
             {{ saving() ? 'Saving…' : 'Save storage' }}
           </button>
         </div>

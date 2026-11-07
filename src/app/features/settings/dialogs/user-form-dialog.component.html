@@ -64,12 +64,8 @@
     type="button"
     [disabled]="form.invalid || saving()"
     (click)="submit()"
-  >
-    @if (saving()) {
-      <mat-spinner diameter="16" />
-    } @else {
-      <mat-icon aria-hidden="true">{{ isEdit ? 'save' : 'person_add' }}</mat-icon>
-    }
+    [appButtonSpinner]="saving()">
+    @if (!saving()) { <mat-icon aria-hidden="true">{{ isEdit ? 'save' : 'person_add' }}</mat-icon> }
     {{ saving() ? 'Saving…' : isEdit ? 'Save' : 'Create' }}
   </button>
 </mat-dialog-actions>

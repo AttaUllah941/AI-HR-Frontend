@@ -42,12 +42,8 @@
             type="button"
             [disabled]="clocking()"
             (click)="clockIn()"
-          >
-            @if (clocking()) {
-              <mat-spinner diameter="16" />
-            } @else {
-              <mat-icon aria-hidden="true">login</mat-icon>
-            }
+            [appButtonSpinner]="clocking()">
+            @if (!clocking()) { <mat-icon aria-hidden="true">login</mat-icon> }
             Clock in
           </button>
         } @else if (clockState() === 'clock-out') {
@@ -57,12 +53,8 @@
             type="button"
             [disabled]="clocking()"
             (click)="clockOut()"
-          >
-            @if (clocking()) {
-              <mat-spinner diameter="16" />
-            } @else {
-              <mat-icon aria-hidden="true">logout</mat-icon>
-            }
+            [appButtonSpinner]="clocking()">
+            @if (!clocking()) { <mat-icon aria-hidden="true">logout</mat-icon> }
             Clock out
           </button>
         } @else {

@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
@@ -18,6 +17,7 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-notifications-devices-page',
@@ -29,10 +29,10 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     MatTooltipModule,
     EmptyStateComponent,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './notifications-devices-page.component.html',
   styleUrl: './notifications-devices-page.component.scss',

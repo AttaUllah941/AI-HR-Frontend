@@ -5,11 +5,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { LeaveBalance, LeaveService, LeaveType } from '../../../core/services/leave.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface LeaveBalanceFormDialogData {
   balance?: LeaveBalance | null;
@@ -27,7 +27,7 @@ export interface LeaveBalanceFormDialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './leave-balance-form-dialog.component.html',
   styleUrl: './leave-balance-form-dialog.component.scss',

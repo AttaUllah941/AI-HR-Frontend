@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { AiGeneration, AiService } from '../../../core/services/ai.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
@@ -16,6 +15,7 @@ import {
 import { ToastService } from '../../../core/services/toast.service';
 import { SmartLoaderComponent } from '../../../shared/smart-loader/smart-loader.component';
 import { LOADER_MESSAGES } from '../../../shared/smart-loader/loader-messages';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface AppraisalRunDialogData {
   employeeId?: string;
@@ -33,8 +33,8 @@ export interface AppraisalRunDialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     SmartLoaderComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './appraisal-run-dialog.component.html',
   styleUrl: './appraisal-run-dialog.component.scss',

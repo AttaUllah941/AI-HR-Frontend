@@ -110,12 +110,8 @@
             type="button"
             [disabled]="!canCreate || sending() || !draft().trim()"
             (click)="send()"
-          >
-            @if (sending()) {
-              <mat-spinner diameter="16" />
-            } @else {
-              <mat-icon aria-hidden="true">send</mat-icon>
-            }
+            [appButtonSpinner]="sending()">
+            @if (!sending()) { <mat-icon aria-hidden="true">send</mat-icon> }
             Send
           </button>
         </div>

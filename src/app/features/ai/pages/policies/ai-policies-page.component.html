@@ -52,12 +52,8 @@
               type="submit"
               class="ai-add-btn"
               [disabled]="form.invalid || generating()"
-            >
-              @if (generating()) {
-                <mat-spinner diameter="16" />
-              } @else {
-                <mat-icon aria-hidden="true">policy</mat-icon>
-              }
+              [appButtonSpinner]="generating()">
+              @if (!generating()) { <mat-icon aria-hidden="true">policy</mat-icon> }
               {{ generating() ? 'Generating…' : 'Generate with Nova' }}
             </button>
           </div>

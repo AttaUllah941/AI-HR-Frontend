@@ -24,6 +24,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
 import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-ai-assistant-page',
@@ -36,6 +37,7 @@ import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages
     EmptyStateComponent,
     OrganizationStatusComponent,
     SmartLoaderComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './ai-assistant-page.component.html',
   styleUrl: './ai-assistant-page.component.scss',

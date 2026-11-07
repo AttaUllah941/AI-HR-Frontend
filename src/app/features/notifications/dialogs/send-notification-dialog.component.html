@@ -52,12 +52,8 @@
     type="submit"
     form="send-notification-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner diameter="16" />
-    } @else {
-      <mat-icon aria-hidden="true">send</mat-icon>
-    }
+    [appButtonSpinner]="saving()">
+    @if (!saving()) { <mat-icon aria-hidden="true">send</mat-icon> }
     {{ saving() ? 'Sending…' : 'Send' }}
   </button>
 </mat-dialog-actions>

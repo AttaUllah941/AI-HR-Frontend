@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { AuthService } from '../../../core/services/auth.service';
 import {
@@ -15,6 +14,7 @@ import {
   FilesService,
 } from '../../../core/services/files.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface UploadFileDialogData {
   defaultCategory?: FileCategory;
@@ -31,7 +31,7 @@ export interface UploadFileDialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './upload-file-dialog.component.html',
   styleUrl: './upload-file-dialog.component.scss',

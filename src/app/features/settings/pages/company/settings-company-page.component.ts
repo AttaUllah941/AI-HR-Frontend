@@ -5,11 +5,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SettingsService } from '../../../../core/services/settings.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-settings-company-page',
@@ -21,8 +21,8 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './settings-company-page.component.html',
   styleUrl: './settings-company-page.component.scss',

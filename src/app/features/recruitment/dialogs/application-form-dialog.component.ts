@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   Candidate,
@@ -13,6 +12,7 @@ import {
   RecruitmentService,
 } from '../../../core/services/recruitment.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface ApplicationFormDialogData {
   jobOpeningId?: string;
@@ -30,7 +30,7 @@ export interface ApplicationFormDialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './application-form-dialog.component.html',
   styleUrl: './application-form-dialog.component.scss',

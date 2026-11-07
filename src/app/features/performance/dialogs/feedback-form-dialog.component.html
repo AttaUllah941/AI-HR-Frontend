@@ -51,10 +51,8 @@
     type="submit"
     form="feedback-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Submitting…' : 'Submit feedback' }}
   </button>
 </mat-dialog-actions>

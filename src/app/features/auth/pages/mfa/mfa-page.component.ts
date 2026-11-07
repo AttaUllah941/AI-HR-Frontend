@@ -7,11 +7,14 @@ import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { safeReturnUrl } from '../../../../core/utils/safe-return-url';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-mfa-page',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule,
+    ButtonSpinnerDirective,
+  ],
   templateUrl: './mfa-page.component.html',
   styleUrl: './mfa-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

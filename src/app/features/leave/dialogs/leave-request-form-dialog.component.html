@@ -83,10 +83,8 @@
       type="submit"
       form="leave-request-form"
       [disabled]="form.invalid || saving()"
-    >
-      @if (saving()) {
-        <mat-spinner class="save-spinner" diameter="16" />
-      }
+      [appButtonSpinner]="saving()">
+      
       {{ saving() ? 'Saving…' : isEdit ? 'Save changes' : 'Submit request' }}
     </button>
   }

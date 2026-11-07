@@ -5,10 +5,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProfileService, UserProfile } from '../../../../core/services/profile.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-profile-security-page',
@@ -20,8 +20,8 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './profile-security-page.component.html',
   styleUrl: './profile-security-page.component.scss',

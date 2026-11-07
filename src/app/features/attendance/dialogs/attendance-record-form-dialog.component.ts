@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   AttendanceRecord,
@@ -16,6 +15,7 @@ import {
 import { AuthService } from '../../../core/services/auth.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface AttendanceRecordDialogData {
   record: AttendanceRecord | null;
@@ -69,7 +69,7 @@ function fromDateTimeLocal(value: string): string | null {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './attendance-record-form-dialog.component.html',
   styleUrl: './attendance-record-form-dialog.component.scss',

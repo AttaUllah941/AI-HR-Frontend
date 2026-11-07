@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { JobOpening, RecruitmentService } from '../../../core/services/recruitment.service';
 import {
@@ -16,6 +15,7 @@ import {
 } from '../../../core/services/organization.service';
 import { EmployeeListItem, EmployeeService, EmploymentType } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface JobFormDialogData {
   job?: JobOpening | null;
@@ -40,7 +40,7 @@ const EMPLOYMENT_TYPES: EmploymentType[] = [
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './job-form-dialog.component.html',
   styleUrl: './job-form-dialog.component.scss',

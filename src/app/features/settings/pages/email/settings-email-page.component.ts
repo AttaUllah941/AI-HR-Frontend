@@ -4,12 +4,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SettingsService } from '../../../../core/services/settings.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-settings-email-page',
@@ -21,8 +21,8 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './settings-email-page.component.html',
   styleUrl: './settings-email-page.component.scss',

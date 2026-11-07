@@ -6,11 +6,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { FeedbackType, PerformanceService } from '../../../core/services/performance.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface FeedbackFormDialogData {
   toEmployeeId?: string;
@@ -28,7 +28,7 @@ export interface FeedbackFormDialogData {
     MatCheckboxModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './feedback-form-dialog.component.html',
   styleUrl: './feedback-form-dialog.component.scss',

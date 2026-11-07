@@ -6,9 +6,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LeaveService, LeaveType } from '../../../core/services/leave.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-leave-type-form-dialog',
@@ -21,7 +21,7 @@ import { ToastService } from '../../../core/services/toast.service';
     MatButtonModule,
     MatCheckboxModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './leave-type-form-dialog.component.html',
   styleUrl: './leave-type-form-dialog.component.scss',

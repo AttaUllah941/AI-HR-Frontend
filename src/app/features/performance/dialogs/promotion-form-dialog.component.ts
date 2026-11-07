@@ -5,12 +5,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { PerformanceService, PromotionRequest } from '../../../core/services/performance.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { Designation, OrganizationService } from '../../../core/services/organization.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface PromotionFormDialogData {
   promotion?: PromotionRequest | null;
@@ -27,7 +27,7 @@ export interface PromotionFormDialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './promotion-form-dialog.component.html',
   styleUrl: './promotion-form-dialog.component.scss',

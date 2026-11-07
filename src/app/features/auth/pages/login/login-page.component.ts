@@ -8,6 +8,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { safeReturnUrl } from '../../../../core/utils/safe-return-url';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-login-page',
@@ -19,6 +20,7 @@ import { safeReturnUrl } from '../../../../core/utils/safe-return-url';
     MatFormFieldModule,
     MatInputModule,
     MatCheckboxModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',

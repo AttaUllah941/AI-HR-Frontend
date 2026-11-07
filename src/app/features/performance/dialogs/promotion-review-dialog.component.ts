@@ -5,9 +5,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PerformanceService, PromotionRequest } from '../../../core/services/performance.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface PromotionReviewDialogData {
   promotion: PromotionRequest;
@@ -24,7 +24,7 @@ export interface PromotionReviewDialogData {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './promotion-review-dialog.component.html',
   styleUrl: './promotion-review-dialog.component.scss',

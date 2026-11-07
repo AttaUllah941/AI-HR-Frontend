@@ -5,9 +5,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Candidate, RecruitmentService } from '../../../core/services/recruitment.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface CandidateFormDialogData {
   candidate?: Candidate | null;
@@ -23,7 +23,7 @@ export interface CandidateFormDialogData {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './candidate-form-dialog.component.html',
   styleUrl: './candidate-form-dialog.component.scss',

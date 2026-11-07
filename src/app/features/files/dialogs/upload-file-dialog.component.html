@@ -49,12 +49,8 @@
     type="button"
     [disabled]="saving() || !selectedFile()"
     (click)="submit()"
-  >
-    @if (saving()) {
-      <mat-spinner diameter="16" />
-    } @else {
-      <mat-icon aria-hidden="true">cloud_upload</mat-icon>
-    }
+    [appButtonSpinner]="saving()">
+    @if (!saving()) { <mat-icon aria-hidden="true">cloud_upload</mat-icon> }
     {{ saving() ? 'Uploading…' : 'Upload' }}
   </button>
 </mat-dialog-actions>

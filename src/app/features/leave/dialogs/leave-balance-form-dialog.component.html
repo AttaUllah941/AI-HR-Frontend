@@ -73,10 +73,8 @@
     type="submit"
     form="leave-balance-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : 'Save balance' }}
   </button>
 </mat-dialog-actions>

@@ -6,7 +6,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -19,6 +18,7 @@ import {
 } from '../../../../core/services/security.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-settings-security-page',
@@ -32,8 +32,8 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './settings-security-page.component.html',
   styleUrl: './settings-security-page.component.scss',

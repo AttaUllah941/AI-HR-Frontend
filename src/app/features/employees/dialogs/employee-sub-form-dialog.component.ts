@@ -10,11 +10,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Observable } from 'rxjs';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import type { SubResourceType } from '../models/employee-sub-resource.types';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-employee-sub-form-dialog',
@@ -27,7 +27,7 @@ import type { SubResourceType } from '../models/employee-sub-resource.types';
     MatButtonModule,
     MatIconModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './employee-sub-form-dialog.component.html',
   styleUrl: './employee-sub-form-dialog.component.scss',

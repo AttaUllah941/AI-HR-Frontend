@@ -6,12 +6,12 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LeavePolicy, LeaveService } from '../../../../core/services/leave.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-leave-policy-page',
@@ -24,9 +24,9 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     OrganizationSectionHeaderComponent,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './leave-policy-page.component.html',
   styleUrl: './leave-policy-page.component.scss',

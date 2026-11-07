@@ -20,12 +20,8 @@
           class="profile-add-btn"
           [disabled]="revokingOthers() || items().length === 0"
           (click)="revokeOthers()"
-        >
-          @if (revokingOthers()) {
-            <mat-spinner diameter="16" />
-          } @else {
-            <mat-icon aria-hidden="true">logout</mat-icon>
-          }
+          [appButtonSpinner]="revokingOthers()">
+          @if (!revokingOthers()) { <mat-icon aria-hidden="true">logout</mat-icon> }
           {{ revokingOthers() ? 'Revoking…' : 'Revoke other sessions' }}
         </button>
       </div>

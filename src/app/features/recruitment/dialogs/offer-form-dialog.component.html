@@ -60,10 +60,8 @@
     type="submit"
     form="offer-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : data.offer ? 'Save changes' : 'Create offer' }}
   </button>
 </mat-dialog-actions>

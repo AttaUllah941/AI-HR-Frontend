@@ -5,9 +5,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PerformanceService, ReviewCycle } from '../../../core/services/performance.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface ReviewCycleFormDialogData {
   cycle?: ReviewCycle | null;
@@ -24,7 +24,7 @@ export interface ReviewCycleFormDialogData {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './review-cycle-form-dialog.component.html',
   styleUrl: './review-cycle-form-dialog.component.scss',

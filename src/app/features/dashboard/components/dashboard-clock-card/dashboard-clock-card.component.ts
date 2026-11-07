@@ -17,6 +17,7 @@ import {
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-dashboard-clock-card',
@@ -27,6 +28,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
     MatIconModule,
     MatProgressSpinnerModule,
     EmptyStateComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './dashboard-clock-card.component.html',
   styleUrl: './dashboard-clock-card.component.scss',

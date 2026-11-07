@@ -48,10 +48,8 @@
     type="submit"
     form="appraisal-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Generating…' : 'Generate draft' }}
   </button>
 </mat-dialog-actions>

@@ -53,10 +53,8 @@
     type="submit"
     form="payroll-run-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : data.run ? 'Save changes' : 'Create run' }}
   </button>
 </mat-dialog-actions>

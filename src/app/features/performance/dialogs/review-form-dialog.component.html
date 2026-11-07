@@ -73,10 +73,8 @@
     type="submit"
     form="review-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : data.review ? 'Save changes' : 'Create review' }}
   </button>
 </mat-dialog-actions>

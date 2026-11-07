@@ -46,12 +46,8 @@
             type="submit"
             class="notifications-add-btn"
             [disabled]="form.invalid || registering()"
-          >
-            @if (registering()) {
-              <mat-spinner diameter="16" />
-            } @else {
-              <mat-icon aria-hidden="true">add</mat-icon>
-            }
+            [appButtonSpinner]="registering()">
+            @if (!registering()) { <mat-icon aria-hidden="true">add</mat-icon> }
             {{ registering() ? 'Registering…' : 'Register device' }}
           </button>
         </div>

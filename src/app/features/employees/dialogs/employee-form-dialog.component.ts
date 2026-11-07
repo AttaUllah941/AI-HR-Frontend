@@ -23,6 +23,7 @@ import {
   EmploymentType,
 } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 const STATUSES: EmployeeStatus[] = [
   'DRAFT',
@@ -57,6 +58,7 @@ const EMPLOYMENT_TYPES: EmploymentType[] = [
     MatProgressSpinnerModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './employee-form-dialog.component.html',
   styleUrl: './employee-form-dialog.component.scss',

@@ -3,7 +3,6 @@ import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   NotificationPreference,
   NotificationsService,
@@ -11,6 +10,7 @@ import {
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-notifications-preferences-page',
@@ -20,9 +20,9 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatButtonModule,
     MatCheckboxModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './notifications-preferences-page.component.html',
   styleUrl: './notifications-preferences-page.component.scss',

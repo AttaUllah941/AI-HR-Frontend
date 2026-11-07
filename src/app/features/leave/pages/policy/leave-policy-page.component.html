@@ -34,10 +34,8 @@
             color="primary"
             type="submit"
             [disabled]="form.invalid || saving() || form.pristine"
-          >
-            @if (saving()) {
-              <mat-spinner class="save-spinner" diameter="16" />
-            }
+            [appButtonSpinner]="saving()">
+            
             {{ saving() ? 'Saving…' : 'Save policy' }}
           </button>
         </div>

@@ -6,9 +6,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AttendanceService, Shift } from '../../../core/services/attendance.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-shift-form-dialog',
@@ -21,7 +21,7 @@ import { ToastService } from '../../../core/services/toast.service';
     MatButtonModule,
     MatCheckboxModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './shift-form-dialog.component.html',
   styleUrl: './shift-form-dialog.component.scss',
