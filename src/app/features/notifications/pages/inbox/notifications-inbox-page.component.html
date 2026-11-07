@@ -81,10 +81,29 @@
       />
     } @else {
       <div class="notifications-table-card">
+        @if (selectedUnread().length > 0) {
+          <div class="notifications-bulk" role="region" aria-label="Bulk actions">
+            <span>{{ selectedUnread().length }} selected</span>
+            <button mat-flat-button color="primary" type="button" (click)="markSelectedRead()">
+              <mat-icon aria-hidden="true">mark_email_read</mat-icon>
+              Mark as read
+            </button>
+            <button mat-button type="button" (click)="clearSelection()">Clear</button>
+          </div>
+        }
         <div class="notifications-table-wrap">
           <table class="notifications-table" data-responsive>
             <thead>
               <tr>
+                <th scope="col" class="notifications-table__select-col">
+                  <mat-checkbox
+                    aria-label="Select all unread notifications"
+                    [checked]="allSelected()"
+                    [indeterminate]="selectedUnread().length > 0 && !allSelected()"
+                    [disabled]="unreadItems().length === 0"
+                    (change)="toggleAll()"
+                  />
+                </th>
                 <th scope="col">Notification</th>
                 <th scope="col">Category</th>
                 <th scope="col">Channel</th>
@@ -99,6 +118,15 @@
                   class="notifications-table__row"
                   [class.notifications-table__row--unread]="!isRead(item)"
                 >
+                  <td class="notifications-table__select-col" data-label="">
+                    @if (!isRead(item)) {
+                      <mat-checkbox
+                        [attr.aria-label]="'Select notification: ' + item.title"
+                        [checked]="selected().has(item.id)"
+                        (change)="toggleSelected(item.id)"
+                      />
+                    }
+                  </td>
                   <td data-label="Notification">
                     <span class="notifications-table__title">{{ item.title }}</span>
                     <span class="notifications-table__body">{{ item.body }}</span>

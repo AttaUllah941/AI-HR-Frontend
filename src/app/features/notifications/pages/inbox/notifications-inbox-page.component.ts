@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { filter, Subscription } from 'rxjs';
+import { filter, Subscription, forkJoin } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
@@ -137,6 +137,63 @@ export class NotificationsInboxPageComponent implements OnInit {
     }
     this.page.update((p) => p + 1);
     this.reload();
+  }
+
+  readonly selected = signal<ReadonlySet<string>>(new Set());
+  readonly unreadItems = computed(() => this.items().filter((n) => !this.notifications.isRead(n)));
+  readonly selectedUnread = computed(() =>
+    this.unreadItems().filter((n) => this.selected().has(n.id)),
+  );
+  readonly allSelected = computed(
+    () => this.unreadItems().length > 0 && this.selectedUnread().length === this.unreadItems().length,
+  );
+
+  toggleSelected(id: string): void {
+    this.selected.update((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  toggleAll(): void {
+    this.selected.set(
+      this.allSelected() ? new Set() : new Set(this.unreadItems().map((n) => n.id)),
+    );
+  }
+
+  clearSelection(): void {
+    this.selected.set(new Set());
+  }
+
+  /** Marks every selected notification read at once; rolls all of them back if any request fails. */
+  markSelectedRead(): void {
+    const targets = this.selectedUnread();
+    if (targets.length === 0) {
+      return;
+    }
+    const ids = new Set(targets.map((n) => n.id));
+    const before = this.items();
+    optimistic({
+      apply: () => {
+        const readAt = new Date().toISOString();
+        this.items.update((list) =>
+          list.map((n) => (ids.has(n.id) ? { ...n, status: 'READ', readAt } : n)),
+        );
+        this.clearSelection();
+      },
+      rollback: () => this.items.set(before),
+      request$: forkJoin(targets.map((n) => this.notifications.markRead(n.id))),
+      onSuccess: () => {
+        this.toast.success(`${targets.length} notification(s) marked as read.`);
+        this.reload();
+      },
+      onError: () => this.toast.error('Unable to mark the selected notifications as read.'),
+    });
   }
 
   markRead(item: NotificationItem): void {

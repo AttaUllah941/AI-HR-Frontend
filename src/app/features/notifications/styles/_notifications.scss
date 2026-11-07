@@ -373,3 +373,17 @@
     grid-template-columns: 1fr;
   }
 }
+
+.notifications-bulk {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--zh-border);
+  background: var(--zh-primary-soft);
+  font-size: 0.85rem;
+}
+
+.notifications-table__select-col {
+  width: 3rem;
+}
