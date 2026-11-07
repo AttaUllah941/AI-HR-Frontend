@@ -1,6 +1,8 @@
 <app-organization-status
   [loading]="loading()"
   [error]="error()"
+  skeleton="kpi"
+  [hasData]="!!summary()"
   loadingMessage="Loading settings…"
   errorTitle="Settings unavailable"
   (retry)="reload()"

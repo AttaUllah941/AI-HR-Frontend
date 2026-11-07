@@ -21,6 +21,9 @@ import {
   DashboardSummary,
 } from '../../../../core/services/dashboard.service';
 
+import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { KpiCardSkeletonComponent } from '../../../../shared/skeleton/kpi-card-skeleton.component';
 @Component({
   selector: 'app-dashboard-home',
   standalone: true,
@@ -35,6 +38,9 @@ import {
     HiringFunnelChartComponent,
     EmployeeGrowthChartComponent,
     DashboardClockCardComponent,
+    ChartSkeletonComponent,
+    ErrorStateComponent,
+    KpiCardSkeletonComponent,
   ],
   templateUrl: './dashboard-home.component.html',
   styleUrl: './dashboard-home.component.scss',
@@ -43,6 +49,7 @@ import {
 export class DashboardHomeComponent implements OnInit {
   private readonly dashboard = inject(DashboardService);
 
+  protected readonly kpiPlaceholders = [0, 1, 2, 3];
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly summary = signal<DashboardSummary | null>(null);

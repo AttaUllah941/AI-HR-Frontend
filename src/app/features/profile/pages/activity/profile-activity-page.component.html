@@ -1,6 +1,8 @@
 <app-organization-status
   [loading]="loading()"
   [error]="error()"
+  skeleton="list"
+  [hasData]="items().length > 0"
   loadingMessage="Loading activity…"
   errorTitle="Activity unavailable"
   (retry)="reload()"

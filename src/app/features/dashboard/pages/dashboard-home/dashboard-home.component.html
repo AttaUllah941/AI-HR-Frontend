@@ -1,11 +1,24 @@
-@if (loading()) {
-  <p class="state-msg">Loading dashboard…</p>
+@if (loading() && !summary()) {
+  <div role="status" aria-live="polite">
+    <span class="sr-only">Loading dashboard…</span>
+    <section class="kpi-grid" aria-hidden="true">
+      @for (n of kpiPlaceholders; track n) {
+        <app-kpi-card-skeleton />
+      }
+    </section>
+    <section class="dashboard-grid" aria-hidden="true">
+      <app-chart-skeleton />
+      <app-chart-skeleton />
+      <app-chart-skeleton />
+      <app-chart-skeleton />
+    </section>
+  </div>
 } @else if (error()) {
-  <mat-card class="state-card">
-    <h3>Dashboard unavailable</h3>
-    <p>{{ error() }}</p>
-    <button mat-flat-button color="primary" type="button" (click)="reload()">Try again</button>
-  </mat-card>
+  <app-error-state
+    title="Dashboard unavailable"
+    [message]="error() ?? ''"
+    (retry)="reload()"
+  />
 } @else if (summary(); as data) {
   <app-dashboard-clock-card />
 

@@ -15,6 +15,8 @@
 <app-organization-status
   [loading]="loading()"
   [error]="error()"
+  skeleton="table"
+  [hasData]="items().length > 0"
   loadingMessage="Loading shifts…"
   errorTitle="Shifts unavailable"
   (retry)="reload()"

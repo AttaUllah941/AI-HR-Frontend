@@ -1,6 +1,8 @@
 <app-organization-status
   [loading]="loading()"
   [error]="error()"
+  skeleton="kpi"
+  [hasData]="!!summary()"
   loadingMessage="Loading recruitment overview…"
   errorTitle="Recruitment overview unavailable"
   (retry)="reload()"

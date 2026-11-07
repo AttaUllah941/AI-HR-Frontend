@@ -17,6 +17,8 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { KpiFormDialogComponent } from '../../dialogs/kpi-form-dialog.component';
 import { EmployeeKpiFormDialogComponent } from '../../dialogs/employee-kpi-form-dialog.component';
@@ -34,6 +36,8 @@ import { EmployeeKpiFormDialogComponent } from '../../dialogs/employee-kpi-form-
     MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationSectionHeaderComponent,
+    ErrorStateComponent,
+    TableSkeletonComponent,
   ],
   templateUrl: './performance-kpis-page.component.html',
   styleUrl: './performance-kpis-page.component.scss',

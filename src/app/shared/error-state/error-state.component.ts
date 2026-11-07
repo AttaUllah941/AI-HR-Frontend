@@ -14,10 +14,12 @@ import { MatIconModule } from '@angular/material/icon';
       @if (message()) {
         <p class="error__message">{{ message() }}</p>
       }
-      <button mat-stroked-button type="button" (click)="retry.emit()">
-        <mat-icon aria-hidden="true">refresh</mat-icon>
-        {{ retryLabel() }}
-      </button>
+      @if (showRetry()) {
+        <button mat-stroked-button type="button" (click)="retry.emit()">
+          <mat-icon aria-hidden="true">refresh</mat-icon>
+          {{ retryLabel() }}
+        </button>
+      }
     </div>
   `,
   styles: `
@@ -55,5 +57,6 @@ export class ErrorStateComponent {
   readonly title = input('Something went wrong');
   readonly message = input('');
   readonly retryLabel = input('Try again');
+  readonly showRetry = input(true);
   readonly retry = output<void>();
 }

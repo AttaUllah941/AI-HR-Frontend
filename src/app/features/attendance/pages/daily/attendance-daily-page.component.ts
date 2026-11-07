@@ -7,7 +7,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   AttendanceRecord,
@@ -18,6 +17,8 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { AttendanceRecordFormDialogComponent } from '../../dialogs/attendance-record-form-dialog.component';
 
 const STATUS_OPTIONS: Array<{ value: AttendanceStatus | ''; label: string }> = [
@@ -55,8 +56,9 @@ const AVATAR_COLORS = [
     MatSelectModule,
     MatIconModule,
     MatMenuModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
+    ErrorStateComponent,
+    TableSkeletonComponent,
   ],
   templateUrl: './attendance-daily-page.component.html',
   styleUrl: './attendance-daily-page.component.scss',

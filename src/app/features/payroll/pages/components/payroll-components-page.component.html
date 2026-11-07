@@ -27,17 +27,10 @@
 </div>
 
 <div class="payroll-table-card" style="margin-top: 1rem">
-  @if (loading()) {
-    <div class="payroll-table-state">
-      <mat-spinner diameter="32" />
-      <span>Loading components…</span>
-    </div>
+  @if (loading() && items().length === 0) {
+    <app-table-skeleton [rows]="6" [cols]="6" />
   } @else if (error()) {
-    <div class="payroll-table-state payroll-table-state--error">
-      <mat-icon>error_outline</mat-icon>
-      <p>{{ error() }}</p>
-      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
-    </div>
+    <app-error-state [message]="error() ?? ''" (retry)="reload()" />
   } @else if (items().length === 0) {
     <app-empty-state
       title="No salary components"

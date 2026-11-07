@@ -1,6 +1,8 @@
 <app-organization-status
   [loading]="loading()"
   [error]="error()"
+  skeleton="kpi"
+  [hasData]="!!companySummary() || !!mySummary()"
   loadingMessage="Loading payroll overview…"
   errorTitle="Payroll overview unavailable"
   (retry)="reload()"

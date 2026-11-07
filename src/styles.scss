@@ -100,3 +100,16 @@ select {
     animation-duration: 2.4s;
   }
 }
+
+/* Refetch with existing data: keep rows visible but dimmed (the top progress bar shows activity). */
+.is-refetching {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-refetching {
+    transition: none;
+  }
+}

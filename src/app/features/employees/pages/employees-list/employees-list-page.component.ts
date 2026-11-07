@@ -9,7 +9,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -20,6 +19,8 @@ import {
 } from '../../../../core/services/employee.service';
 import { Department, OrganizationService } from '../../../../core/services/organization.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { EmployeeFormDialogComponent } from '../../dialogs/employee-form-dialog.component';
 import { downloadBlob } from '../../../../shared/utils/download-blob';
 
@@ -56,8 +57,9 @@ const AVATAR_COLORS = [
     MatSelectModule,
     MatIconModule,
     MatMenuModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
+    ErrorStateComponent,
+    TableSkeletonComponent,
   ],
   templateUrl: './employees-list-page.component.html',
   styleUrl: './employees-list-page.component.scss',
