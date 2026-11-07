@@ -22,14 +22,9 @@
       title="No salary structures"
       message="Create a structure to include an employee in payroll runs."
       icon="account_tree"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openForm()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Add structure
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Add structure' : ''"
+      (action)="openForm()"
+    />
   } @else {
     <div class="payroll-table-wrap">
       <table class="payroll-table">

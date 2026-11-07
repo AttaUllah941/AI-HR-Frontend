@@ -40,14 +40,9 @@
       title="No interviews"
       message="Schedule an interview or change the filters."
       icon="event"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Schedule interview
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Schedule interview' : ''"
+      (action)="openCreate()"
+    />
   } @else {
     <div class="recruitment-table-wrap">
       <table class="recruitment-table">

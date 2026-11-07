@@ -26,14 +26,9 @@
       title="No leave types yet"
       message="Add your first leave type to start tracking entitlements and requests."
       icon="category"
-    >
-      @if (canUpdate) {
-        <button mat-flat-button color="primary" type="button" (click)="openForm()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Add leave type
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canUpdate ? 'Add your first leave type' : ''"
+      (action)="openForm()"
+    />
   } @else {
     <div class="org-entity-list" role="list" aria-label="Leave types">
       @for (item of items(); track item.id) {

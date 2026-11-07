@@ -40,14 +40,9 @@
       title="No feedback"
       message="Give feedback or adjust the filters."
       icon="forum"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Give feedback
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Give feedback' : ''"
+      (action)="openCreate()"
+    />
   } @else {
     <div class="performance-table-wrap">
       <table class="performance-table">

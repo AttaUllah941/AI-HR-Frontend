@@ -51,22 +51,9 @@
       message="Teams help you group employees within departments."
 
       icon="groups"
-
-    >
-
-      @if (canCreate) {
-
-        <button mat-flat-button color="primary" type="button" (click)="openForm()">
-
-          <mat-icon aria-hidden="true">add</mat-icon>
-
-          Add team
-
-        </button>
-
-      }
-
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Add your first team' : ''"
+      (action)="openForm()"
+    />
 
   } @else {
 

@@ -34,5 +34,13 @@ p {
 }
 
 .empty-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
   margin-top: 1rem;
+}
+
+.empty-state__actions:empty {
+  display: none;
 }

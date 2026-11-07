@@ -26,14 +26,9 @@
       title="No shifts yet"
       message="Add your first shift to establish working hours for attendance."
       icon="schedule"
-    >
-      @if (canUpdate) {
-        <button mat-flat-button color="primary" type="button" (click)="openForm()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Add shift
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canUpdate ? 'Add your first shift' : ''"
+      (action)="openForm()"
+    />
   } @else {
     <div class="org-entity-list" role="list" aria-label="Shifts">
       @for (item of items(); track item.id) {

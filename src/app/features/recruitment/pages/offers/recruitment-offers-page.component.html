@@ -31,14 +31,9 @@
       title="No offers"
       message="Create an offer or adjust the status filter."
       icon="handshake"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Create offer
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Create offer' : ''"
+      (action)="openCreate()"
+    />
   } @else {
     <div class="recruitment-table-wrap">
       <table class="recruitment-table">

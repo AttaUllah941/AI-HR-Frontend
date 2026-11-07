@@ -59,14 +59,9 @@
           title="No goals yet"
           message="Create goals to track employee objectives."
           icon="flag"
-        >
-          @if (canCreate) {
-            <button mat-flat-button color="primary" type="button" (click)="openCreateGoal()">
-              <mat-icon aria-hidden="true">add</mat-icon>
-              New goal
-            </button>
-          }
-        </app-empty-state>
+      [actionLabel]="canCreate ? 'New goal' : ''"
+      (action)="openCreateGoal()"
+    />
       } @else {
         <div class="performance-table-card">
           <div class="performance-table-wrap">

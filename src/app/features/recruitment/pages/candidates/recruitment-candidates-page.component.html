@@ -32,14 +32,9 @@
       title="No candidates"
       message="Add a candidate or clear the search filter."
       icon="person_search"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Add candidate
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Add candidate' : ''"
+      (action)="openCreate()"
+    />
   } @else {
     <div class="recruitment-table-wrap">
       <table class="recruitment-table">

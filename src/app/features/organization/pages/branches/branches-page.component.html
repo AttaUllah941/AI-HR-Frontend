@@ -51,22 +51,9 @@
       message="Add your first branch to represent office locations across your organization."
 
       icon="apartment"
-
-    >
-
-      @if (canCreate) {
-
-        <button mat-flat-button color="primary" type="button" (click)="openForm()">
-
-          <mat-icon aria-hidden="true">add</mat-icon>
-
-          Add branch
-
-        </button>
-
-      }
-
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Add your first branch' : ''"
+      (action)="openForm()"
+    />
 
   } @else {
 

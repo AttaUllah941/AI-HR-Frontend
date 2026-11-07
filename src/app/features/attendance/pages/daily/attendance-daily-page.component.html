@@ -59,14 +59,9 @@
         title="No attendance records"
         message="Try another date or add a manual attendance record."
         icon="fact_check"
-      >
-        @if (canCreate) {
-          <button mat-flat-button color="primary" type="button" (click)="openForm()">
-            <mat-icon aria-hidden="true">add</mat-icon>
-            Add record
-          </button>
-        }
-      </app-empty-state>
+      [actionLabel]="canCreate ? 'Add record' : ''"
+      (action)="openForm()"
+    />
     } @else {
       <div class="att-table-wrap">
         <table class="att-table">

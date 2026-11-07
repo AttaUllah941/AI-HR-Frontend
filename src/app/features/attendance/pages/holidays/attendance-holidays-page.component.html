@@ -26,14 +26,9 @@
       title="No holidays yet"
       message="Add holidays for the current year to mark non-working days."
       icon="event"
-    >
-      @if (canUpdate) {
-        <button mat-flat-button color="primary" type="button" (click)="openForm()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Add holiday
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canUpdate ? 'Add your first holiday' : ''"
+      (action)="openForm()"
+    />
   } @else {
     <div class="org-entity-list" role="list" aria-label="Holidays">
       @for (item of items(); track item.id) {

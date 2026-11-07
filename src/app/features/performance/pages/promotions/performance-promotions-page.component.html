@@ -31,14 +31,9 @@
       title="No promotions"
       message="Create a promotion request or adjust the status filter."
       icon="move_up"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          New promotion
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'New promotion' : ''"
+      (action)="openCreate()"
+    />
   } @else {
     <div class="performance-table-wrap">
       <table class="performance-table">

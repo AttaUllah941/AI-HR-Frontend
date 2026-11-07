@@ -31,14 +31,9 @@
       title="No job openings"
       message="Create a job or adjust the status filter."
       icon="work"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Create job
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Create job' : ''"
+      (action)="openCreate()"
+    />
   } @else {
     <div class="recruitment-table-wrap">
       <table class="recruitment-table">

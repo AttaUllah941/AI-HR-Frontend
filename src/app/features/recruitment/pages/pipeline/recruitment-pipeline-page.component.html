@@ -30,14 +30,9 @@
     title="Pipeline is empty"
     message="Create an application to start moving candidates through stages."
     icon="view_kanban"
-  >
-    @if (canCreate) {
-      <button mat-flat-button color="primary" type="button" (click)="openCreateApplication()">
-        <mat-icon aria-hidden="true">add</mat-icon>
-        Create application
-      </button>
-    }
-  </app-empty-state>
+      [actionLabel]="canCreate ? 'Create application' : ''"
+      (action)="openCreateApplication()"
+    />
 } @else {
   <div class="recruitment-pipeline">
     @for (column of columns(); track column.status) {

@@ -34,14 +34,10 @@
       <button mat-stroked-button type="button" (click)="reloadCycles()">Try again</button>
     </div>
   } @else if (cycles().length === 0) {
-    <app-empty-state title="No cycles" message="Create a review cycle for this year." icon="event">
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreateCycle()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          New cycle
-        </button>
-      }
-    </app-empty-state>
+    <app-empty-state title="No cycles" message="Create a review cycle for this year." icon="event"
+      [actionLabel]="canCreate ? 'New cycle' : ''"
+      (action)="openCreateCycle()"
+    />
   } @else {
     <div class="performance-table-wrap">
       <table class="performance-table">
@@ -152,14 +148,10 @@
   } @else if (error()) {
     <app-error-state [message]="error() ?? ''" (retry)="reloadReviews()" />
   } @else if (items().length === 0) {
-    <app-empty-state title="No reviews" message="Create a review or adjust filters." icon="rate_review">
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreateReview()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          New review
-        </button>
-      }
-    </app-empty-state>
+    <app-empty-state title="No reviews" message="Create a review or adjust filters." icon="rate_review"
+      [actionLabel]="canCreate ? 'New review' : ''"
+      (action)="openCreateReview()"
+    />
   } @else {
     <div class="performance-table-wrap">
       <table class="performance-table">

@@ -40,14 +40,9 @@
       title="No goals"
       message="Create a goal or adjust the filters."
       icon="flag"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          New goal
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'New goal' : ''"
+      (action)="openCreate()"
+    />
   } @else {
     <div class="performance-table-wrap">
       <table class="performance-table">

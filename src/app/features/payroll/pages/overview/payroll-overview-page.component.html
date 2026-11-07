@@ -60,14 +60,9 @@
             title="No payroll runs yet"
             message="Create a payroll run to process salaries for the month."
             icon="payments"
-          >
-            @if (canCreate) {
-              <button mat-flat-button color="primary" type="button" (click)="openCreateRun()">
-                <mat-icon aria-hidden="true">add</mat-icon>
-                Create run
-              </button>
-            }
-          </app-empty-state>
+      [actionLabel]="canCreate ? 'Create run' : ''"
+      (action)="openCreateRun()"
+    />
         } @else {
           <div class="payroll-table-card">
             <div class="payroll-table-wrap">

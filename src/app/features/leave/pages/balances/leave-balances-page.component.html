@@ -43,14 +43,9 @@
       title="No balances found"
       message="Set entitlements for employees or adjust the year filter."
       icon="account_balance_wallet"
-    >
-      @if (canUpdate) {
-        <button mat-flat-button color="primary" type="button" (click)="openForm()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Set balance
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canUpdate ? 'Set balance' : ''"
+      (action)="openForm()"
+    />
   } @else {
     <div class="leave-table-wrap">
       <table class="leave-table">

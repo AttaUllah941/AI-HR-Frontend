@@ -51,22 +51,9 @@
       message="Add designations to represent roles and seniority levels in your company."
 
       icon="badge"
-
-    >
-
-      @if (canCreate) {
-
-        <button mat-flat-button color="primary" type="button" (click)="openForm()">
-
-          <mat-icon aria-hidden="true">add</mat-icon>
-
-          Add designation
-
-        </button>
-
-      }
-
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Add your first designation' : ''"
+      (action)="openForm()"
+    />
 
   } @else {
 

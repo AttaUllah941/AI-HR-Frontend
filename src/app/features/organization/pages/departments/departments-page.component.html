@@ -51,22 +51,9 @@
       message="Create departments to group teams and build your org structure."
 
       icon="account_tree"
-
-    >
-
-      @if (canCreate) {
-
-        <button mat-flat-button color="primary" type="button" (click)="openForm()">
-
-          <mat-icon aria-hidden="true">add</mat-icon>
-
-          Add department
-
-        </button>
-
-      }
-
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Add your first department' : ''"
+      (action)="openForm()"
+    />
 
   } @else {
 

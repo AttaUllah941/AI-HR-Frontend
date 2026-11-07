@@ -47,14 +47,9 @@
           : 'Payroll runs are visible to payroll administrators only. Your payslips are available under Payslips.'
       "
       icon="payments"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Create run
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Create run' : ''"
+      (action)="openCreate()"
+    />
   } @else {
     <div class="payroll-table-wrap">
       <table class="payroll-table">

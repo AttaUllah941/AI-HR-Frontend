@@ -18,14 +18,10 @@
   } @else if (error()) {
     <app-error-state [message]="error() ?? ''" (retry)="reloadKpis()" />
   } @else if (kpis().length === 0) {
-    <app-empty-state title="No KPIs" message="Create KPI definitions for the company." icon="speed">
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreateKpi()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          New KPI
-        </button>
-      }
-    </app-empty-state>
+    <app-empty-state title="No KPIs" message="Create KPI definitions for the company." icon="speed"
+      [actionLabel]="canCreate ? 'New KPI' : ''"
+      (action)="openCreateKpi()"
+    />
   } @else {
     <div class="performance-table-wrap">
       <table class="performance-table">
@@ -124,14 +120,9 @@
       title="No assignments"
       message="Assign KPIs to employees for this year."
       icon="assignment_ind"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openAssign()">
-          <mat-icon aria-hidden="true">person_add</mat-icon>
-          Assign KPI
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Assign KPI' : ''" actionIcon="person_add"
+      (action)="openAssign()"
+    />
   } @else {
     <div class="performance-table-wrap">
       <table class="performance-table">

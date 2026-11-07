@@ -63,14 +63,9 @@
         title="No hiring activity yet"
         message="Create a job opening to start building your talent pipeline."
         icon="work"
-      >
-        @if (canCreate) {
-          <button mat-flat-button color="primary" type="button" (click)="openCreateJob()">
-            <mat-icon aria-hidden="true">add</mat-icon>
-            Create job
-          </button>
-        }
-      </app-empty-state>
+      [actionLabel]="canCreate ? 'Create job' : ''"
+      (action)="openCreateJob()"
+    />
     }
   </section>
 </app-organization-status>

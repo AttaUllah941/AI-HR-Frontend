@@ -36,14 +36,9 @@
       title="No salary components"
       message="Add allowances, deductions, bonuses, or tax components."
       icon="category"
-    >
-      @if (canCreate || canUpdate) {
-        <button mat-flat-button color="primary" type="button" (click)="openForm()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Add component
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate || canUpdate ? 'Add component' : ''"
+      (action)="openForm()"
+    />
   } @else {
     <div class="payroll-table-wrap">
       <table class="payroll-table">

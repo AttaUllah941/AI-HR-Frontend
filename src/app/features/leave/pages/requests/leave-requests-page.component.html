@@ -31,14 +31,9 @@
       title="No leave requests"
       message="Create a request or adjust the status filter."
       icon="event_available"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openApply()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Apply leave
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Apply leave' : ''"
+      (action)="openApply()"
+    />
   } @else {
     <div class="leave-table-wrap">
       <table class="leave-table">
