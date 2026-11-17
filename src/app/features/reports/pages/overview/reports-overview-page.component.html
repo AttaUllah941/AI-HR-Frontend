@@ -65,7 +65,7 @@
         <mat-card class="reports-chart-card">
           @defer (on viewport) {
             <app-reports-bar-chart
-              [points]="s.charts.attendanceByStatus ?? []"
+              [points]="s.charts.attendanceByStatus"
               title="Attendance by status"
             />
           } @placeholder {
@@ -75,7 +75,7 @@
         <mat-card class="reports-chart-card">
           @defer (on viewport) {
             <app-reports-bar-chart
-              [points]="s.charts.leaveByStatus ?? []"
+              [points]="s.charts.leaveByStatus"
               title="Leave by status"
             />
           } @placeholder {
@@ -85,7 +85,7 @@
         <mat-card class="reports-chart-card">
           @defer (on viewport) {
             <app-reports-bar-chart
-              [points]="s.charts.payrollByStatus ?? []"
+              [points]="s.charts.payrollByStatus"
               title="Payroll by status"
             />
           } @placeholder {
@@ -95,7 +95,7 @@
         <mat-card class="reports-chart-card">
           @defer (on viewport) {
             <app-reports-bar-chart
-              [points]="s.charts.jobsByStatus ?? []"
+              [points]="s.charts.jobsByStatus"
               title="Jobs by status"
             />
           } @placeholder {
@@ -105,7 +105,7 @@
         <mat-card class="reports-chart-card">
           @defer (on viewport) {
             <app-reports-bar-chart
-              [points]="s.charts.applicationsByStatus ?? []"
+              [points]="s.charts.applicationsByStatus"
               title="Applications by status"
             />
           } @placeholder {

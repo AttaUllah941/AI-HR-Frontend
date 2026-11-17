@@ -109,7 +109,7 @@
             </mat-form-field>
           </div>
 
-          @if (form.controls.avatarUrl.value?.trim()?.startsWith('https://')) {
+          @if (form.controls.avatarUrl.value.trim().startsWith('https://')) {
             <div class="profile-avatar-preview">
               <img
                 [src]="form.controls.avatarUrl.value!.trim()"

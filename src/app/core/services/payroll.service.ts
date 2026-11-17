@@ -64,13 +64,13 @@ export interface SalaryStructure {
 }
 
 export interface TaxSetting {
-  id: string;
+  id: string | null;
   taxYear: number;
   standardRate: number;
   personalAllowance: number;
   notes: string | null;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 export interface PayrollRun {
