@@ -5,7 +5,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   AttendanceService,
@@ -16,9 +15,11 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { OvertimeFormDialogComponent } from '../../dialogs/overtime-form-dialog.component';
-import { filter } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
 
 const STATUS_OPTIONS: Array<{ value: OvertimeStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -37,9 +38,10 @@ const STATUS_OPTIONS: Array<{ value: OvertimeStatus | ''; label: string }> = [
     MatSelectModule,
     MatIconModule,
     MatMenuModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationSectionHeaderComponent,
+    ErrorStateComponent,
+    TableSkeletonComponent,
   ],
   templateUrl: './attendance-overtime-page.component.html',
   styleUrl: './attendance-overtime-page.component.scss',
@@ -64,7 +66,9 @@ export class AttendanceOvertimePageComponent implements OnInit {
   readonly statusControl = new FormControl<OvertimeStatus | ''>('', { nonNullable: true });
 
   ngOnInit(): void {
-    this.statusControl.valueChanges.subscribe(() => this.reload());
+    this.statusControl.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged())
+      .subscribe(() => this.reload());
     this.reload();
   }
 

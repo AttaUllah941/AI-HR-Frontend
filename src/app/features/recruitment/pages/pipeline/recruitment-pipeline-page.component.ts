@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   ApplicationStatus,
@@ -18,6 +17,8 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { ApplicationFormDialogComponent } from '../../dialogs/application-form-dialog.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
 
 const STAGE_ORDER: ApplicationStatus[] = [
   'APPLIED',
@@ -45,9 +46,10 @@ const NEXT_STATUS: Partial<Record<ApplicationStatus, ApplicationStatus>> = {
     MatFormFieldModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationSectionHeaderComponent,
+    TableSkeletonComponent,
+    ErrorStateComponent,
   ],
   templateUrl: './recruitment-pipeline-page.component.html',
   styleUrl: './recruitment-pipeline-page.component.scss',

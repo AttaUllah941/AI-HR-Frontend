@@ -18,6 +18,8 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { ReviewCycleFormDialogComponent } from '../../dialogs/review-cycle-form-dialog.component';
 import { ReviewFormDialogComponent } from '../../dialogs/review-form-dialog.component';
@@ -45,6 +47,8 @@ const STATUS_OPTIONS: Array<{ value: ReviewStatus | ''; label: string }> = [
     MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationSectionHeaderComponent,
+    ErrorStateComponent,
+    TableSkeletonComponent,
   ],
   templateUrl: './performance-reviews-page.component.html',
   styleUrl: './performance-reviews-page.component.scss',

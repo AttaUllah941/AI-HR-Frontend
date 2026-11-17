@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   Candidate,
@@ -13,6 +12,8 @@ import {
   RecruitmentService,
 } from '../../../core/services/recruitment.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface ApplicationFormDialogData {
   jobOpeningId?: string;
@@ -30,7 +31,7 @@ export interface ApplicationFormDialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './application-form-dialog.component.html',
   styleUrl: './application-form-dialog.component.scss',
@@ -54,6 +55,7 @@ export class ApplicationFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     this.recruitment.listJobs({ status: 'OPEN', page: 1, pageSize: 100 }).subscribe({
       next: (res) => this.jobs.set(res.items),
       error: () => this.jobs.set([]),

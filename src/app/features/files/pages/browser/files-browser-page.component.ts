@@ -6,10 +6,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import {
   FILE_CATEGORIES,
+  FILE_CATEGORY_LABELS,
   FileCategory,
   FilesService,
   StoredFileItem,
@@ -18,6 +20,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { UploadFileDialogComponent } from '../../dialogs/upload-file-dialog.component';
+import { downloadBlob } from '../../../../shared/utils/download-blob';
 
 @Component({
   selector: 'app-files-browser-page',
@@ -38,10 +41,12 @@ import { UploadFileDialogComponent } from '../../dialogs/upload-file-dialog.comp
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilesBrowserPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly filesApi = inject(FilesService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
+  private readonly confirm = inject(ConfirmDialogService);
 
   /** When set, locks the category filter (documents / resumes pages). */
   readonly lockedCategory = input<FileCategory | null>(null);
@@ -56,6 +61,7 @@ export class FilesBrowserPageComponent implements OnInit {
   readonly canCreate = this.auth.hasPermission('files:create');
   readonly canDelete = this.auth.hasPermission('files:delete');
   readonly categories = FILE_CATEGORIES;
+  readonly categoryLabels = FILE_CATEGORY_LABELS;
 
   readonly search = new FormControl('', { nonNullable: true });
   readonly category = new FormControl('', { nonNullable: true });
@@ -77,7 +83,8 @@ export class FilesBrowserPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     const locked = this.lockedCategory();
-    this.filesApi
+    this.inflight?.unsubscribe();
+    this.inflight = this.filesApi
       .list({
         search: this.search.value.trim() || undefined,
         category: locked || this.category.value || undefined,
@@ -112,14 +119,7 @@ export class FilesBrowserPageComponent implements OnInit {
 
   download(file: StoredFileItem): void {
     this.filesApi.downloadBlob(file.id).subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = file.originalName;
-        a.click();
-        URL.revokeObjectURL(url);
-      },
+      next: (blob) => downloadBlob(blob, file.originalName),
       error: () => this.toast.error('Download failed.'),
     });
   }
@@ -141,16 +141,29 @@ export class FilesBrowserPageComponent implements OnInit {
 
   remove(file: StoredFileItem): void {
     if (!this.canDelete) return;
-    if (!confirm(`Delete ${file.originalName}?`)) return;
-    this.filesApi.remove(file.id).subscribe({
-      next: () => {
-        this.toast.success('File deleted.');
-        this.reload();
-      },
-      error: (err: { error?: { message?: string }; message?: string }) => {
-        this.toast.error(err?.error?.message || err?.message || 'Unable to delete file.');
-      },
-    });
+    this.confirm
+      .open({
+        title: 'Delete file?',
+        message: `Remove “${file.title || file.originalName}”? This soft-deletes the record and removes the file from storage.`,
+        confirmLabel: 'Delete',
+        destructive: true,
+      })
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        this.filesApi.remove(file.id).subscribe({
+          next: () => {
+            this.toast.success('File deleted.');
+            this.reload();
+          },
+          error: (err: { error?: { message?: string }; message?: string }) => {
+            this.toast.error(err?.error?.message || err?.message || 'Unable to delete file.');
+          },
+        });
+      });
+  }
+
+  categoryLabel(category: string): string {
+    return this.categoryLabels[category as FileCategory] ?? category;
   }
 
   formatBytes(n: number): string {

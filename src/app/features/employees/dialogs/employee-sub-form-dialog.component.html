@@ -57,10 +57,8 @@
     type="submit"
     [attr.form]="formId"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : 'Save' }}
   </button>
 </mat-dialog-actions>

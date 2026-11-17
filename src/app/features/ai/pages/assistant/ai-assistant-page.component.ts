@@ -22,6 +22,9 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
+import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-ai-assistant-page',
@@ -33,12 +36,15 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationStatusComponent,
+    SmartLoaderComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './ai-assistant-page.component.html',
   styleUrl: './ai-assistant-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AiAssistantPageComponent implements OnInit {
+  protected readonly novaMessages = LOADER_MESSAGES.nova;
   @ViewChild('threadEl') threadEl?: ElementRef<HTMLElement>;
 
   private readonly ai = inject(AiService);

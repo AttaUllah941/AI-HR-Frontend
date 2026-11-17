@@ -6,7 +6,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   NOTIFICATION_CATEGORIES,
@@ -14,9 +13,11 @@ import {
   NotificationCategory,
   NotificationChannel,
   NotificationsService,
+  describeSendResult,
 } from '../../../core/services/notifications.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface SendNotificationDialogData {
   templateCode?: string;
@@ -35,7 +36,7 @@ export interface SendNotificationDialogData {
     MatCheckboxModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './send-notification-dialog.component.html',
   styleUrl: './send-notification-dialog.component.scss',
@@ -100,9 +101,12 @@ export class SendNotificationDialogComponent {
       })
       .subscribe({
         next: (res) => {
-          this.toast.success(
-            res.count ? `Dispatched ${res.count} notification(s).` : 'No channels delivered.',
-          );
+          const message = describeSendResult(res);
+          if (res.count) {
+            this.toast.success(message);
+          } else {
+            this.toast.info(message);
+          }
           this.dialogRef.close(true);
         },
         error: (err: { error?: { message?: string }; message?: string }) => {

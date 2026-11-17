@@ -16,6 +16,9 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ReportsBarChartComponent } from '../../components/reports-bar-chart.component';
+import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
+import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
+import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
 
 @Component({
   selector: 'app-reports-overview-page',
@@ -30,12 +33,15 @@ import { ReportsBarChartComponent } from '../../components/reports-bar-chart.com
     EmptyStateComponent,
     OrganizationStatusComponent,
     ReportsBarChartComponent,
+    SmartLoaderComponent,
+    ChartSkeletonComponent,
   ],
   templateUrl: './reports-overview-page.component.html',
   styleUrl: './reports-overview-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportsOverviewPageComponent implements OnInit {
+  protected readonly exportMessages = LOADER_MESSAGES.export;
   private readonly reports = inject(ReportsService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -44,6 +50,7 @@ export class ReportsOverviewPageComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly exporting = signal(false);
+  readonly exportingKey = signal<string | null>(null);
 
   readonly canExport = this.auth.hasPermission('reports:export');
 
@@ -100,6 +107,15 @@ export class ReportsOverviewPageComponent implements OnInit {
     EMPLOYEES: 'groups',
   };
 
+  readonly moduleFallbacks: Record<string, string> = {
+    ATTENDANCE: 'Daily · monthly · departmental breakdowns',
+    LEAVE: 'Balances, utilization, accrual forecasts',
+    PAYROLL: 'Compensation, tax, deductions, YTD totals',
+    RECRUITMENT: 'Time-to-hire, source of hire, funnel drop-off',
+    PERFORMANCE: 'Goals, reviews, and promotion pipeline',
+    EMPLOYEES: 'Hiring vs attrition, tenure curves',
+  };
+
   ngOnInit(): void {
     this.reload();
   }
@@ -120,23 +136,36 @@ export class ReportsOverviewPageComponent implements OnInit {
   }
 
   exportOverview(format: ReportExportFormat): void {
-    this.runExport('OVERVIEW', format);
+    this.runExport('OVERVIEW', format, 'OVERVIEW');
   }
 
-  private runExport(reportType: ReportType, format: ReportExportFormat): void {
+  exportModule(reportType: string, format: ReportExportFormat, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.runExport(reportType as ReportType, format, reportType);
+  }
+
+  moduleDescription(key: string, description?: string): string {
+    return description || this.moduleFallbacks[key] || 'Open analytics and export options';
+  }
+
+  private runExport(reportType: ReportType, format: ReportExportFormat, key: string): void {
     if (!this.canExport) {
       return;
     }
     this.exporting.set(true);
+    this.exportingKey.set(key);
     this.reports.exportReport({ reportType, format }).subscribe({
       next: () => {
-        this.toast.success(`${format} export started.`);
+        this.toast.success(`${format} download ready.`);
         this.exporting.set(false);
+        this.exportingKey.set(null);
         this.reload();
       },
       error: (err: { error?: { message?: string }; message?: string }) => {
         this.toast.error(err?.error?.message || err?.message || 'Export failed.');
         this.exporting.set(false);
+        this.exportingKey.set(null);
       },
     });
   }

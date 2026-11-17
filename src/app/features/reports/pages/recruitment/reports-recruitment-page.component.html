@@ -5,6 +5,9 @@
   errorTitle="Recruitment report unavailable"
   (retry)="reload()"
 >
+  @if (exporting()) {
+    <app-smart-loader class="long-op" [messages]="exportMessages" [diameter]="28" />
+  }
   <section class="reports-page" aria-label="Recruitment report">
     <div class="reports-action-bar">
       <div>
@@ -30,6 +33,7 @@
           </button>
           <mat-menu #exportMenu="matMenu">
             <button mat-menu-item type="button" (click)="exportReport('CSV')">CSV</button>
+            <button mat-menu-item type="button" (click)="exportReport('XLSX')">Excel (.xlsx)</button>
             <button mat-menu-item type="button" (click)="exportReport('PDF')">PDF</button>
             <button mat-menu-item type="button" (click)="exportReport('JSON')">JSON</button>
           </mat-menu>
@@ -47,22 +51,38 @@
       } @else {
         <div class="reports-chart-grid">
           <mat-card class="reports-chart-card">
-            <app-reports-bar-chart [points]="r.charts.jobsByStatus" title="Jobs by status" />
+            @defer (on viewport) {
+              <app-reports-bar-chart [points]="r.charts.jobsByStatus" title="Jobs by status" />
+            } @placeholder {
+              <app-chart-skeleton />
+            }
           </mat-card>
           <mat-card class="reports-chart-card">
-            <app-reports-bar-chart
-              [points]="r.charts.applicationsByStatus"
-              title="Applications by status"
-            />
+            @defer (on viewport) {
+              <app-reports-bar-chart
+                [points]="r.charts.applicationsByStatus"
+                title="Applications by status"
+              />
+            } @placeholder {
+              <app-chart-skeleton />
+            }
           </mat-card>
           <mat-card class="reports-chart-card">
-            <app-reports-bar-chart
-              [points]="r.charts.interviewsByStatus"
-              title="Interviews by status"
-            />
+            @defer (on viewport) {
+              <app-reports-bar-chart
+                [points]="r.charts.interviewsByStatus"
+                title="Interviews by status"
+              />
+            } @placeholder {
+              <app-chart-skeleton />
+            }
           </mat-card>
           <mat-card class="reports-chart-card">
-            <app-reports-bar-chart [points]="r.charts.offersByStatus" title="Offers by status" />
+            @defer (on viewport) {
+              <app-reports-bar-chart [points]="r.charts.offersByStatus" title="Offers by status" />
+            } @placeholder {
+              <app-chart-skeleton />
+            }
           </mat-card>
         </div>
       }

@@ -30,34 +30,29 @@
   }
 </app-organization-section-header>
 
-<div class="payroll-table-card">
-  @if (loading()) {
-    <div class="payroll-table-state">
-      <mat-spinner diameter="32" />
-      <span>Loading payroll runs…</span>
-    </div>
+<div class="payroll-table-card" [class.is-refetching]="loading() && items().length > 0" [attr.aria-busy]="loading()">
+  @if (processing()) {
+    <app-smart-loader class="long-op" [messages]="payrollMessages" />
+  }
+  @if (loading() && items().length === 0) {
+    <app-table-skeleton [rows]="6" [cols]="5" />
   } @else if (error()) {
-    <div class="payroll-table-state payroll-table-state--error">
-      <mat-icon>error_outline</mat-icon>
-      <p>{{ error() }}</p>
-      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
-    </div>
+    <app-error-state [message]="error() ?? ''" (retry)="reload()" />
   } @else if (items().length === 0) {
     <app-empty-state
       title="No payroll runs"
-      message="Create a run or adjust the year and status filters."
+      [message]="
+        canManageRuns
+          ? 'Create a run or adjust the year and status filters.'
+          : 'Payroll runs are visible to payroll administrators only. Your payslips are available under Payslips.'
+      "
       icon="payments"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Create run
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Create run' : ''"
+      (action)="openCreate()"
+    />
   } @else {
     <div class="payroll-table-wrap">
-      <table class="payroll-table">
+      <table class="payroll-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Period</th>
@@ -70,18 +65,18 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="payroll-table__row" (click)="openEntries(item)" style="cursor: pointer">
-              <td>
+              <td data-label="Period">
                 <strong>{{ monthLabel(item.month) }} {{ item.year }}</strong>
               </td>
-              <td>{{ item.title || '—' }}</td>
-              <td>{{ entryCount(item) }}</td>
-              <td>
+              <td data-label="Title">{{ item.title || '—' }}</td>
+              <td data-label="Entries">{{ entryCount(item) }}</td>
+              <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="payroll-status-pill__dot" aria-hidden="true"></span>
                   {{ statusLabel(item.status) }}
                 </span>
               </td>
-              <td class="payroll-table__actions-col" (click)="$event.stopPropagation()">
+              <td class="payroll-table__actions-col" (click)="$event.stopPropagation()" data-label="">
                 <button
                   mat-icon-button
                   type="button"

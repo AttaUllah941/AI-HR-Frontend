@@ -77,7 +77,7 @@
     } @else {
       <div class="ai-table-card">
         <div class="ai-table-wrap">
-          <table class="ai-table">
+          <table class="ai-table" data-responsive>
             <thead>
               <tr>
                 <th scope="col">Created</th>
@@ -94,8 +94,8 @@
                   style="cursor: pointer"
                   (click)="selectGeneration(item)"
                 >
-                  <td>{{ createdLabel(item.createdAt) }}</td>
-                  <td>
+                  <td data-label="Created">{{ createdLabel(item.createdAt) }}</td>
+                  <td data-label="Status">
                     <span
                       class="ai-status-pill"
                       [class.ai-status-pill--success]="item.status === 'SUCCESS'"
@@ -106,9 +106,9 @@
                       {{ item.status }}
                     </span>
                   </td>
-                  <td>{{ item.provider || '—' }}</td>
-                  <td>{{ scoreFor(item) }}</td>
-                  <td class="ai-table__actions-col" (click)="$event.stopPropagation()">
+                  <td data-label="Provider">{{ item.provider || '—' }}</td>
+                  <td data-label="Score">{{ scoreFor(item) }}</td>
+                  <td class="ai-table__actions-col" (click)="$event.stopPropagation()" data-label="">
                     @if (canDelete) {
                       <button
                         mat-icon-button

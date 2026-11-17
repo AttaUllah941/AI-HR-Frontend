@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { filter } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   PayrollRun,
@@ -17,9 +16,13 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { PayrollRunFormDialogComponent } from '../../dialogs/payroll-run-form-dialog.component';
 import { RunEntriesDialogComponent } from '../../dialogs/run-entries-dialog.component';
+import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
+import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
 
 const STATUS_OPTIONS: Array<{ value: PayrollRunStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -41,15 +44,19 @@ const STATUS_OPTIONS: Array<{ value: PayrollRunStatus | ''; label: string }> = [
     MatSelectModule,
     MatIconModule,
     MatMenuModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationSectionHeaderComponent,
+    ErrorStateComponent,
+    TableSkeletonComponent,
+    SmartLoaderComponent,
   ],
   templateUrl: './payroll-runs-page.component.html',
   styleUrl: './payroll-runs-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PayrollRunsPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
+  protected readonly payrollMessages = LOADER_MESSAGES.payroll;
   private readonly payroll = inject(PayrollService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -60,6 +67,7 @@ export class PayrollRunsPageComponent implements OnInit {
   readonly yearOptions = [this.currentYear - 1, this.currentYear, this.currentYear + 1];
 
   readonly items = signal<PayrollRun[]>([]);
+  readonly processing = signal(false);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly actionId = signal<string | null>(null);
@@ -73,6 +81,12 @@ export class PayrollRunsPageComponent implements OnInit {
   readonly canUpdate = this.auth.hasPermission('payroll:update');
   readonly canApprove = this.auth.hasPermission('payroll:approve');
   readonly canDelete = this.auth.hasPermission('payroll:delete');
+  /** The server returns an empty run list to plain payroll:view holders. */
+  readonly canManageRuns = this.auth.hasAnyPermission(
+    'payroll:create',
+    'payroll:update',
+    'payroll:approve',
+  );
 
   readonly statusOptions = STATUS_OPTIONS;
   readonly statusControl = new FormControl<PayrollRunStatus | ''>('', { nonNullable: true });
@@ -93,7 +107,8 @@ export class PayrollRunsPageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.payroll
+    this.inflight?.unsubscribe();
+    this.inflight = this.payroll
       .listRuns({
         status: this.statusControl.value || undefined,
         year: this.yearControl.value,
@@ -170,14 +185,17 @@ export class PayrollRunsPageComponent implements OnInit {
       .pipe(filter((confirmed) => confirmed === true))
       .subscribe(() => {
         this.actionId.set(item.id);
+        this.processing.set(true);
         this.payroll.processRun(item.id).subscribe({
           next: () => {
             this.toast.success('Payroll run processed');
             this.actionId.set(null);
+            this.processing.set(false);
             this.reload();
           },
           error: (err: Error) => {
             this.actionId.set(null);
+            this.processing.set(false);
             this.toast.error(err.message || 'Unable to process payroll run');
           },
         });

@@ -90,7 +90,7 @@
     border: 1px solid color-mix(in oklab, var(--zh-destructive) 25%, var(--zh-border)) !important;
 
     > mat-icon {
-      color: var(--zh-destructive);
+      color: var(--zh-destructive-text);
       flex-shrink: 0;
     }
 
@@ -203,7 +203,7 @@
     }
 
     &[aria-label='Delete']:hover:not([disabled]) {
-      color: var(--zh-destructive);
+      color: var(--zh-destructive-text);
       background: color-mix(in oklab, var(--zh-destructive) 10%, white);
     }
   }

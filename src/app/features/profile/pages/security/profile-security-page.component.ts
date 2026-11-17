@@ -5,10 +5,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProfileService, UserProfile } from '../../../../core/services/profile.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-profile-security-page',
@@ -20,8 +20,8 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './profile-security-page.component.html',
   styleUrl: './profile-security-page.component.scss',
@@ -39,15 +39,7 @@ export class ProfileSecurityPageComponent implements OnInit {
 
   readonly form = this.fb.nonNullable.group({
     currentPassword: ['', [Validators.required]],
-    newPassword: [
-      '',
-      [
-        Validators.required,
-        Validators.minLength(8),
-        Validators.maxLength(128),
-        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).+$/),
-      ],
-    ],
+    newPassword: ['', [Validators.required, Validators.maxLength(128)]],
     confirmPassword: ['', [Validators.required]],
   });
 
@@ -87,20 +79,28 @@ export class ProfileSecurityPageComponent implements OnInit {
         newPassword: raw.newPassword,
       })
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.form.reset({
             currentPassword: '',
             newPassword: '',
             confirmPassword: '',
           });
-          this.toast.success('Password changed. Other sessions were revoked.');
+          const revoked =
+            typeof res.otherSessionsRevoked === 'number'
+              ? res.otherSessionsRevoked
+              : res.otherSessionsRevoked
+                ? 1
+                : 0;
+          this.toast.success(
+            revoked > 0
+              ? `Password changed. Revoked ${revoked} other session${revoked === 1 ? '' : 's'}.`
+              : 'Password changed.',
+          );
           this.saving.set(false);
           this.reload();
         },
-        error: (err: { error?: { message?: string }; message?: string }) => {
-          this.toast.error(err?.error?.message || err?.message || 'Unable to change password.');
-          this.saving.set(false);
-        },
+        // The global error interceptor already toasts the server's password-policy message.
+        error: () => this.saving.set(false),
       });
   }
 

@@ -1,0 +1,133 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  min-height: var(--zh-header-height);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 28rem) minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 1.35rem;
+  background: color-mix(in oklab, var(--zh-background) 92%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--zh-border);
+}
+
+.topbar__left,
+.topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.topbar__right {
+  justify-content: flex-end;
+}
+
+.topbar__greeting {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.topbar__search {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 999px;
+  background: var(--zh-card);
+  box-shadow: var(--zh-shadow-sm);
+  mat-icon {
+    color: var(--zh-muted-foreground);
+    font-size: 1.05rem;
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+  input {
+    border: 0;
+    outline: 0;
+    width: 100%;
+    background: transparent;
+    color: var(--zh-foreground);
+    font-size: 0.86rem;
+  }
+}
+
+.topbar__kbd {
+  display: none;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.35rem;
+  border: 1px solid var(--zh-border);
+  background: var(--zh-muted);
+  color: var(--zh-muted-foreground);
+  font-size: 0.68rem;
+  font-family: inherit;
+}
+
+.company-chip {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.35rem !important;
+  height: 2.35rem !important;
+  padding: 0 0.75rem !important;
+  border-radius: 999px !important;
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+  span {
+    max-width: 8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.company-chip__chevron {
+  font-size: 1.1rem !important;
+  width: 1.1rem !important;
+  height: 1.1rem !important;
+  opacity: 0.7;
+}
+
+.topbar__menu-mobile {
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .topbar__kbd {
+    display: inline-block;
+  }
+}
+
+@media (max-width: 1100px) {
+  .topbar {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .topbar__search {
+    display: none;
+  }
+
+  .company-chip span {
+    display: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .topbar__menu-mobile {
+    display: inline-flex;
+  }
+
+  .topbar__greeting {
+    font-size: 0.92rem;
+  }
+}

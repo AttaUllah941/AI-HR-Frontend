@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { filter } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   FeedbackType,
@@ -17,6 +16,8 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { FeedbackFormDialogComponent } from '../../dialogs/feedback-form-dialog.component';
 
@@ -45,15 +46,17 @@ const DIRECTION_OPTIONS = [
     MatSelectModule,
     MatIconModule,
     MatMenuModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationSectionHeaderComponent,
+    ErrorStateComponent,
+    TableSkeletonComponent,
   ],
   templateUrl: './performance-feedback-page.component.html',
   styleUrl: './performance-feedback-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PerformanceFeedbackPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly api = inject(PerformanceService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -93,7 +96,8 @@ export class PerformanceFeedbackPageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.api
+    this.inflight?.unsubscribe();
+    this.inflight = this.api
       .listFeedback({
         type: this.typeControl.value || undefined,
         direction: this.directionControl.value || undefined,
@@ -177,10 +181,7 @@ export class PerformanceFeedbackPageComponent implements OnInit {
   }
 
   fromLabel(item: PerformanceFeedback): string {
-    if (item.isAnonymous) {
-      return 'Anonymous';
-    }
-    return this.api.employeeLabel(item.fromEmployee);
+    return this.api.feedbackAuthorLabel(item);
   }
 
   toLabel(item: PerformanceFeedback): string {

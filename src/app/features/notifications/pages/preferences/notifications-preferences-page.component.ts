@@ -3,7 +3,6 @@ import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   NotificationPreference,
   NotificationsService,
@@ -11,6 +10,8 @@ import {
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-notifications-preferences-page',
@@ -20,15 +21,15 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatButtonModule,
     MatCheckboxModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './notifications-preferences-page.component.html',
   styleUrl: './notifications-preferences-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NotificationsPreferencesPageComponent implements OnInit {
+export class NotificationsPreferencesPageComponent implements OnInit, HasUnsavedChanges {
   private readonly fb = inject(FormBuilder);
   private readonly notifications = inject(NotificationsService);
   private readonly toast = inject(ToastService);
@@ -77,6 +78,7 @@ export class NotificationsPreferencesPageComponent implements OnInit {
     const payload = this.preferences.getRawValue() as NotificationPreference[];
     this.notifications.upsertPreferences(payload).subscribe({
       next: (res) => {
+          this.form.markAsPristine();
         this.preferences.clear();
         for (const pref of res.preferences) {
           this.preferences.push(this.createPrefGroup(pref));
@@ -103,4 +105,9 @@ export class NotificationsPreferencesPageComponent implements OnInit {
       pushEnabled: [pref.pushEnabled],
     });
   }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
 }

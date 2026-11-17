@@ -2,13 +2,13 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { filter } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ProfileService, ProfileSession } from '../../../../core/services/profile.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-profile-sessions-page',
@@ -16,10 +16,10 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
   imports: [
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     MatTooltipModule,
     EmptyStateComponent,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './profile-sessions-page.component.html',
   styleUrl: './profile-sessions-page.component.scss',

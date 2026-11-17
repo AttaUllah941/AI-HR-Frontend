@@ -39,10 +39,8 @@
     type="submit"
     form="review-cycle-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : data.cycle ? 'Save changes' : 'Create cycle' }}
   </button>
 </mat-dialog-actions>

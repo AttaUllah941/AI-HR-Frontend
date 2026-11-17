@@ -3,11 +3,12 @@
 // Material theme aligned to Zenith UX primary (indigo/violet hue ~265)
 html {
   height: 100%;
+  color-scheme: light dark;
 
   @include mat.theme(
     (
       color: (
-        theme-type: light,
+        theme-type: color-scheme,
         primary: mat.$azure-palette,
         tertiary: mat.$blue-palette,
       ),

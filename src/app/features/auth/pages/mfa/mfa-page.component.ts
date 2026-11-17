@@ -1,16 +1,20 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { safeReturnUrl } from '../../../../core/utils/safe-return-url';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-mfa-page',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule,
+    ButtonSpinnerDirective,
+  ],
   templateUrl: './mfa-page.component.html',
   styleUrl: './mfa-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,6 +24,7 @@ export class MfaPageComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly submitting = signal(false);
 
@@ -44,7 +49,9 @@ export class MfaPageComponent implements OnInit {
       next: () => {
         this.submitting.set(false);
         this.toast.success('Signed in successfully');
-        void this.router.navigate(['/dashboard']);
+        void this.router.navigateByUrl(
+          safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl')),
+        );
       },
       error: () => this.submitting.set(false),
     });

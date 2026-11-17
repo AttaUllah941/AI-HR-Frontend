@@ -21,7 +21,7 @@
 
 .confirm-dialog--destructive .confirm-dialog__icon {
   background: color-mix(in oklab, var(--zh-destructive) 12%, white);
-  color: var(--zh-destructive);
+  color: var(--zh-destructive-text);
 }
 
 h2 {

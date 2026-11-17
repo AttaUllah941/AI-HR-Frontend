@@ -5,6 +5,8 @@
 <app-organization-status
   [loading]="loading()"
   [error]="error()"
+  skeleton="profile"
+  [hasData]="!!employee()"
   loadingMessage="Loading profile…"
   errorTitle="Profile unavailable"
   (retry)="reload()"

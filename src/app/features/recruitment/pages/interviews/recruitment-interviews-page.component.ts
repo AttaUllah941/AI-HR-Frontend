@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { filter } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   Interview,
@@ -17,6 +16,8 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { InterviewFormDialogComponent } from '../../dialogs/interview-form-dialog.component';
 import { InterviewCompleteDialogComponent } from '../../dialogs/interview-complete-dialog.component';
@@ -39,15 +40,17 @@ const STATUS_OPTIONS: Array<{ value: InterviewStatus | ''; label: string }> = [
     MatSelectModule,
     MatIconModule,
     MatMenuModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationSectionHeaderComponent,
+    ErrorStateComponent,
+    TableSkeletonComponent,
   ],
   templateUrl: './recruitment-interviews-page.component.html',
   styleUrl: './recruitment-interviews-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecruitmentInterviewsPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly recruitment = inject(RecruitmentService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -90,7 +93,8 @@ export class RecruitmentInterviewsPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     const view = this.viewControl.value;
-    this.recruitment
+    this.inflight?.unsubscribe();
+    this.inflight = this.recruitment
       .listInterviews({
         status: this.statusControl.value || undefined,
         upcoming: view === 'upcoming' ? true : undefined,

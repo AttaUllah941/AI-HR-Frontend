@@ -55,10 +55,8 @@
     form="team-form"
     class="org-dialog-actions__save"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : 'Save team' }}
   </button>
 </mat-dialog-actions>

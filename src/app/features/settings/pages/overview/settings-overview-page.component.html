@@ -1,6 +1,8 @@
 <app-organization-status
   [loading]="loading()"
   [error]="error()"
+  skeleton="kpi"
+  [hasData]="!!summary()"
   loadingMessage="Loading settings…"
   errorTitle="Settings unavailable"
   (retry)="reload()"
@@ -48,39 +50,18 @@
         </div>
       </div>
 
-      <div class="settings-quick-links">
-        <a class="settings-quick-link" routerLink="/settings/company">
-          <mat-icon aria-hidden="true">business</mat-icon>
-          Company profile
-        </a>
-        <a class="settings-quick-link" routerLink="/settings/users">
-          <mat-icon aria-hidden="true">group</mat-icon>
-          Users
-        </a>
-        <a class="settings-quick-link" routerLink="/settings/roles">
-          <mat-icon aria-hidden="true">admin_panel_settings</mat-icon>
-          Roles &amp; permissions
-        </a>
-        <a class="settings-quick-link" routerLink="/settings/email">
-          <mat-icon aria-hidden="true">mail</mat-icon>
-          Email settings
-        </a>
-        <a class="settings-quick-link" routerLink="/settings/storage">
-          <mat-icon aria-hidden="true">cloud</mat-icon>
-          Storage
-        </a>
-        <a class="settings-quick-link" routerLink="/settings/system">
-          <mat-icon aria-hidden="true">tune</mat-icon>
-          System &amp; integrations
-        </a>
-        <a class="settings-quick-link" routerLink="/settings/security">
-          <mat-icon aria-hidden="true">security</mat-icon>
-          Security hardening
-        </a>
-        <a class="settings-quick-link" routerLink="/settings/audit">
-          <mat-icon aria-hidden="true">history</mat-icon>
-          Audit logs
-        </a>
+      <div class="settings-catalog-grid" aria-label="Settings catalog">
+        @for (card of cards(); track card.route) {
+          <a class="settings-catalog-card" [routerLink]="card.route">
+            <span class="settings-catalog-card__icon" aria-hidden="true">
+              <mat-icon>{{ card.icon }}</mat-icon>
+            </span>
+            <div>
+              <h3>{{ card.title }}</h3>
+              <p>{{ card.description }}</p>
+            </div>
+          </a>
+        }
       </div>
     </section>
   }

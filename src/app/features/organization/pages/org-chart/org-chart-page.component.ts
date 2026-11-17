@@ -34,6 +34,47 @@ export class OrgChartPageComponent implements OnInit {
     this.reload();
   }
 
+  onTreeKeydown(event: KeyboardEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target || target.getAttribute('role') !== 'treeitem') {
+      return;
+    }
+    const items = Array.from(
+      (event.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('[role="treeitem"]'),
+    );
+    const index = items.indexOf(target);
+    let next: HTMLElement | undefined;
+    switch (event.key) {
+      case 'ArrowDown':
+        next = items[Math.min(index + 1, items.length - 1)];
+        break;
+      case 'ArrowUp':
+        next = items[Math.max(index - 1, 0)];
+        break;
+      case 'Home':
+        next = items[0];
+        break;
+      case 'End':
+        next = items[items.length - 1];
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+    next?.focus();
+  }
+
+  /** Roving tabindex: only the focused item is a tab stop. */
+  onTreeFocusIn(event: FocusEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target || target.getAttribute('role') !== 'treeitem') {
+      return;
+    }
+    (event.currentTarget as HTMLElement)
+      .querySelectorAll<HTMLElement>('[role="treeitem"]')
+      .forEach((item) => item.setAttribute('tabindex', item === target ? '0' : '-1'));
+  }
+
   reload(): void {
     this.loading.set(true);
     this.error.set(null);

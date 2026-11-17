@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   CreateUserResult,
@@ -14,6 +13,7 @@ import {
   SettingsUser,
 } from '../../../core/services/settings.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 
 export interface UserFormDialogData {
   user?: SettingsUser | null;
@@ -21,7 +21,9 @@ export interface UserFormDialogData {
   mode: 'create' | 'edit';
 }
 
-export type UserFormDialogResult = boolean | { created: true; temporaryPassword?: string };
+export type UserFormDialogResult =
+  | boolean
+  | { created: true; temporaryPassword?: string; temporaryPasswordEmailed?: boolean };
 
 @Component({
   selector: 'app-user-form-dialog',
@@ -34,7 +36,7 @@ export type UserFormDialogResult = boolean | { created: true; temporaryPassword?
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './user-form-dialog.component.html',
   styleUrl: './user-form-dialog.component.scss',
@@ -68,7 +70,14 @@ export class UserFormDialogComponent {
       this.data.user?.roles.map((r) => r.code) ?? ([] as string[]),
       [Validators.required, Validators.minLength(1)],
     ],
-    temporaryPassword: [''],
+    temporaryPassword: [
+      '',
+      [
+        Validators.minLength(8),
+        Validators.maxLength(128),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).*$/),
+      ],
+    ],
   });
 
   submit(): void {
@@ -112,10 +121,15 @@ export class UserFormDialogComponent {
       })
       .subscribe({
         next: (res: CreateUserResult) => {
-          this.toast.success('User created.');
+          this.toast.success(
+            res.temporaryPasswordEmailed
+              ? 'User created. A temporary password was emailed to them.'
+              : 'User created.',
+          );
           this.dialogRef.close({
             created: true,
             temporaryPassword: res.temporaryPassword,
+            temporaryPasswordEmailed: res.temporaryPasswordEmailed,
           });
         },
         error: (err: { error?: { message?: string }; message?: string }) => {

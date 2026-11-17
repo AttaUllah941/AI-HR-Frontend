@@ -1,6 +1,8 @@
 <app-organization-status
   [loading]="loading()"
   [error]="error()"
+  skeleton="list"
+  [hasData]="items().length > 0"
   loadingMessage="Loading activity…"
   errorTitle="Activity unavailable"
   (retry)="reload()"
@@ -28,7 +30,7 @@
     } @else {
       <div class="profile-table-card">
         <div class="profile-table-wrap">
-          <table class="profile-table">
+          <table class="profile-table" data-responsive>
             <thead>
               <tr>
                 <th scope="col">Event</th>
@@ -40,11 +42,11 @@
             <tbody>
               @for (item of items(); track item.id) {
                 <tr class="profile-table__row">
-                  <td>
+                  <td data-label="Event">
                     <span class="profile-table__title">{{ item.title }}</span>
                     <span class="profile-table__body">{{ item.action }}</span>
                   </td>
-                  <td>
+                  <td data-label="Entity">
                     @if (item.entityType) {
                       {{ item.entityType }}
                       @if (item.entityId) {
@@ -54,8 +56,8 @@
                       —
                     }
                   </td>
-                  <td>{{ item.ipAddress || '—' }}</td>
-                  <td>
+                  <td data-label="IP">{{ item.ipAddress || '—' }}</td>
+                  <td data-label="When">
                     <span class="profile-table__title">{{ relative(item.createdAt) }}</span>
                     <span class="profile-table__body">{{ formatDate(item.createdAt) }}</span>
                   </td>

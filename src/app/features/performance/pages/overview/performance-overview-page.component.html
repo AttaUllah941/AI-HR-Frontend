@@ -1,6 +1,8 @@
 <app-organization-status
   [loading]="loading()"
   [error]="error()"
+  skeleton="kpi"
+  [hasData]="!!companySummary() || !!mySummary()"
   loadingMessage="Loading performance overview…"
   errorTitle="Performance overview unavailable"
   (retry)="reload()"
@@ -57,18 +59,13 @@
           title="No goals yet"
           message="Create goals to track employee objectives."
           icon="flag"
-        >
-          @if (canCreate) {
-            <button mat-flat-button color="primary" type="button" (click)="openCreateGoal()">
-              <mat-icon aria-hidden="true">add</mat-icon>
-              New goal
-            </button>
-          }
-        </app-empty-state>
+      [actionLabel]="canCreate ? 'New goal' : ''"
+      (action)="openCreateGoal()"
+    />
       } @else {
         <div class="performance-table-card">
           <div class="performance-table-wrap">
-            <table class="performance-table">
+            <table class="performance-table" data-responsive>
               <thead>
                 <tr>
                   <th scope="col">Goal</th>
@@ -82,14 +79,14 @@
               <tbody>
                 @for (goal of recentGoals(); track goal.id) {
                   <tr class="performance-table__row">
-                    <td>
+                    <td data-label="Goal">
                       <strong>{{ goal.title }}</strong>
                     </td>
                     @if (!isEmployeeView()) {
-                      <td>{{ employeeLabel(goal.employee) }}</td>
+                      <td data-label="Employee">{{ employeeLabel(goal.employee) }}</td>
                     }
-                    <td>{{ goal.progress }}%</td>
-                    <td>
+                    <td data-label="Progress">{{ goal.progress }}%</td>
+                    <td data-label="Status">
                       <span [class]="statusClass(goal.status)">
                         <span class="performance-status-pill__dot" aria-hidden="true"></span>
                         {{ statusLabel(goal.status) }}
@@ -118,7 +115,7 @@
       } @else {
         <div class="performance-table-card">
           <div class="performance-table-wrap">
-            <table class="performance-table">
+            <table class="performance-table" data-responsive>
               <thead>
                 <tr>
                   <th scope="col">Employee</th>
@@ -129,9 +126,9 @@
               <tbody>
                 @for (review of recentReviews(); track review.id) {
                   <tr class="performance-table__row">
-                    <td>{{ employeeLabel(review.employee) }}</td>
-                    <td>{{ review.overallRating ?? '—' }}</td>
-                    <td>
+                    <td data-label="Employee">{{ employeeLabel(review.employee) }}</td>
+                    <td data-label="Overall">{{ review.overallRating ?? '—' }}</td>
+                    <td data-label="Status">
                       <span [class]="statusClass(review.status)">
                         <span class="performance-status-pill__dot" aria-hidden="true"></span>
                         {{ statusLabel(review.status) }}

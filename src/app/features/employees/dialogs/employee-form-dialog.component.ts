@@ -23,6 +23,8 @@ import {
   EmploymentType,
 } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 const STATUSES: EmployeeStatus[] = [
   'DRAFT',
@@ -57,6 +59,7 @@ const EMPLOYMENT_TYPES: EmploymentType[] = [
     MatProgressSpinnerModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './employee-form-dialog.component.html',
   styleUrl: './employee-form-dialog.component.scss',
@@ -68,6 +71,10 @@ export class EmployeeFormDialogComponent implements OnInit {
   private readonly org = inject(OrganizationService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<EmployeeFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<{ employeeId: string | null }>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);

@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { AiGeneration, AiService } from '../../../core/services/ai.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
@@ -14,6 +13,10 @@ import {
   PerformanceService,
 } from '../../../core/services/performance.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { SmartLoaderComponent } from '../../../shared/smart-loader/smart-loader.component';
+import { LOADER_MESSAGES } from '../../../shared/smart-loader/loader-messages';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface AppraisalRunDialogData {
   employeeId?: string;
@@ -31,13 +34,15 @@ export interface AppraisalRunDialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    SmartLoaderComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './appraisal-run-dialog.component.html',
   styleUrl: './appraisal-run-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppraisalRunDialogComponent {
+  protected readonly generationMessages = LOADER_MESSAGES.generation;
   private readonly fb = inject(FormBuilder);
   private readonly ai = inject(AiService);
   private readonly employeesApi = inject(EmployeeService);
@@ -57,6 +62,7 @@ export class AppraisalRunDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     this.employeesApi.list({ page: 1, pageSize: 100, sortBy: 'lastName', sortDir: 'asc' }).subscribe({
       next: (res) => this.employees.set(res.items),
       error: () => this.employees.set([]),

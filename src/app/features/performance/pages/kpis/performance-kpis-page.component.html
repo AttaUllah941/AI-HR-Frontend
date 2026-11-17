@@ -13,29 +13,18 @@
 </app-organization-section-header>
 
 <div class="performance-table-card" style="margin-bottom: 1.5rem">
-  @if (loading()) {
-    <div class="performance-table-state">
-      <mat-spinner diameter="32" />
-      <span>Loading KPIs…</span>
-    </div>
+  @if (loading() && kpis().length === 0) {
+    <app-table-skeleton [rows]="6" [cols]="13" />
   } @else if (error()) {
-    <div class="performance-table-state performance-table-state--error">
-      <mat-icon>error_outline</mat-icon>
-      <p>{{ error() }}</p>
-      <button mat-stroked-button type="button" (click)="reloadKpis()">Try again</button>
-    </div>
+    <app-error-state [message]="error() ?? ''" (retry)="reloadKpis()" />
   } @else if (kpis().length === 0) {
-    <app-empty-state title="No KPIs" message="Create KPI definitions for the company." icon="speed">
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreateKpi()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          New KPI
-        </button>
-      }
-    </app-empty-state>
+    <app-empty-state title="No KPIs" message="Create KPI definitions for the company." icon="speed"
+      [actionLabel]="canCreate ? 'New KPI' : ''"
+      (action)="openCreateKpi()"
+    />
   } @else {
     <div class="performance-table-wrap">
-      <table class="performance-table">
+      <table class="performance-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Name</th>
@@ -49,12 +38,12 @@
         <tbody>
           @for (item of kpis(); track item.id) {
             <tr class="performance-table__row">
-              <td><strong>{{ item.name }}</strong></td>
-              <td>{{ item.code }}</td>
-              <td>{{ item.unit || '—' }}</td>
-              <td>{{ item.targetDefault ?? '—' }}</td>
-              <td>{{ item.isActive ? 'Yes' : 'No' }}</td>
-              <td class="performance-table__actions-col">
+              <td data-label="Name"><strong>{{ item.name }}</strong></td>
+              <td data-label="Code">{{ item.code }}</td>
+              <td data-label="Unit">{{ item.unit || '—' }}</td>
+              <td data-label="Default target">{{ item.targetDefault ?? '—' }}</td>
+              <td data-label="Active">{{ item.isActive ? 'Yes' : 'No' }}</td>
+              <td class="performance-table__actions-col" data-label="">
                 <button
                   mat-icon-button
                   type="button"
@@ -114,7 +103,7 @@
   }
 </app-organization-section-header>
 
-<div class="performance-table-card">
+<div class="performance-table-card" [class.is-refetching]="loading() && kpis().length > 0" [attr.aria-busy]="loading()">
   @if (assignmentsLoading()) {
     <div class="performance-table-state">
       <mat-spinner diameter="32" />
@@ -131,17 +120,12 @@
       title="No assignments"
       message="Assign KPIs to employees for this year."
       icon="assignment_ind"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openAssign()">
-          <mat-icon aria-hidden="true">person_add</mat-icon>
-          Assign KPI
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Assign KPI' : ''" actionIcon="person_add"
+      (action)="openAssign()"
+    />
   } @else {
     <div class="performance-table-wrap">
-      <table class="performance-table">
+      <table class="performance-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Employee</th>
@@ -156,13 +140,13 @@
         <tbody>
           @for (item of assignments(); track item.id) {
             <tr class="performance-table__row">
-              <td>{{ employeeLabel(item) }}</td>
-              <td>{{ kpiName(item) }}</td>
-              <td>{{ item.quarter ?? '—' }}</td>
-              <td>{{ item.targetValue }}</td>
-              <td>{{ item.actualValue }}</td>
-              <td>{{ item.score ?? '—' }}</td>
-              <td class="performance-table__actions-col">
+              <td data-label="Employee">{{ employeeLabel(item) }}</td>
+              <td data-label="KPI">{{ kpiName(item) }}</td>
+              <td data-label="Quarter">{{ item.quarter ?? '—' }}</td>
+              <td data-label="Target">{{ item.targetValue }}</td>
+              <td data-label="Actual">{{ item.actualValue }}</td>
+              <td data-label="Score">{{ item.score ?? '—' }}</td>
+              <td class="performance-table__actions-col" data-label="">
                 @if (canUpdate || canCreate) {
                   <button
                     mat-icon-button

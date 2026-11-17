@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { filter } from 'rxjs';
+import { filter, Subscription, forkJoin } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
@@ -20,6 +20,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { SendNotificationDialogComponent } from '../../dialogs/send-notification-dialog.component';
+import { optimistic } from '../../../../core/utils/optimistic';
 
 @Component({
   selector: 'app-notifications-inbox-page',
@@ -40,6 +41,7 @@ import { SendNotificationDialogComponent } from '../../dialogs/send-notification
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotificationsInboxPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly notifications = inject(NotificationsService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -86,9 +88,11 @@ export class NotificationsInboxPageComponent implements OnInit {
       next: (summary) => this.summary.set(summary),
       error: () => this.summary.set(null),
     });
-    this.notifications
+    this.inflight?.unsubscribe();
+    this.inflight = this.notifications
       .list({
         category: this.category.value || undefined,
+        channel: 'IN_APP',
         unreadOnly: this.unreadOnly.value || undefined,
         page: this.page(),
         pageSize: this.pageSize,
@@ -114,6 +118,11 @@ export class NotificationsInboxPageComponent implements OnInit {
     this.reload();
   }
 
+  filterByCategory(category: string): void {
+    this.category.setValue(category);
+    this.applyFilters();
+  }
+
   prevPage(): void {
     if (this.page() <= 1) {
       return;
@@ -130,16 +139,76 @@ export class NotificationsInboxPageComponent implements OnInit {
     this.reload();
   }
 
+  readonly selected = signal<ReadonlySet<string>>(new Set());
+  readonly unreadItems = computed(() => this.items().filter((n) => !this.notifications.isRead(n)));
+  readonly selectedUnread = computed(() =>
+    this.unreadItems().filter((n) => this.selected().has(n.id)),
+  );
+  readonly allSelected = computed(
+    () => this.unreadItems().length > 0 && this.selectedUnread().length === this.unreadItems().length,
+  );
+
+  toggleSelected(id: string): void {
+    this.selected.update((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  toggleAll(): void {
+    this.selected.set(
+      this.allSelected() ? new Set() : new Set(this.unreadItems().map((n) => n.id)),
+    );
+  }
+
+  clearSelection(): void {
+    this.selected.set(new Set());
+  }
+
+  /** Marks every selected notification read at once; rolls all of them back if any request fails. */
+  markSelectedRead(): void {
+    const targets = this.selectedUnread();
+    if (targets.length === 0) {
+      return;
+    }
+    const ids = new Set(targets.map((n) => n.id));
+    const before = this.items();
+    optimistic({
+      apply: () => {
+        const readAt = new Date().toISOString();
+        this.items.update((list) =>
+          list.map((n) => (ids.has(n.id) ? { ...n, status: 'READ', readAt } : n)),
+        );
+        this.clearSelection();
+      },
+      rollback: () => this.items.set(before),
+      request$: forkJoin(targets.map((n) => this.notifications.markRead(n.id))),
+      onSuccess: () => {
+        this.toast.success(`${targets.length} notification(s) marked as read.`);
+        this.reload();
+      },
+      onError: () => this.toast.error('Unable to mark the selected notifications as read.'),
+    });
+  }
+
   markRead(item: NotificationItem): void {
     if (this.notifications.isRead(item)) {
       return;
     }
-    this.notifications.markRead(item.id).subscribe({
-      next: () => {
-        this.toast.success('Marked as read.');
-        this.reload();
-      },
-      error: () => this.toast.error('Unable to mark as read.'),
+    const patch = (changes: Partial<NotificationItem>) =>
+      this.items.update((list) => list.map((n) => (n.id === item.id ? { ...n, ...changes } : n)));
+    optimistic({
+      apply: () => patch({ status: 'READ', readAt: new Date().toISOString() }),
+      rollback: () => patch({ status: item.status, readAt: item.readAt }),
+      request$: this.notifications.markRead(item.id),
+      // Refetch quietly so unread counters stay accurate.
+      onSuccess: () => this.reload(),
+      onError: () => this.toast.error('Unable to mark as read.'),
     });
   }
 

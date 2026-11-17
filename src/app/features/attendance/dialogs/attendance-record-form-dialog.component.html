@@ -16,19 +16,21 @@
 
   <form [formGroup]="form" class="att-form" id="attendance-record-form" (ngSubmit)="submit()">
     <div class="att-form__grid">
-      <mat-form-field appearance="outline">
-        <mat-label>Employee</mat-label>
-        <mat-select formControlName="employeeId">
-          @for (emp of employees(); track emp.id) {
-            <mat-option [value]="emp.id">
-              {{ emp.firstName }} {{ emp.lastName }} ({{ emp.employeeCode }})
-            </mat-option>
+      @if (canPickEmployee) {
+        <mat-form-field appearance="outline">
+          <mat-label>Employee</mat-label>
+          <mat-select formControlName="employeeId">
+            @for (emp of employees(); track emp.id) {
+              <mat-option [value]="emp.id">
+                {{ emp.firstName }} {{ emp.lastName }} ({{ emp.employeeCode }})
+              </mat-option>
+            }
+          </mat-select>
+          @if (form.controls.employeeId.touched && form.controls.employeeId.hasError('required')) {
+            <mat-error>Employee is required</mat-error>
           }
-        </mat-select>
-        @if (form.controls.employeeId.touched && form.controls.employeeId.hasError('required')) {
-          <mat-error>Employee is required</mat-error>
-        }
-      </mat-form-field>
+        </mat-form-field>
+      }
 
       <mat-form-field appearance="outline">
         <mat-label>Date</mat-label>
@@ -87,10 +89,8 @@
       type="submit"
       form="attendance-record-form"
       [disabled]="form.invalid || saving()"
-    >
-      @if (saving()) {
-        <mat-spinner class="save-spinner" diameter="16" />
-      }
+      [appButtonSpinner]="saving()">
+      
       {{ saving() ? 'Saving…' : 'Save record' }}
     </button>
   }

@@ -25,7 +25,7 @@
     />
   } @else {
     <div class="payroll-table-wrap">
-      <table class="payroll-table">
+      <table class="payroll-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Employee</th>
@@ -39,17 +39,17 @@
         <tbody>
           @for (entry of items(); track entry.id) {
             <tr class="payroll-table__row">
-              <td>
+              <td data-label="Employee">
                 <div class="payroll-table__employee-text">
                   <strong>{{ employeeName(entry) }}</strong>
                   <span>{{ entry.employee?.employeeCode || '—' }}</span>
                 </div>
               </td>
-              <td>{{ formatMoney(entry.basicSalary) }}</td>
-              <td>{{ formatMoney(entry.grossPay) }}</td>
-              <td>{{ formatMoney(entry.totalDeductions) }}</td>
-              <td>{{ formatMoney(entry.totalTax) }}</td>
-              <td>{{ formatMoney(entry.netPay) }}</td>
+              <td data-label="Basic">{{ formatMoney(entry.basicSalary) }}</td>
+              <td data-label="Gross">{{ formatMoney(entry.grossPay) }}</td>
+              <td data-label="Deductions">{{ formatMoney(entry.totalDeductions) }}</td>
+              <td data-label="Tax">{{ formatMoney(entry.totalTax) }}</td>
+              <td data-label="Net">{{ formatMoney(entry.netPay) }}</td>
             </tr>
           }
         </tbody>

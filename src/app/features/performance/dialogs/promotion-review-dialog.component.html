@@ -31,10 +31,8 @@
     type="submit"
     form="promotion-review-form"
     [disabled]="saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : approve ? 'Approve' : 'Reject' }}
   </button>
 </mat-dialog-actions>

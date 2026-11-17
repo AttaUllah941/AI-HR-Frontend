@@ -78,8 +78,6 @@ export interface UpdateEmailBody {
   emailProvider?: 'console' | 'smtp';
   emailFrom?: string | null;
   emailSmtpUrl?: string | null;
-  emailApiKey?: string | null;
-  clearApiKey?: boolean;
 }
 
 export interface UpdateStorageBody {
@@ -141,7 +139,10 @@ export interface UpdateUserBody {
 
 export interface CreateUserResult {
   user: SettingsUser;
+  /** Only returned for local development with the console email provider. */
   temporaryPassword?: string;
+  /** True when a generated password was delivered to the user by email. */
+  temporaryPasswordEmailed?: boolean;
 }
 
 export interface UsersListParams {

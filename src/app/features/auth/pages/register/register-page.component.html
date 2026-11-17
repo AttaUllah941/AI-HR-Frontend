@@ -41,7 +41,7 @@
       class="full"
       type="submit"
       [disabled]="form.invalid || submitting()"
-    >
+      [appButtonSpinner]="submitting()">
       {{ submitting() ? 'Creating…' : 'Create account' }}
     </button>
   </form>

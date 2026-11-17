@@ -8,33 +8,14 @@ import {
   input,
   viewChild,
 } from '@angular/core';
-import * as echarts from 'echarts/core';
-import { LineChart } from 'echarts/charts';
-import {
-  GridComponent,
-  TooltipComponent,
-} from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
+import { echarts } from '../../../../shared/charts/echarts-setup';
 
-echarts.use([LineChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
 @Component({
   selector: 'app-kpi-sparkline',
   standalone: true,
-  template: `<div #chartHost class="kpi-sparkline" role="img" [attr.aria-label]="label() + ' trend'"></div>`,
-  styles: `
-    :host {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    .kpi-sparkline {
-      width: 100%;
-      height: 100%;
-      min-height: 2.75rem;
-    }
-  `,
+  templateUrl: './kpi-sparkline.component.html',
+  styleUrl: './kpi-sparkline.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KpiSparklineComponent implements AfterViewInit, OnDestroy {

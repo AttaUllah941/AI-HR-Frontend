@@ -22,34 +22,22 @@
   }
 </app-organization-section-header>
 
-<div class="recruitment-table-card">
-  @if (loading()) {
-    <div class="recruitment-table-state">
-      <mat-spinner diameter="32" />
-      <span>Loading candidates…</span>
-    </div>
+<div class="recruitment-table-card" [class.is-refetching]="loading() && items().length > 0" [attr.aria-busy]="loading()">
+  @if (loading() && items().length === 0) {
+    <app-table-skeleton [rows]="6" [cols]="6" />
   } @else if (error()) {
-    <div class="recruitment-table-state recruitment-table-state--error">
-      <mat-icon>error_outline</mat-icon>
-      <p>{{ error() }}</p>
-      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
-    </div>
+    <app-error-state [message]="error() ?? ''" (retry)="reload()" />
   } @else if (items().length === 0) {
     <app-empty-state
       title="No candidates"
       message="Add a candidate or clear the search filter."
       icon="person_search"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Add candidate
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'Add candidate' : ''"
+      (action)="openCreate()"
+    />
   } @else {
     <div class="recruitment-table-wrap">
-      <table class="recruitment-table">
+      <table class="recruitment-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Candidate</th>
@@ -65,13 +53,13 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="recruitment-table__row">
-              <td>
+              <td data-label="Candidate">
                 <div class="recruitment-table__employee-text">
                   <strong>{{ fullName(item) }}</strong>
                   <span>{{ item.email }}</span>
                 </div>
               </td>
-              <td>
+              <td data-label="Current role">
                 {{ item.currentTitle || '—' }}
                 @if (item.currentCompany) {
                   <div class="recruitment-table__employee-text">
@@ -79,10 +67,10 @@
                   </div>
                 }
               </td>
-              <td>{{ item.source || '—' }}</td>
-              <td>{{ item.screeningScore != null ? item.screeningScore : '—' }}</td>
-              <td>{{ item.resumeFileName || (item.resumeUrl ? 'Linked' : '—') }}</td>
-              <td class="recruitment-table__actions-col">
+              <td data-label="Source">{{ item.source || '—' }}</td>
+              <td data-label="Screening">{{ item.screeningScore != null ? item.screeningScore : '—' }}</td>
+              <td data-label="Resume">{{ item.resumeFileName || (item.resumeUrl ? 'Linked' : '—') }}</td>
+              <td class="recruitment-table__actions-col" data-label="">
                 <button
                   mat-icon-button
                   type="button"

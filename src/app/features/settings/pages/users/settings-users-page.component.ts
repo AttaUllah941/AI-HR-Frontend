@@ -6,8 +6,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import {
   SettingsRole,
   SettingsService,
@@ -40,10 +41,12 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsUsersPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly settings = inject(SettingsService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
+  private readonly confirm = inject(ConfirmDialogService);
 
   readonly items = signal<SettingsUser[]>([]);
   readonly roles = signal<SettingsRole[]>([]);
@@ -51,6 +54,7 @@ export class SettingsUsersPageComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly total = signal(0);
   readonly generatedPassword = signal<string | null>(null);
+  readonly passwordEmailed = signal(false);
 
   readonly canCreate = this.auth.hasPermission('users:create');
   readonly canUpdate = this.auth.hasPermission('users:update');
@@ -80,7 +84,8 @@ export class SettingsUsersPageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.settings
+    this.inflight?.unsubscribe();
+    this.inflight = this.settings
       .listUsers({
         search: this.search.value.trim() || undefined,
         status: this.status.value || undefined,
@@ -112,6 +117,7 @@ export class SettingsUsersPageComponent implements OnInit {
         if (!result) return;
         if (typeof result === 'object' && result.created) {
           this.generatedPassword.set(result.temporaryPassword ?? null);
+          this.passwordEmailed.set(Boolean(result.temporaryPasswordEmailed));
           this.reload();
         } else if (result === true) {
           this.reload();
@@ -134,16 +140,25 @@ export class SettingsUsersPageComponent implements OnInit {
 
   remove(user: SettingsUser): void {
     if (!this.canDelete) return;
-    if (!confirm(`Delete user ${user.email}?`)) return;
-    this.settings.deleteUser(user.id).subscribe({
-      next: () => {
-        this.toast.success('User deleted.');
-        this.reload();
-      },
-      error: (err: { error?: { message?: string }; message?: string }) => {
-        this.toast.error(err?.error?.message || err?.message || 'Unable to delete user.');
-      },
-    });
+    this.confirm
+      .open({
+        title: 'Delete user?',
+        message: `Remove ${user.email} from this company? This soft-deletes the account.`,
+        confirmLabel: 'Delete',
+        destructive: true,
+      })
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        this.settings.deleteUser(user.id).subscribe({
+          next: () => {
+            this.toast.success('User deleted.');
+            this.reload();
+          },
+          error: (err: { error?: { message?: string }; message?: string }) => {
+            this.toast.error(err?.error?.message || err?.message || 'Unable to delete user.');
+          },
+        });
+      });
   }
 
   formatDate(iso: string | null | undefined): string {
@@ -152,5 +167,6 @@ export class SettingsUsersPageComponent implements OnInit {
 
   dismissPassword(): void {
     this.generatedPassword.set(null);
+    this.passwordEmailed.set(false);
   }
 }

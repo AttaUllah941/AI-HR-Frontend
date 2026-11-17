@@ -12,9 +12,9 @@
         <p class="settings-page-sub">
           Provider configuration for outbound mail.
           @if (apiKeySet()) {
-            <span class="settings-badge settings-badge--ok">API key set</span>
+            <span class="settings-badge settings-badge--ok">API key configured (environment)</span>
           } @else {
-            <span class="settings-badge settings-badge--warn">API key not set</span>
+            <span class="settings-badge settings-badge--warn">API key not set in environment</span>
           }
         </p>
       </div>
@@ -27,12 +27,8 @@
             class="settings-add-btn"
             [disabled]="form.invalid || saving()"
             (click)="save()"
-          >
-            @if (saving()) {
-              <mat-spinner diameter="16" />
-            } @else {
-              <mat-icon aria-hidden="true">save</mat-icon>
-            }
+            [appButtonSpinner]="saving()">
+            @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
             {{ saving() ? 'Saving…' : 'Save email' }}
           </button>
         </div>
@@ -55,16 +51,35 @@
           </mat-form-field>
           <mat-form-field appearance="outline" class="settings-form__full">
             <mat-label>SMTP URL</mat-label>
-            <input matInput formControlName="emailSmtpUrl" placeholder="smtps://user:pass@host:465" />
+            <input
+              matInput
+              formControlName="emailSmtpUrl"
+              autocomplete="off"
+              [placeholder]="maskedSmtpUrl() || 'smtps://user:pass@host:465'"
+            />
+            <mat-hint>
+              @if (maskedSmtpUrl()) {
+                Current: {{ maskedSmtpUrl() }} (credentials hidden). Leave blank to keep it.
+              } @else {
+                Enter a relay URL to configure SMTP.
+              }
+            </mat-hint>
           </mat-form-field>
           <mat-form-field appearance="outline" class="settings-form__full">
-            <mat-label>API key (optional)</mat-label>
-            <input matInput formControlName="emailApiKey" type="password" autocomplete="off" />
-            <mat-hint>Stored as a flag only — runtime keys still come from environment</mat-hint>
+            <mat-label>API key</mat-label>
+            <input
+              matInput
+              type="password"
+              autocomplete="off"
+              disabled
+              [value]="apiKeySet() ? '••••••••••••' : ''"
+              [placeholder]="apiKeySet() ? '' : 'Not configured'"
+            />
+            <mat-hint>
+              The API key is configured via the EMAIL_API_KEY server environment variable and
+              cannot be changed here.
+            </mat-hint>
           </mat-form-field>
-          <div class="settings-form__full">
-            <mat-checkbox formControlName="clearApiKey">Clear API key flag</mat-checkbox>
-          </div>
         </div>
       </form>
     </div>

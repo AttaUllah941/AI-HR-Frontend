@@ -4,11 +4,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
+  PROFILE_DATE_FORMAT_OPTIONS,
+  PROFILE_LOCALE_OPTIONS,
   PROFILE_THEMES,
+  PROFILE_THEME_LABELS,
   PROFILE_TIME_FORMATS,
+  PROFILE_TIMEZONE_OPTIONS,
   ProfileTheme,
   ProfileTimeFormat,
   ProfileService,
@@ -16,6 +19,9 @@ import {
 } from '../../../../core/services/profile.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { ThemeService, isThemeMode } from '../../../../core/services/theme.service';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-profile-preferences-page',
@@ -27,14 +33,15 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './profile-preferences-page.component.html',
   styleUrl: './profile-preferences-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProfilePreferencesPageComponent implements OnInit {
+export class ProfilePreferencesPageComponent implements OnInit, HasUnsavedChanges {
+  private readonly themeService = inject(ThemeService);
   private readonly fb = inject(FormBuilder);
   private readonly profile = inject(ProfileService);
   private readonly toast = inject(ToastService);
@@ -44,7 +51,11 @@ export class ProfilePreferencesPageComponent implements OnInit {
   readonly error = signal<string | null>(null);
 
   readonly themes = PROFILE_THEMES;
+  readonly themeLabels = PROFILE_THEME_LABELS;
   readonly timeFormats = PROFILE_TIME_FORMATS;
+  readonly locales = signal<string[]>([...PROFILE_LOCALE_OPTIONS]);
+  readonly timezones = signal<string[]>([...PROFILE_TIMEZONE_OPTIONS]);
+  readonly dateFormats = signal<string[]>([...PROFILE_DATE_FORMAT_OPTIONS]);
   readonly weekStartsOnOptions = WEEK_START_OPTIONS;
 
   readonly form = this.fb.nonNullable.group({
@@ -68,11 +79,17 @@ export class ProfilePreferencesPageComponent implements OnInit {
     this.error.set(null);
     this.profile.getPreferences().subscribe({
       next: (prefs) => {
+        const locale = prefs.locale || 'en-US';
+        const timezone = prefs.timezone || 'UTC';
+        const dateFormat = prefs.dateFormat || 'DD MMM YYYY';
+        this.locales.set(this.withOption(PROFILE_LOCALE_OPTIONS, locale));
+        this.timezones.set(this.withOption(PROFILE_TIMEZONE_OPTIONS, timezone));
+        this.dateFormats.set(this.withOption(PROFILE_DATE_FORMAT_OPTIONS, dateFormat));
         this.form.reset({
           theme: (prefs.theme as ProfileTheme) || 'system',
-          locale: prefs.locale || 'en-US',
-          timezone: prefs.timezone || 'UTC',
-          dateFormat: prefs.dateFormat || 'DD MMM YYYY',
+          locale,
+          timezone,
+          dateFormat,
           timeFormat: (prefs.timeFormat as ProfileTimeFormat) || '24h',
           weekStartsOn: prefs.weekStartsOn ?? 1,
         });
@@ -103,11 +120,20 @@ export class ProfilePreferencesPageComponent implements OnInit {
       })
       .subscribe({
         next: (prefs) => {
+          if (isThemeMode(prefs.theme)) {
+            this.themeService.setMode(prefs.theme, { persist: false });
+          }
+          const locale = prefs.locale || 'en-US';
+          const timezone = prefs.timezone || 'UTC';
+          const dateFormat = prefs.dateFormat || 'DD MMM YYYY';
+          this.locales.set(this.withOption(PROFILE_LOCALE_OPTIONS, locale));
+          this.timezones.set(this.withOption(PROFILE_TIMEZONE_OPTIONS, timezone));
+          this.dateFormats.set(this.withOption(PROFILE_DATE_FORMAT_OPTIONS, dateFormat));
           this.form.reset({
             theme: (prefs.theme as ProfileTheme) || 'system',
-            locale: prefs.locale || 'en-US',
-            timezone: prefs.timezone || 'UTC',
-            dateFormat: prefs.dateFormat || 'DD MMM YYYY',
+            locale,
+            timezone,
+            dateFormat,
             timeFormat: (prefs.timeFormat as ProfileTimeFormat) || '24h',
             weekStartsOn: prefs.weekStartsOn ?? 1,
           });
@@ -120,4 +146,13 @@ export class ProfilePreferencesPageComponent implements OnInit {
         },
       });
   }
+
+  private withOption(options: string[], value: string): string[] {
+    return options.includes(value) ? [...options] : [value, ...options];
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
 }

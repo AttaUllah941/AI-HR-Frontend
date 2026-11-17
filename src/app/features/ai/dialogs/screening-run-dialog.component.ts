@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { AiGeneration, AiService } from '../../../core/services/ai.service';
 import {
@@ -14,6 +13,10 @@ import {
   RecruitmentService,
 } from '../../../core/services/recruitment.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { SmartLoaderComponent } from '../../../shared/smart-loader/smart-loader.component';
+import { LOADER_MESSAGES } from '../../../shared/smart-loader/loader-messages';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface ScreeningRunDialogData {
   candidateId?: string;
@@ -31,13 +34,15 @@ export interface ScreeningRunDialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    SmartLoaderComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './screening-run-dialog.component.html',
   styleUrl: './screening-run-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScreeningRunDialogComponent {
+  protected readonly resumeMessages = LOADER_MESSAGES.resume;
   private readonly fb = inject(FormBuilder);
   private readonly ai = inject(AiService);
   private readonly recruitment = inject(RecruitmentService);
@@ -56,6 +61,7 @@ export class ScreeningRunDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     this.recruitment.listCandidates({ page: 1, pageSize: 100 }).subscribe({
       next: (res) => this.candidates.set(res.items),
       error: () => this.candidates.set([]),

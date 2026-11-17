@@ -37,6 +37,8 @@ export interface GlobalSearchParams {
   departmentId?: string;
   status?: string;
   category?: string;
+  /** When false, do not write to recent-searches history. */
+  saveRecent?: boolean;
 }
 
 export interface GlobalSearchResult {
@@ -102,11 +104,21 @@ export class GlobalService {
   private readonly api = inject(ApiService);
 
   search(params: GlobalSearchParams): Observable<GlobalSearchResult> {
+    const query: Record<string, string | number | boolean> = {
+      q: params.q,
+    };
+    if (params.types) query['types'] = params.types;
+    if (params.page != null) query['page'] = params.page;
+    if (params.pageSize != null) query['pageSize'] = params.pageSize;
+    if (params.sortBy) query['sortBy'] = params.sortBy;
+    if (params.sortDir) query['sortDir'] = params.sortDir;
+    if (params.departmentId) query['departmentId'] = params.departmentId;
+    if (params.status) query['status'] = params.status;
+    if (params.category) query['category'] = params.category;
+    if (params.saveRecent === false) query['saveRecent'] = false;
+
     return this.api
-      .get<GlobalSearchResult>(
-        '/global/search',
-        params as unknown as Record<string, string | number | boolean>,
-      )
+      .get<GlobalSearchResult>('/global/search', query)
       .pipe(map((res) => this.unwrap(res)));
   }
 

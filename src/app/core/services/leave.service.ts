@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
+import { TtlCache } from '../utils/ttl-cache';
 import { ApiService } from './api.service';
 import { ApiResponse } from '../models/api.models';
 
@@ -145,26 +146,39 @@ export interface LeaveBalanceListParams {
 export class LeaveService {
   private readonly api = inject(ApiService);
 
-  listTypes(): Observable<LeaveType[]> {
-    return this.api
+  private readonly leaveTypesCache = new TtlCache<LeaveType[]>(() =>
+    this.api
       .get<{ items: LeaveType[] }>('/leave/types')
-      .pipe(map((res) => this.unwrap(res).items));
+      .pipe(map((res) => this.unwrap(res).items)),
+  );
+
+  listTypes(): Observable<LeaveType[]> {
+    return this.leaveTypesCache.get();
   }
 
   createType(body: Record<string, unknown>): Observable<LeaveType> {
-    return this.api.post<LeaveType>('/leave/types', body).pipe(map((res) => this.unwrap(res)));
+    return this.api.post<LeaveType>('/leave/types', body).pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.leaveTypesCache.invalidate()),
+      );
   }
 
   updateType(id: string, body: Record<string, unknown>): Observable<LeaveType> {
     return this.api
       .patch<LeaveType>(`/leave/types/${id}`, body)
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.leaveTypesCache.invalidate()),
+      );
   }
 
   deleteType(id: string): Observable<{ id: string; deleted: boolean }> {
     return this.api
       .delete<{ id: string; deleted: boolean }>(`/leave/types/${id}`)
-      .pipe(map((res) => this.unwrap(res)));
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => this.leaveTypesCache.invalidate()),
+      );
   }
 
   getPolicy(): Observable<LeavePolicy> {
@@ -179,7 +193,11 @@ export class LeaveService {
 
   listBalances(params: LeaveBalanceListParams = {}): Observable<LeaveBalance[]> {
     return this.api
-      .get<{ items: LeaveBalance[] }>('/leave/balances', params as Record<string, string | number>)
+      .get<{ items: LeaveBalance[] }>('/leave/balances', {
+        ...(params as Record<string, string | number>),
+        page: 1,
+        pageSize: 100,
+      })
       .pipe(map((res) => this.unwrap(res).items));
   }
 

@@ -6,9 +6,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PerformanceKpi, PerformanceService } from '../../../core/services/performance.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface KpiFormDialogData {
   kpi?: PerformanceKpi | null;
@@ -25,7 +26,7 @@ export interface KpiFormDialogData {
     MatCheckboxModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './kpi-form-dialog.component.html',
   styleUrl: './kpi-form-dialog.component.scss',
@@ -51,6 +52,7 @@ export class KpiFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     if (this.isEdit) {
       this.form.controls.code.disable();
     }

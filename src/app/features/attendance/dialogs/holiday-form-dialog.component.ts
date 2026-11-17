@@ -6,9 +6,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AttendanceService, Holiday } from '../../../core/services/attendance.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-holiday-form-dialog',
@@ -21,7 +22,7 @@ import { ToastService } from '../../../core/services/toast.service';
     MatButtonModule,
     MatCheckboxModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './holiday-form-dialog.component.html',
   styleUrl: './holiday-form-dialog.component.scss',
@@ -32,6 +33,10 @@ export class HolidayFormDialogComponent {
   private readonly attendance = inject(AttendanceService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<HolidayFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<{ holiday: Holiday | null }>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);

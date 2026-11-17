@@ -5,13 +5,7 @@ import { FilesBrowserPageComponent } from '../browser/files-browser-page.compone
   selector: 'app-files-documents-page',
   standalone: true,
   imports: [FilesBrowserPageComponent],
-  template: `
-    <app-files-browser-page
-      lockedCategory="EMPLOYEE_DOCUMENT"
-      heading="Employee documents"
-      subtitle="HR documents linked to employee records."
-    />
-  `,
+  templateUrl: './files-documents-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilesDocumentsPageComponent {}

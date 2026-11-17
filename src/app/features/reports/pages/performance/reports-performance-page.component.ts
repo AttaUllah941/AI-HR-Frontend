@@ -16,6 +16,9 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ReportsBarChartComponent } from '../../components/reports-bar-chart.component';
+import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
+import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
+import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
 
 @Component({
   selector: 'app-reports-performance-page',
@@ -31,12 +34,15 @@ import { ReportsBarChartComponent } from '../../components/reports-bar-chart.com
     EmptyStateComponent,
     OrganizationStatusComponent,
     ReportsBarChartComponent,
+    SmartLoaderComponent,
+    ChartSkeletonComponent,
   ],
   templateUrl: './reports-performance-page.component.html',
   styleUrl: './reports-performance-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportsPerformancePageComponent implements OnInit {
+  protected readonly exportMessages = LOADER_MESSAGES.export;
   private readonly reports = inject(ReportsService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -87,7 +93,7 @@ export class ReportsPerformancePageComponent implements OnInit {
       })
       .subscribe({
         next: () => {
-          this.toast.success(`${format} export started.`);
+          this.toast.success(`${format} download ready.`);
           this.exporting.set(false);
         },
         error: (err: { error?: { message?: string }; message?: string }) => {

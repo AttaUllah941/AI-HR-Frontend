@@ -5,12 +5,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PayrollService, TaxSetting } from '../../../../core/services/payroll.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-payroll-tax-page',
@@ -22,15 +23,15 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     OrganizationSectionHeaderComponent,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './payroll-tax-page.component.html',
   styleUrl: './payroll-tax-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PayrollTaxPageComponent implements OnInit {
+export class PayrollTaxPageComponent implements OnInit, HasUnsavedChanges {
   private readonly payroll = inject(PayrollService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -110,4 +111,9 @@ export class PayrollTaxPageComponent implements OnInit {
         },
       });
   }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
 }

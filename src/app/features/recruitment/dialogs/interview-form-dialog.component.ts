@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   Interview,
@@ -15,6 +14,8 @@ import {
 } from '../../../core/services/recruitment.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface InterviewFormDialogData {
   interview?: Interview | null;
@@ -41,7 +42,7 @@ const INTERVIEW_TYPES: InterviewType[] = [
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './interview-form-dialog.component.html',
   styleUrl: './interview-form-dialog.component.scss',
@@ -80,6 +81,7 @@ export class InterviewFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     if (!this.isEdit) {
       this.recruitment
         .listApplications({ page: 1, pageSize: 100 })

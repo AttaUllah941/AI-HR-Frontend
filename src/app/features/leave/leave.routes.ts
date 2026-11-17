@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
 
 export const LEAVE_ROUTES: Routes = [
   {
@@ -46,6 +47,7 @@ export const LEAVE_ROUTES: Routes = [
       },
       {
         path: 'policy',
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./pages/policy/leave-policy-page.component').then(
             (m) => m.LeavePolicyPageComponent,

@@ -8,28 +8,15 @@ import {
   input,
   viewChild,
 } from '@angular/core';
-import * as echarts from 'echarts/core';
-import { LineChart } from 'echarts/charts';
-import { GridComponent, TooltipComponent } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
+import { echarts } from '../../../../shared/charts/echarts-setup';
 import { DashboardGrowthPoint } from '../../../../core/services/dashboard.service';
 
-echarts.use([LineChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
 @Component({
   selector: 'app-employee-growth-chart',
   standalone: true,
-  template: `<div #host class="chart-host" role="img" aria-label="Employee growth"></div>`,
-  styles: `
-    :host {
-      display: block;
-      width: 100%;
-    }
-    .chart-host {
-      width: 100%;
-      height: 16.5rem;
-    }
-  `,
+  templateUrl: './employee-growth-chart.component.html',
+  styleUrl: './employee-growth-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmployeeGrowthChartComponent implements AfterViewInit, OnDestroy {

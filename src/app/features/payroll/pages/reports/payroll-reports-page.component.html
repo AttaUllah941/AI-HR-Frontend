@@ -34,7 +34,7 @@
           <p class="payroll-overview-sub">No status aggregates.</p>
         } @else {
           <div class="payroll-table-wrap">
-            <table class="payroll-table">
+            <table class="payroll-table" data-responsive>
               <thead>
                 <tr>
                   <th scope="col">Status</th>
@@ -44,13 +44,13 @@
               <tbody>
                 @for (row of report()!.byStatus; track row.status) {
                   <tr class="payroll-table__row">
-                    <td>
+                    <td data-label="Status">
                       <span [class]="statusClass(row.status)">
                         <span class="payroll-status-pill__dot" aria-hidden="true"></span>
                         {{ statusLabel(row.status) }}
                       </span>
                     </td>
-                    <td>{{ row.count }}</td>
+                    <td data-label="Runs">{{ row.count }}</td>
                   </tr>
                 }
               </tbody>
@@ -65,7 +65,7 @@
           <p class="payroll-overview-sub">No monthly aggregates.</p>
         } @else {
           <div class="payroll-table-wrap">
-            <table class="payroll-table">
+            <table class="payroll-table" data-responsive>
               <thead>
                 <tr>
                   <th scope="col">Month</th>
@@ -78,16 +78,16 @@
               <tbody>
                 @for (row of report()!.byMonth; track row.month) {
                   <tr class="payroll-table__row">
-                    <td>{{ monthLabel(row.month) }}</td>
-                    <td>
+                    <td data-label="Month">{{ monthLabel(row.month) }}</td>
+                    <td data-label="Status">
                       <span [class]="statusClass(row.status)">
                         <span class="payroll-status-pill__dot" aria-hidden="true"></span>
                         {{ statusLabel(row.status) }}
                       </span>
                     </td>
-                    <td>{{ row.entryCount }}</td>
-                    <td>{{ formatMoney(row.grossPay) }}</td>
-                    <td>{{ formatMoney(row.netPay) }}</td>
+                    <td data-label="Entries">{{ row.entryCount }}</td>
+                    <td data-label="Gross">{{ formatMoney(row.grossPay) }}</td>
+                    <td data-label="Net">{{ formatMoney(row.netPay) }}</td>
                   </tr>
                 }
               </tbody>

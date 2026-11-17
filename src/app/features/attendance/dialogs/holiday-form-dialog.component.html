@@ -41,10 +41,8 @@
     type="submit"
     form="holiday-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : 'Save holiday' }}
   </button>
 </mat-dialog-actions>

@@ -5,6 +5,9 @@
   errorTitle="Reports overview unavailable"
   (retry)="reload()"
 >
+  @if (exporting()) {
+    <app-smart-loader class="long-op" [messages]="exportMessages" [diameter]="28" />
+  }
   <section class="reports-page" aria-label="Reports overview">
     <div class="reports-action-bar">
       <div>
@@ -35,6 +38,7 @@
           </button>
           <mat-menu #exportMenu="matMenu">
             <button mat-menu-item type="button" (click)="exportOverview('CSV')">CSV</button>
+            <button mat-menu-item type="button" (click)="exportOverview('XLSX')">Excel (.xlsx)</button>
             <button mat-menu-item type="button" (click)="exportOverview('PDF')">PDF</button>
             <button mat-menu-item type="button" (click)="exportOverview('JSON')">JSON</button>
           </mat-menu>
@@ -59,29 +63,94 @@
     @if (summary(); as s) {
       <div class="reports-chart-grid">
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart
-            [points]="s.charts.attendanceByStatus"
-            title="Attendance by status"
-          />
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.attendanceByStatus"
+              title="Attendance by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart [points]="s.charts.leaveByStatus" title="Leave by status" />
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.leaveByStatus"
+              title="Leave by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart [points]="s.charts.jobsByStatus" title="Jobs by status" />
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.payrollByStatus"
+              title="Payroll by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
+        </mat-card>
+        <mat-card class="reports-chart-card">
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.jobsByStatus"
+              title="Jobs by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
+        </mat-card>
+        <mat-card class="reports-chart-card">
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.applicationsByStatus"
+              title="Applications by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
       </div>
 
       <div>
         <div class="reports-action-bar">
-          <h3 class="reports-heading">Modules</h3>
+          <h3 class="reports-heading">Report catalog</h3>
         </div>
         <div class="reports-module-grid">
           @for (mod of s.modules; track mod.key) {
-            <a class="reports-module-link" [routerLink]="['/reports', mod.path]">
-              <mat-icon aria-hidden="true">{{ moduleIcons[mod.key] || 'insights' }}</mat-icon>
-              {{ mod.label }}
-            </a>
+            <article class="reports-module-card">
+              <a class="reports-module-card__body" [routerLink]="['/reports', mod.path]">
+                <span class="reports-module-card__icon" aria-hidden="true">
+                  <mat-icon>{{ moduleIcons[mod.key] || 'insights' }}</mat-icon>
+                </span>
+                <div>
+                  <h4>{{ mod.label }}</h4>
+                  <p>{{ moduleDescription(mod.key, mod.description) }}</p>
+                </div>
+              </a>
+              @if (canExport) {
+                <div class="reports-module-card__actions">
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="exporting()"
+                    (click)="exportModule(mod.key, 'PDF', $event)"
+                  >
+                    {{ exportingKey() === mod.key ? '…' : 'PDF' }}
+                  </button>
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="exporting()"
+                    (click)="exportModule(mod.key, 'XLSX', $event)"
+                  >
+                    Excel
+                  </button>
+                </div>
+              }
+            </article>
           }
         </div>
       </div>
@@ -99,7 +168,7 @@
         } @else {
           <div class="reports-table-card">
             <div class="reports-table-wrap">
-              <table class="reports-table">
+              <table class="reports-table" data-responsive>
                 <thead>
                   <tr>
                     <th scope="col">Report</th>
@@ -111,15 +180,15 @@
                 <tbody>
                   @for (row of s.recentExports; track row.id) {
                     <tr class="reports-table__row">
-                      <td>{{ reportTypeLabel(row.reportType) }}</td>
-                      <td>
+                      <td data-label="Report">{{ reportTypeLabel(row.reportType) }}</td>
+                      <td data-label="Format">
                         <span [class]="statusClass('info')">
                           <span class="reports-status-pill__dot" aria-hidden="true"></span>
                           {{ row.format }}
                         </span>
                       </td>
-                      <td>{{ row.fileName || '—' }}</td>
-                      <td>{{ row.createdAt | date: 'short' }}</td>
+                      <td data-label="File">{{ row.fileName || '—' }}</td>
+                      <td data-label="When">{{ row.createdAt | date: 'short' }}</td>
                     </tr>
                   }
                 </tbody>

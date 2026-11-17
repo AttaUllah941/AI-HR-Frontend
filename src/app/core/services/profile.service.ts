@@ -63,7 +63,7 @@ export interface ChangePasswordBody {
 
 export interface ChangePasswordResult {
   changed: boolean;
-  otherSessionsRevoked: boolean;
+  otherSessionsRevoked: boolean | number;
 }
 
 export interface UpdatePreferencesBody {
@@ -111,6 +111,24 @@ export interface ProfileActivityResult {
 
 export const PROFILE_THEMES: ProfileTheme[] = ['system', 'light', 'dark'];
 export const PROFILE_TIME_FORMATS: ProfileTimeFormat[] = ['12h', '24h'];
+export const PROFILE_THEME_LABELS: Record<ProfileTheme, string> = {
+  system: 'System',
+  light: 'Light',
+  dark: 'Dark',
+};
+export const PROFILE_LOCALE_OPTIONS = ['en-US', 'en-GB', 'fr-FR', 'de-DE', 'ar-SA', 'ur-PK'];
+export const PROFILE_TIMEZONE_OPTIONS = [
+  'UTC',
+  'America/New_York',
+  'America/Los_Angeles',
+  'Europe/London',
+  'Europe/Berlin',
+  'Asia/Dubai',
+  'Asia/Karachi',
+  'Asia/Kolkata',
+  'Asia/Singapore',
+];
+export const PROFILE_DATE_FORMAT_OPTIONS = ['DD MMM YYYY', 'MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'];
 
 export const WEEK_START_OPTIONS: { value: number; label: string }[] = [
   { value: 0, label: 'Sunday' },

@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, finalize, map, shareReplay, tap, throwError } from 'rxjs';
 import { ApiService } from './api.service';
+import { clearAllTtlCaches } from '../utils/ttl-cache';
 import {
   ApiResponse,
   AuthTokens,
@@ -17,6 +18,7 @@ const ACCESS_TOKEN_KEY = 'zh_access_token';
 const REFRESH_TOKEN_KEY = 'zh_refresh_token';
 const USER_KEY = 'zh_user';
 const MFA_TOKEN_KEY = 'zh_mfa_token';
+const REMEMBER_KEY = 'zh_mfa_remember';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -25,18 +27,26 @@ export class AuthService {
 
   private readonly userSignal = signal<AuthUser | null>(this.readUser());
   private readonly accessTokenSignal = signal<string | null>(this.readAccessToken());
+  private readonly refreshTokenSignal = signal<string | null>(this.readStored(REFRESH_TOKEN_KEY));
   private refreshInFlight$: Observable<AuthSessionData> | null = null;
 
   readonly user = this.userSignal.asReadonly();
   readonly accessToken = this.accessTokenSignal.asReadonly();
-  readonly isAuthenticated = computed(() => !!this.accessTokenSignal());
+  readonly isAuthenticated = computed(() => {
+    const token = this.accessTokenSignal();
+    if (!token) {
+      return false;
+    }
+    // An expired access token can only be recovered through a refresh token.
+    return !isJwtExpired(token) || !!this.refreshTokenSignal();
+  });
 
   getAccessToken(): string | null {
     return this.accessTokenSignal();
   }
 
   getRefreshToken(): string | null {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
+    return this.refreshTokenSignal();
   }
 
   hasPermission(permission: string): boolean {
@@ -51,27 +61,40 @@ export class AuthService {
     return this.userSignal()?.roles.includes(role) ?? false;
   }
 
-  setSession(user: AuthUser, tokens: AuthTokens): void {
-    localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  /**
+   * Persists the session. `remember` selects localStorage (survives browser restarts)
+   * or sessionStorage (cleared when the tab closes). When omitted, the storage that
+   * currently holds the session is reused (e.g. token refresh), defaulting to localStorage.
+   */
+  setSession(user: AuthUser, tokens: AuthTokens, remember?: boolean): void {
+    if (this.userSignal()?.id !== user.id) {
+      clearAllTtlCaches();
+    }
+    const persistent = remember ?? this.isPersistentSession();
+    const target = persistent ? localStorage : sessionStorage;
+    this.removeStoredSession();
+    target.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
+    target.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
+    target.setItem(USER_KEY, JSON.stringify(user));
     this.clearMfaChallengeToken();
     this.accessTokenSignal.set(tokens.accessToken);
+    this.refreshTokenSignal.set(tokens.refreshToken);
     this.userSignal.set(user);
   }
 
   clearSession(): void {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    clearAllTtlCaches();
+    this.removeStoredSession();
     this.clearMfaChallengeToken();
     this.refreshInFlight$ = null;
     this.accessTokenSignal.set(null);
+    this.refreshTokenSignal.set(null);
     this.userSignal.set(null);
   }
 
-  setMfaChallengeToken(token: string): void {
+  setMfaChallengeToken(token: string, remember = true): void {
     sessionStorage.setItem(MFA_TOKEN_KEY, token);
+    sessionStorage.setItem(REMEMBER_KEY, remember ? '1' : '0');
   }
 
   getMfaChallengeToken(): string | null {
@@ -80,6 +103,7 @@ export class AuthService {
 
   clearMfaChallengeToken(): void {
     sessionStorage.removeItem(MFA_TOKEN_KEY);
+    sessionStorage.removeItem(REMEMBER_KEY);
     localStorage.removeItem(MFA_TOKEN_KEY);
   }
 
@@ -100,16 +124,21 @@ export class AuthService {
     password: string;
     remember?: boolean;
   }): Observable<LoginResponseData> {
+    const remember = payload.remember ?? true;
     return this.api.post<LoginResponseData>('/auth/login', payload).pipe(
       map((res) => this.unwrap(res)),
       tap((data) => {
         if (!data.mfaRequired) {
-          this.setSession(data.user, {
-            accessToken: data.accessToken,
-            refreshToken: data.refreshToken,
-          });
+          this.setSession(
+            data.user,
+            {
+              accessToken: data.accessToken,
+              refreshToken: data.refreshToken,
+            },
+            remember,
+          );
         } else {
-          this.setMfaChallengeToken(data.mfaToken);
+          this.setMfaChallengeToken(data.mfaToken, remember);
         }
       }),
     );
@@ -120,14 +149,19 @@ export class AuthService {
     if (!mfaToken) {
       return throwError(() => new Error('Missing MFA challenge token'));
     }
+    const remember = sessionStorage.getItem(REMEMBER_KEY) !== '0';
 
     return this.api.post<AuthSessionData>('/auth/mfa/verify', { mfaToken, code }).pipe(
       map((res) => this.unwrap(res)),
       tap((data) => {
-        this.setSession(data.user, {
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-        });
+        this.setSession(
+          data.user,
+          {
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
+          },
+          remember,
+        );
       }),
     );
   }
@@ -190,14 +224,28 @@ export class AuthService {
     return this.api.get<AuthUser>('/auth/me').pipe(
       map((res) => this.unwrap(res)),
       tap((user) => {
-        localStorage.setItem(USER_KEY, JSON.stringify(user));
+        this.userStorage().setItem(USER_KEY, JSON.stringify(user));
         this.userSignal.set(user);
       }),
     );
   }
 
-  setupMfa(): Observable<MfaSetupData> {
-    return this.api.post<MfaSetupData>('/auth/mfa/setup').pipe(map((res) => this.unwrap(res)));
+  /** Password and code are required by the server when MFA is already enabled (re-setup). */
+  setupMfa(credentials?: { password: string; code: string }): Observable<MfaSetupData> {
+    return this.api
+      .post<MfaSetupData>('/auth/mfa/setup', credentials ?? {})
+      .pipe(
+        map((res) => this.unwrap(res)),
+        tap(() => {
+          // Setup replaces the secret and leaves MFA off until it is confirmed again.
+          const current = this.userSignal();
+          if (current?.mfaEnabled) {
+            const updated = { ...current, mfaEnabled: false };
+            this.userStorage().setItem(USER_KEY, JSON.stringify(updated));
+            this.userSignal.set(updated);
+          }
+        }),
+      );
   }
 
   enableMfa(code: string): Observable<{ mfaEnabled: boolean }> {
@@ -207,7 +255,7 @@ export class AuthService {
         const current = this.userSignal();
         if (current) {
           const updated = { ...current, mfaEnabled: data.mfaEnabled };
-          localStorage.setItem(USER_KEY, JSON.stringify(updated));
+          this.userStorage().setItem(USER_KEY, JSON.stringify(updated));
           this.userSignal.set(updated);
         }
       }),
@@ -221,7 +269,7 @@ export class AuthService {
         const current = this.userSignal();
         if (current) {
           const updated = { ...current, mfaEnabled: data.mfaEnabled };
-          localStorage.setItem(USER_KEY, JSON.stringify(updated));
+          this.userStorage().setItem(USER_KEY, JSON.stringify(updated));
           this.userSignal.set(updated);
         }
       }),
@@ -235,12 +283,31 @@ export class AuthService {
     return res.data;
   }
 
+  private readStored(key: string): string | null {
+    return localStorage.getItem(key) ?? sessionStorage.getItem(key);
+  }
+
+  private isPersistentSession(): boolean {
+    return sessionStorage.getItem(ACCESS_TOKEN_KEY) === null;
+  }
+
+  private userStorage(): Storage {
+    return localStorage.getItem(ACCESS_TOKEN_KEY) !== null ? localStorage : sessionStorage;
+  }
+
+  private removeStoredSession(): void {
+    for (const key of [ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY]) {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    }
+  }
+
   private readAccessToken(): string | null {
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
+    return this.readStored(ACCESS_TOKEN_KEY);
   }
 
   private readUser(): AuthUser | null {
-    const raw = localStorage.getItem(USER_KEY);
+    const raw = this.readStored(USER_KEY);
     if (!raw) {
       return null;
     }
@@ -249,5 +316,20 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+}
+
+function isJwtExpired(token: string): boolean {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) {
+      return false;
+    }
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    const exp = (JSON.parse(json) as { exp?: unknown }).exp;
+    return typeof exp === 'number' && exp * 1000 <= Date.now();
+  } catch {
+    // Not a decodable JWT: let the server decide.
+    return false;
   }
 }

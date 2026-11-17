@@ -74,10 +74,8 @@
     type="submit"
     form="candidate-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : data.candidate ? 'Save changes' : 'Add candidate' }}
   </button>
 </mat-dialog-actions>

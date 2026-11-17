@@ -31,10 +31,8 @@
     type="submit"
     form="screening-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : 'Save screening' }}
   </button>
 </mat-dialog-actions>

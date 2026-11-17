@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   JobApplication,
@@ -13,6 +12,8 @@ import {
   RecruitmentService,
 } from '../../../core/services/recruitment.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface OfferFormDialogData {
   offer?: JobOffer | null;
@@ -30,7 +31,7 @@ export interface OfferFormDialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './offer-form-dialog.component.html',
   styleUrl: './offer-form-dialog.component.scss',
@@ -61,6 +62,7 @@ export class OfferFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     if (!this.isEdit) {
       this.recruitment.listApplications({ page: 1, pageSize: 100 }).subscribe({
         next: (res) =>

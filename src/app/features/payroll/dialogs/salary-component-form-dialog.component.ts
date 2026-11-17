@@ -6,7 +6,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   SalaryCalcType,
@@ -15,6 +14,8 @@ import {
   PayrollService,
 } from '../../../core/services/payroll.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface SalaryComponentFormDialogData {
   component?: SalaryComponent | null;
@@ -44,7 +45,7 @@ const CALC_OPTIONS: Array<{ value: SalaryCalcType; label: string }> = [
     MatCheckboxModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './salary-component-form-dialog.component.html',
   styleUrl: './salary-component-form-dialog.component.scss',
@@ -55,6 +56,10 @@ export class SalaryComponentFormDialogComponent {
   private readonly payroll = inject(PayrollService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<SalaryComponentFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<SalaryComponentFormDialogData>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);

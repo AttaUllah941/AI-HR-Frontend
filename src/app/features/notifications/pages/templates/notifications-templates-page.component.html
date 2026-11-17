@@ -48,7 +48,7 @@
     } @else {
       <div class="notifications-table-card">
         <div class="notifications-table-wrap">
-          <table class="notifications-table">
+          <table class="notifications-table" data-responsive>
             <thead>
               <tr>
                 <th scope="col">Code</th>
@@ -63,13 +63,13 @@
             <tbody>
               @for (item of items(); track item.id) {
                 <tr class="notifications-table__row">
-                  <td>
+                  <td data-label="Code">
                     <code>{{ item.code }}</code>
                   </td>
-                  <td>{{ item.name }}</td>
-                  <td>{{ categoryLabel(item.category) }}</td>
-                  <td>{{ channelLabel(item.channel) }}</td>
-                  <td>
+                  <td data-label="Name">{{ item.name }}</td>
+                  <td data-label="Category">{{ categoryLabel(item.category) }}</td>
+                  <td data-label="Channel">{{ channelLabel(item.channel) }}</td>
+                  <td data-label="Active">
                     <span
                       class="notifications-status-pill"
                       [class.notifications-status-pill--success]="item.isActive"
@@ -79,8 +79,8 @@
                       {{ item.isActive ? 'Active' : 'Inactive' }}
                     </span>
                   </td>
-                  <td>{{ createdLabel(item.createdAt) }}</td>
-                  <td class="notifications-table__actions-col">
+                  <td data-label="Created">{{ createdLabel(item.createdAt) }}</td>
+                  <td class="notifications-table__actions-col" data-label="">
                     <button
                       mat-icon-button
                       type="button"

@@ -43,4 +43,44 @@ describe('AuthService', () => {
     expect(auth.hasAnyPermission('employees:delete', 'settings:update')).toBe(true);
     expect(auth.hasRole('HR_ADMIN')).toBe(true);
   });
+
+  describe('remember me storage', () => {
+    const user: AuthUser = {
+      id: 'u1',
+      email: 'a@b.c',
+      firstName: 'A',
+      lastName: 'B',
+      roles: [],
+      permissions: [],
+    };
+    const tokens: AuthTokens = { accessToken: 'access', refreshToken: 'refresh' };
+
+    it('stores tokens in localStorage when remember is true', () => {
+      auth.setSession(user, tokens, true);
+      expect(localStorage.getItem('zh_access_token')).toBe('access');
+      expect(sessionStorage.getItem('zh_access_token')).toBeNull();
+    });
+
+    it('stores tokens in sessionStorage when remember is false and clears both on logout', () => {
+      auth.setSession(user, tokens, false);
+      expect(sessionStorage.getItem('zh_access_token')).toBe('access');
+      expect(sessionStorage.getItem('zh_refresh_token')).toBe('refresh');
+      expect(localStorage.getItem('zh_access_token')).toBeNull();
+      expect(auth.getRefreshToken()).toBe('refresh');
+
+      auth.clearSession();
+      expect(sessionStorage.getItem('zh_access_token')).toBeNull();
+      expect(localStorage.getItem('zh_access_token')).toBeNull();
+    });
+  });
+
+  it('treats an expired access token without a refresh token as unauthenticated', () => {
+    const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) - 60 }));
+    const expired = `h.${payload}.s`;
+    auth.setSession(
+      { id: 'u1', email: 'a@b.c', firstName: 'A', lastName: 'B', roles: [], permissions: [] },
+      { accessToken: expired, refreshToken: '' },
+    );
+    expect(auth.isAuthenticated()).toBe(false);
+  });
 });

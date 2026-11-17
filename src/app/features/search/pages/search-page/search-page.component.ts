@@ -8,7 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import {
   GlobalSearchHit,
   GlobalSearchResult,
@@ -20,6 +21,16 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+
+const TYPE_LABELS: Record<string, string> = {
+  employees: 'Employees',
+  departments: 'Departments',
+  branches: 'Branches',
+  candidates: 'Candidates',
+  jobs: 'Jobs',
+  files: 'Files',
+  users: 'Users',
+};
 
 @Component({
   selector: 'app-search-page',
@@ -43,11 +54,13 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly global = inject(GlobalService);
   private readonly toast = inject(ToastService);
+  private readonly confirm = inject(ConfirmDialogService);
 
   readonly result = signal<GlobalSearchResult | null>(null);
   readonly recent = signal<RecentSearchItem[]>([]);
@@ -72,6 +85,28 @@ export class SearchPageComponent implements OnInit {
     { value: 'jobs', label: 'Jobs' },
     { value: 'files', label: 'Files' },
     { value: 'users', label: 'Users' },
+  ];
+
+  readonly statusOptions = [
+    { value: '', label: 'Any status' },
+    { value: 'ACTIVE', label: 'Active' },
+    { value: 'DRAFT', label: 'Draft' },
+    { value: 'ON_LEAVE', label: 'On leave' },
+    { value: 'PROBATION', label: 'Probation' },
+    { value: 'NOTICE_PERIOD', label: 'Notice period' },
+    { value: 'TERMINATED', label: 'Terminated' },
+    { value: 'RESIGNED', label: 'Resigned' },
+    { value: 'INACTIVE', label: 'Inactive' },
+  ];
+
+  readonly categoryOptions = [
+    { value: '', label: 'Any category' },
+    { value: 'GENERAL', label: 'General' },
+    { value: 'EMPLOYEE_DOCUMENT', label: 'Employee document' },
+    { value: 'RESUME', label: 'Resume' },
+    { value: 'AVATAR', label: 'Avatar' },
+    { value: 'POLICY', label: 'Policy' },
+    { value: 'OTHER', label: 'Other' },
   ];
 
   ngOnInit(): void {
@@ -101,7 +136,7 @@ export class SearchPageComponent implements OnInit {
     });
 
     this.form.controls.q.valueChanges
-      .pipe(debounceTime(400), distinctUntilChanged())
+      .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe((q) => {
         if (q.trim().length >= 2) {
           this.applyQueryToUrl();
@@ -144,7 +179,8 @@ export class SearchPageComponent implements OnInit {
     if (!q) return;
     this.loading.set(true);
     this.error.set(null);
-    this.global
+    this.inflight?.unsubscribe();
+    this.inflight = this.global
       .search({
         q,
         types: raw.types.length ? raw.types.join(',') : undefined,
@@ -177,12 +213,32 @@ export class SearchPageComponent implements OnInit {
   }
 
   clearRecent(): void {
-    this.global.clearRecent().subscribe({
+    this.confirm
+      .open({
+        title: 'Clear recent searches?',
+        message: 'This removes your recent search history for this account.',
+        confirmLabel: 'Clear',
+        destructive: true,
+      })
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        this.global.clearRecent().subscribe({
+          next: () => {
+            this.recent.set([]);
+            this.toast.success('Recent searches cleared.');
+          },
+          error: () => this.toast.error('Unable to clear recent searches.'),
+        });
+      });
+  }
+
+  removeRecent(id: string, event: Event): void {
+    event.stopPropagation();
+    this.global.deleteRecent(id).subscribe({
       next: () => {
-        this.recent.set([]);
-        this.toast.success('Recent searches cleared.');
+        this.recent.update((list) => list.filter((item) => item.id !== id));
       },
-      error: () => this.toast.error('Unable to clear recent searches.'),
+      error: () => this.toast.error('Unable to remove recent search.'),
     });
   }
 
@@ -229,5 +285,9 @@ export class SearchPageComponent implements OnInit {
 
   isTypeChecked(value: string): boolean {
     return this.form.controls.types.value.includes(value);
+  }
+
+  typeLabel(type: string): string {
+    return TYPE_LABELS[type] ?? type;
   }
 }

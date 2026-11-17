@@ -5,12 +5,7 @@ import { FilesBrowserPageComponent } from '../browser/files-browser-page.compone
   selector: 'app-files-library-page',
   standalone: true,
   imports: [FilesBrowserPageComponent],
-  template: `
-    <app-files-browser-page
-      heading="Library"
-      subtitle="All company files with secure download and preview."
-    />
-  `,
+  templateUrl: './files-library-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilesLibraryPageComponent {}

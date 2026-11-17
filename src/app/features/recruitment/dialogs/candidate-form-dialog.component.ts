@@ -5,9 +5,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Candidate, RecruitmentService } from '../../../core/services/recruitment.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface CandidateFormDialogData {
   candidate?: Candidate | null;
@@ -23,7 +24,7 @@ export interface CandidateFormDialogData {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './candidate-form-dialog.component.html',
   styleUrl: './candidate-form-dialog.component.scss',
@@ -34,6 +35,10 @@ export class CandidateFormDialogComponent {
   private readonly recruitment = inject(RecruitmentService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<CandidateFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<CandidateFormDialogData>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);

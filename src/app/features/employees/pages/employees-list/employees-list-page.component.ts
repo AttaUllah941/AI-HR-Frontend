@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,7 +9,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -20,7 +19,11 @@ import {
 } from '../../../../core/services/employee.service';
 import { Department, OrganizationService } from '../../../../core/services/organization.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { EmployeeFormDialogComponent } from '../../dialogs/employee-form-dialog.component';
+import { downloadBlob } from '../../../../shared/utils/download-blob';
+import { SavedFilters, TablePrefs } from '../../../../core/utils/table-prefs';
 
 const STATUS_OPTIONS: Array<{ value: EmployeeStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -44,6 +47,12 @@ const AVATAR_COLORS = [
   { bg: '#f3f4f6', color: '#4b5563' },
 ];
 
+interface EmployeeFilterPreset {
+  search: string;
+  status: EmployeeStatus | '';
+  departmentId: string;
+}
+
 @Component({
   selector: 'app-employees-list-page',
   standalone: true,
@@ -55,14 +64,16 @@ const AVATAR_COLORS = [
     MatSelectModule,
     MatIconModule,
     MatMenuModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
+    ErrorStateComponent,
+    TableSkeletonComponent,
   ],
   templateUrl: './employees-list-page.component.html',
   styleUrl: './employees-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmployeesListPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly employees = inject(EmployeeService);
   private readonly org = inject(OrganizationService);
   private readonly auth = inject(AuthService);
@@ -70,6 +81,16 @@ export class EmployeesListPageComponent implements OnInit {
   private readonly confirm = inject(ConfirmDialogService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+
+  readonly prefs = new TablePrefs('employees');
+  readonly savedFilters = new SavedFilters<EmployeeFilterPreset>('employees');
+  readonly columnOptions = [
+    { id: 'department', label: 'Department' },
+    { id: 'position', label: 'Position' },
+    { id: 'manager', label: 'Manager' },
+    { id: 'status', label: 'Status' },
+    { id: 'joined', label: 'Joined' },
+  ];
 
   readonly items = signal<EmployeeListItem[]>([]);
   readonly loading = signal(true);
@@ -113,7 +134,8 @@ export class EmployeesListPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.employees
+    this.inflight?.unsubscribe();
+    this.inflight = this.employees
       .list({
         page: this.page(),
         pageSize: 10,
@@ -135,6 +157,27 @@ export class EmployeesListPageComponent implements OnInit {
           this.loading.set(false);
         },
       });
+  }
+
+  savePreset(input: HTMLInputElement): void {
+    const saved = this.savedFilters.save(input.value, {
+      search: this.searchControl.value,
+      status: this.statusControl.value,
+      departmentId: this.departmentControl.value,
+    });
+    if (saved) {
+      input.value = '';
+      this.toast.success('Filters saved.');
+    }
+  }
+
+  applyPreset(preset: EmployeeFilterPreset): void {
+    // Set quietly, then reload once instead of once per control.
+    this.searchControl.setValue(preset.search, { emitEvent: false });
+    this.statusControl.setValue(preset.status, { emitEvent: false });
+    this.departmentControl.setValue(preset.departmentId, { emitEvent: false });
+    this.page.set(1);
+    this.reload();
   }
 
   toggleFilters(): void {
@@ -217,12 +260,7 @@ export class EmployeesListPageComponent implements OnInit {
     const blob = new Blob([[header.join(','), ...lines].join('\n')], {
       type: 'text/csv;charset=utf-8;',
     });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'employees.csv';
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadBlob(blob, 'employees.csv');
     this.toast.success('Employees exported');
   }
 

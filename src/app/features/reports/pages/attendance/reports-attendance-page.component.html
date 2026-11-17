@@ -5,6 +5,9 @@
   errorTitle="Attendance report unavailable"
   (retry)="reload()"
 >
+  @if (exporting()) {
+    <app-smart-loader class="long-op" [messages]="exportMessages" [diameter]="28" />
+  }
   <section class="reports-page" aria-label="Attendance report">
     <div class="reports-action-bar">
       <div>
@@ -26,6 +29,7 @@
           </button>
           <mat-menu #exportMenu="matMenu">
             <button mat-menu-item type="button" (click)="exportReport('CSV')">CSV</button>
+            <button mat-menu-item type="button" (click)="exportReport('XLSX')">Excel (.xlsx)</button>
             <button mat-menu-item type="button" (click)="exportReport('PDF')">PDF</button>
             <button mat-menu-item type="button" (click)="exportReport('JSON')">JSON</button>
           </mat-menu>
@@ -68,10 +72,18 @@
 
       <div class="reports-chart-grid">
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart [points]="r.charts.byStatus" title="By status" />
+          @defer (on viewport) {
+            <app-reports-bar-chart [points]="r.charts.byStatus" title="By status" />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart [points]="r.charts.dailyPresent" title="Daily present" />
+          @defer (on viewport) {
+            <app-reports-bar-chart [points]="r.charts.dailyPresent" title="Daily present" />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
       </div>
 
@@ -84,7 +96,7 @@
       } @else {
         <div class="reports-table-card">
           <div class="reports-table-wrap">
-            <table class="reports-table">
+            <table class="reports-table" data-responsive>
               <thead>
                 <tr>
                   <th scope="col">Status</th>
@@ -96,15 +108,15 @@
               <tbody>
                 @for (row of r.rows; track row.status) {
                   <tr class="reports-table__row">
-                    <td>
+                    <td data-label="Status">
                       <span [class]="statusClass(row.status)">
                         <span class="reports-status-pill__dot" aria-hidden="true"></span>
                         {{ statusLabel(row.status) }}
                       </span>
                     </td>
-                    <td>{{ formatNumber(row.count) }}</td>
-                    <td>{{ formatNumber(row.workMinutes) }}</td>
-                    <td>{{ formatNumber(row.overtimeMinutes) }}</td>
+                    <td data-label="Count">{{ formatNumber(row.count) }}</td>
+                    <td data-label="Work minutes">{{ formatNumber(row.workMinutes) }}</td>
+                    <td data-label="Overtime">{{ formatNumber(row.overtimeMinutes) }}</td>
                   </tr>
                 }
               </tbody>

@@ -5,11 +5,12 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SettingsService } from '../../../../core/services/settings.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-settings-company-page',
@@ -21,14 +22,14 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './settings-company-page.component.html',
   styleUrl: './settings-company-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SettingsCompanyPageComponent implements OnInit {
+export class SettingsCompanyPageComponent implements OnInit, HasUnsavedChanges {
   private readonly fb = inject(FormBuilder);
   private readonly settings = inject(SettingsService);
   private readonly auth = inject(AuthService);
@@ -104,6 +105,7 @@ export class SettingsCompanyPageComponent implements OnInit {
       })
       .subscribe({
         next: () => {
+          this.form.markAsPristine();
           this.toast.success('Company profile updated.');
           this.saving.set(false);
         },
@@ -113,4 +115,9 @@ export class SettingsCompanyPageComponent implements OnInit {
         },
       });
   }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
 }

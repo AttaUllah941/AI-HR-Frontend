@@ -1,13 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   AttendanceRecord,
@@ -18,6 +17,8 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { AttendanceRecordFormDialogComponent } from '../../dialogs/attendance-record-form-dialog.component';
 
 const STATUS_OPTIONS: Array<{ value: AttendanceStatus | ''; label: string }> = [
@@ -55,14 +56,16 @@ const AVATAR_COLORS = [
     MatSelectModule,
     MatIconModule,
     MatMenuModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
+    ErrorStateComponent,
+    TableSkeletonComponent,
   ],
   templateUrl: './attendance-daily-page.component.html',
   styleUrl: './attendance-daily-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AttendanceDailyPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly attendance = inject(AttendanceService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -110,7 +113,8 @@ export class AttendanceDailyPageComponent implements OnInit {
     this.error.set(null);
     const date = this.dateControl.value;
 
-    this.attendance
+    this.inflight?.unsubscribe();
+    this.inflight = this.attendance
       .listRecords({
         page: this.page(),
         pageSize: 10,

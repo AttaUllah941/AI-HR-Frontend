@@ -88,7 +88,7 @@
             @if (sending()) {
               <div class="ai-chat-bubble ai-chat-bubble--assistant">
                 <span class="ai-chat-bubble__meta">Nova</span>
-                Thinking…
+                <app-smart-loader [messages]="novaMessages" [diameter]="20" />
               </div>
             }
           }
@@ -110,12 +110,8 @@
             type="button"
             [disabled]="!canCreate || sending() || !draft().trim()"
             (click)="send()"
-          >
-            @if (sending()) {
-              <mat-spinner diameter="16" />
-            } @else {
-              <mat-icon aria-hidden="true">send</mat-icon>
-            }
+            [appButtonSpinner]="sending()">
+            @if (!sending()) { <mat-icon aria-hidden="true">send</mat-icon> }
             Send
           </button>
         </div>

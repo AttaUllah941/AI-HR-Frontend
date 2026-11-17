@@ -9,10 +9,10 @@
     <section class="files-page" aria-label="Files overview">
       <div class="files-action-bar">
         <div>
-          <h2 class="files-page-heading">Storage overview</h2>
+          <h2 class="files-page-heading">Documents overview</h2>
           <p class="files-page-sub">
-            Provider {{ s.storage.provider }} (runtime {{ s.storage.runtimeProvider }}) · max upload
-            {{ formatBytes(s.maxUploadBytes) }}
+            Contracts, offer letters, policies, and resumes ·
+            {{ formatBytes(s.totalBytes) }} used · max upload {{ formatBytes(s.maxUploadBytes) }}
           </p>
         </div>
         <div class="files-action-bar__actions">

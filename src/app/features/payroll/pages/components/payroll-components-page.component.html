@@ -27,33 +27,21 @@
 </div>
 
 <div class="payroll-table-card" style="margin-top: 1rem">
-  @if (loading()) {
-    <div class="payroll-table-state">
-      <mat-spinner diameter="32" />
-      <span>Loading components…</span>
-    </div>
+  @if (loading() && items().length === 0) {
+    <app-table-skeleton [rows]="6" [cols]="6" />
   } @else if (error()) {
-    <div class="payroll-table-state payroll-table-state--error">
-      <mat-icon>error_outline</mat-icon>
-      <p>{{ error() }}</p>
-      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
-    </div>
+    <app-error-state [message]="error() ?? ''" (retry)="reload()" />
   } @else if (items().length === 0) {
     <app-empty-state
       title="No salary components"
       message="Add allowances, deductions, bonuses, or tax components."
       icon="category"
-    >
-      @if (canCreate || canUpdate) {
-        <button mat-flat-button color="primary" type="button" (click)="openForm()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Add component
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate || canUpdate ? 'Add component' : ''"
+      (action)="openForm()"
+    />
   } @else {
     <div class="payroll-table-wrap">
-      <table class="payroll-table">
+      <table class="payroll-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Name</th>
@@ -67,22 +55,22 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="payroll-table__row">
-              <td>
+              <td data-label="Name">
                 <div class="payroll-table__employee-text">
                   <strong>{{ item.name }}</strong>
                   <span>{{ item.code }}</span>
                 </div>
               </td>
-              <td>{{ kindLabel(item.kind) }}</td>
-              <td>{{ calcLabel(item.calcType) }}</td>
-              <td>
+              <td data-label="Kind">{{ kindLabel(item.kind) }}</td>
+              <td data-label="Calculation">{{ calcLabel(item.calcType) }}</td>
+              <td data-label="Default">
                 {{
                   item.calcType === 'PERCENT_OF_BASIC'
                     ? item.defaultValue + '%'
                     : item.defaultValue
                 }}
               </td>
-              <td>
+              <td data-label="Status">
                 <span
                   [class]="
                     item.isActive
@@ -94,7 +82,7 @@
                   {{ item.isActive ? 'Active' : 'Inactive' }}
                 </span>
               </td>
-              <td class="payroll-table__actions-col">
+              <td class="payroll-table__actions-col" data-label="">
                 @if (canUpdate) {
                   <button
                     mat-icon-button

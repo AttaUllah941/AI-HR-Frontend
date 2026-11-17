@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   PaginatedPayslips,
@@ -14,6 +13,8 @@ import {
 } from '../../../../core/services/payroll.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { PayslipDetailDialogComponent } from '../../dialogs/payslip-detail-dialog.component';
 
@@ -33,9 +34,10 @@ const STATUS_OPTIONS: Array<{ value: PayslipStatus | ''; label: string }> = [
     MatFormFieldModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationSectionHeaderComponent,
+    ErrorStateComponent,
+    TableSkeletonComponent,
   ],
   templateUrl: './payroll-payslips-page.component.html',
   styleUrl: './payroll-payslips-page.component.scss',
@@ -58,10 +60,9 @@ export class PayrollPayslipsPageComponent implements OnInit {
   readonly pageSize = 20;
   readonly isMineOnly = signal(false);
 
+  /** Company-wide payroll visibility mirrors the server: payroll:update or payroll:approve. */
   readonly canManage =
-    this.auth.hasPermission('payroll:create') ||
-    this.auth.hasPermission('payroll:update') ||
-    this.auth.hasPermission('payroll:approve');
+    this.auth.hasPermission('payroll:update') || this.auth.hasPermission('payroll:approve');
 
   sectionDescription(): string {
     return this.isMineOnly()

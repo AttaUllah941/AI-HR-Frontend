@@ -5,9 +5,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PerformanceService, ReviewCycle } from '../../../core/services/performance.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface ReviewCycleFormDialogData {
   cycle?: ReviewCycle | null;
@@ -24,7 +25,7 @@ export interface ReviewCycleFormDialogData {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './review-cycle-form-dialog.component.html',
   styleUrl: './review-cycle-form-dialog.component.scss',
@@ -35,6 +36,10 @@ export class ReviewCycleFormDialogComponent {
   private readonly api = inject(PerformanceService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<ReviewCycleFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<ReviewCycleFormDialogData>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);

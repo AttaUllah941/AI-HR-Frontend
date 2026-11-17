@@ -1,6 +1,8 @@
 <app-organization-status
   [loading]="loading()"
   [error]="error()"
+  skeleton="list"
+  [hasData]="items().length > 0"
   loadingMessage="Loading sessions…"
   errorTitle="Sessions unavailable"
   (retry)="reload()"
@@ -18,12 +20,8 @@
           class="profile-add-btn"
           [disabled]="revokingOthers() || items().length === 0"
           (click)="revokeOthers()"
-        >
-          @if (revokingOthers()) {
-            <mat-spinner diameter="16" />
-          } @else {
-            <mat-icon aria-hidden="true">logout</mat-icon>
-          }
+          [appButtonSpinner]="revokingOthers()">
+          @if (!revokingOthers()) { <mat-icon aria-hidden="true">logout</mat-icon> }
           {{ revokingOthers() ? 'Revoking…' : 'Revoke other sessions' }}
         </button>
       </div>
@@ -38,7 +36,7 @@
     } @else {
       <div class="profile-table-card">
         <div class="profile-table-wrap">
-          <table class="profile-table">
+          <table class="profile-table" data-responsive>
             <thead>
               <tr>
                 <th scope="col">Device</th>
@@ -52,14 +50,14 @@
             <tbody>
               @for (item of items(); track item.id) {
                 <tr class="profile-table__row">
-                  <td>
+                  <td data-label="Device">
                     <span class="profile-table__title">{{ item.deviceLabel || 'Unknown device' }}</span>
                     @if (item.current) {
                       <span class="profile-table__body">This device</span>
                     }
                   </td>
-                  <td>{{ item.ipAddress || '—' }}</td>
-                  <td>
+                  <td data-label="IP">{{ item.ipAddress || '—' }}</td>
+                  <td data-label="Status">
                     <span
                       class="profile-status-pill"
                       [class.profile-status-pill--success]="statusTone(item.status) === 'success'"
@@ -74,9 +72,9 @@
                       }
                     </span>
                   </td>
-                  <td>{{ formatDate(item.createdAt) }}</td>
-                  <td>{{ formatDate(item.expiresAt) }}</td>
-                  <td class="profile-table__actions-col">
+                  <td data-label="Created">{{ formatDate(item.createdAt) }}</td>
+                  <td data-label="Expires">{{ formatDate(item.expiresAt) }}</td>
+                  <td class="profile-table__actions-col" data-label="">
                     @if (!item.current && item.active) {
                       <button
                         mat-icon-button

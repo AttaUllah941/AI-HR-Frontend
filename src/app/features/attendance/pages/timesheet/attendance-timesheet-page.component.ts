@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   AttendanceRecord,
@@ -13,6 +12,9 @@ import {
 } from '../../../../core/services/attendance.service';
 import { EmployeeListItem, EmployeeService } from '../../../../core/services/employee.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { Subscription } from 'rxjs';
 
 function monthStart(): string {
   const now = new Date();
@@ -33,14 +35,16 @@ function today(): string {
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
+    TableSkeletonComponent,
+    ErrorStateComponent,
   ],
   templateUrl: './attendance-timesheet-page.component.html',
   styleUrl: './attendance-timesheet-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AttendanceTimesheetPageComponent implements OnInit {
+  private inflight: Subscription | null = null;
   private readonly attendance = inject(AttendanceService);
   private readonly employeesApi = inject(EmployeeService);
 
@@ -74,7 +78,8 @@ export class AttendanceTimesheetPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.attendance
+    this.inflight?.unsubscribe();
+    this.inflight = this.attendance
       .getTimesheet({
         employeeId: this.employeeControl.value,
         dateFrom: this.dateFromControl.value,

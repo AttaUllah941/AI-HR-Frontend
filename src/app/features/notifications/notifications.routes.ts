@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { unsavedChangesGuard } from '../../core/guards/unsaved-changes.guard';
 
 export const NOTIFICATIONS_ROUTES: Routes = [
   {
@@ -22,6 +23,7 @@ export const NOTIFICATIONS_ROUTES: Routes = [
       },
       {
         path: 'preferences',
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./pages/preferences/notifications-preferences-page.component').then(
             (m) => m.NotificationsPreferencesPageComponent,

@@ -5,10 +5,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { PayrollRun, PayrollService } from '../../../core/services/payroll.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface PayrollRunFormDialogData {
   run?: PayrollRun | null;
@@ -25,7 +26,7 @@ export interface PayrollRunFormDialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './payroll-run-form-dialog.component.html',
   styleUrl: './payroll-run-form-dialog.component.scss',
@@ -61,6 +62,7 @@ export class PayrollRunFormDialogComponent {
   });
 
   constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
     if (this.isEdit) {
       this.form.controls.year.disable();
       this.form.controls.month.disable();

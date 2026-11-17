@@ -5,6 +5,9 @@
   errorTitle="Leave report unavailable"
   (retry)="reload()"
 >
+  @if (exporting()) {
+    <app-smart-loader class="long-op" [messages]="exportMessages" [diameter]="28" />
+  }
   <section class="reports-page" aria-label="Leave report">
     <div class="reports-action-bar">
       <div>
@@ -34,6 +37,7 @@
           </button>
           <mat-menu #exportMenu="matMenu">
             <button mat-menu-item type="button" (click)="exportReport('CSV')">CSV</button>
+            <button mat-menu-item type="button" (click)="exportReport('XLSX')">Excel (.xlsx)</button>
             <button mat-menu-item type="button" (click)="exportReport('PDF')">PDF</button>
             <button mat-menu-item type="button" (click)="exportReport('JSON')">JSON</button>
           </mat-menu>
@@ -44,10 +48,18 @@
     @if (report(); as r) {
       <div class="reports-chart-grid">
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart [points]="r.charts.byStatus" title="By status" />
+          @defer (on viewport) {
+            <app-reports-bar-chart [points]="r.charts.byStatus" title="By status" />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
         <mat-card class="reports-chart-card">
-          <app-reports-bar-chart [points]="r.charts.byType" title="By leave type (days)" />
+          @defer (on viewport) {
+            <app-reports-bar-chart [points]="r.charts.byType" title="By leave type (days)" />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
         </mat-card>
       </div>
 
@@ -61,7 +73,7 @@
         <div class="reports-chart-grid">
           <div class="reports-table-card">
             <div class="reports-table-wrap">
-              <table class="reports-table">
+              <table class="reports-table" data-responsive>
                 <thead>
                   <tr>
                     <th scope="col">Status</th>
@@ -72,14 +84,14 @@
                 <tbody>
                   @for (row of r.rows; track row.status) {
                     <tr class="reports-table__row">
-                      <td>
+                      <td data-label="Status">
                         <span [class]="statusClass(row.status)">
                           <span class="reports-status-pill__dot" aria-hidden="true"></span>
                           {{ statusLabel(row.status) }}
                         </span>
                       </td>
-                      <td>{{ formatNumber(row.count) }}</td>
-                      <td>{{ formatNumber(row.days) }}</td>
+                      <td data-label="Requests">{{ formatNumber(row.count) }}</td>
+                      <td data-label="Days">{{ formatNumber(row.days) }}</td>
                     </tr>
                   }
                 </tbody>
@@ -89,7 +101,7 @@
 
           <div class="reports-table-card">
             <div class="reports-table-wrap">
-              <table class="reports-table">
+              <table class="reports-table" data-responsive>
                 <thead>
                   <tr>
                     <th scope="col">Leave type</th>
@@ -100,9 +112,9 @@
                 <tbody>
                   @for (row of r.byLeaveType; track row.leaveTypeId) {
                     <tr class="reports-table__row">
-                      <td>{{ row.leaveTypeName }}</td>
-                      <td>{{ formatNumber(row.count) }}</td>
-                      <td>{{ formatNumber(row.days) }}</td>
+                      <td data-label="Leave type">{{ row.leaveTypeName }}</td>
+                      <td data-label="Requests">{{ formatNumber(row.count) }}</td>
+                      <td data-label="Days">{{ formatNumber(row.days) }}</td>
                     </tr>
                   }
                 </tbody>

@@ -1,21 +1,25 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
   LoginAttemptItem,
+  SecurityReview,
   SecurityReviewCheck,
   SecurityService,
   SecurityStatus,
 } from '../../../../core/services/security.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-settings-security-page',
@@ -27,15 +31,16 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
     MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     OrganizationStatusComponent,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './settings-security-page.component.html',
   styleUrl: './settings-security-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SettingsSecurityPageComponent implements OnInit {
+export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges {
   private readonly fb = inject(FormBuilder);
   private readonly security = inject(SecurityService);
   private readonly auth = inject(AuthService);
@@ -45,9 +50,15 @@ export class SettingsSecurityPageComponent implements OnInit {
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
   readonly status = signal<SecurityStatus | null>(null);
+  readonly review = signal<SecurityReview | null>(null);
   readonly checks = signal<SecurityReviewCheck[]>([]);
   readonly attempts = signal<LoginAttemptItem[]>([]);
   readonly canUpdate = this.auth.hasPermission('settings:update');
+
+  readonly attemptEmail = new FormControl('', { nonNullable: true });
+  readonly attemptSuccess = new FormControl<'all' | 'true' | 'false'>('all', {
+    nonNullable: true,
+  });
 
   readonly form = this.fb.nonNullable.group({
     maxFailedLogins: [5, [Validators.required, Validators.min(1), Validators.max(50)]],
@@ -64,6 +75,10 @@ export class SettingsSecurityPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.reload();
+    this.attemptEmail.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => this.reloadAttempts());
+    this.attemptSuccess.valueChanges.subscribe(() => this.reloadAttempts());
   }
 
   reload(): void {
@@ -87,13 +102,16 @@ export class SettingsSecurityPageComponent implements OnInit {
         });
         if (!this.canUpdate) this.form.disable();
         this.security.getReview().subscribe({
-          next: (review) => this.checks.set(review.checks),
-          error: () => this.checks.set([]),
+          next: (review) => {
+            this.review.set(review);
+            this.checks.set(review.checks);
+          },
+          error: () => {
+            this.review.set(null);
+            this.checks.set([]);
+          },
         });
-        this.security.listLoginAttempts({ page: 1, pageSize: 20 }).subscribe({
-          next: (res) => this.attempts.set(res.items),
-          error: () => this.attempts.set([]),
-        });
+        this.reloadAttempts();
         this.loading.set(false);
       },
       error: (err: { error?: { message?: string }; message?: string }) => {
@@ -101,6 +119,24 @@ export class SettingsSecurityPageComponent implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  reloadAttempts(): void {
+    const success =
+      this.attemptSuccess.value === 'all'
+        ? undefined
+        : this.attemptSuccess.value === 'true';
+    this.security
+      .listLoginAttempts({
+        page: 1,
+        pageSize: 20,
+        email: this.attemptEmail.value.trim() || undefined,
+        success,
+      })
+      .subscribe({
+        next: (res) => this.attempts.set(res.items),
+        error: () => this.attempts.set([]),
+      });
   }
 
   save(): void {
@@ -130,6 +166,7 @@ export class SettingsSecurityPageComponent implements OnInit {
       })
       .subscribe({
         next: () => {
+          this.form.markAsPristine();
           this.toast.success('Security policy saved.');
           this.saving.set(false);
           this.reload();
@@ -140,4 +177,15 @@ export class SettingsSecurityPageComponent implements OnInit {
         },
       });
   }
+
+  statusLabel(status: string): string {
+    if (status === 'pass') return 'Pass';
+    if (status === 'fail') return 'Fail';
+    return 'Warn';
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
 }

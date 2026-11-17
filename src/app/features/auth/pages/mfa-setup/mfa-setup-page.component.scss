@@ -78,3 +78,7 @@ header p {
     font-weight: 600;
   }
 }
+
+form button.full + button.full {
+  margin-top: 0.5rem;
+}

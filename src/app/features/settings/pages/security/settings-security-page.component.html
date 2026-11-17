@@ -22,12 +22,8 @@
             class="settings-add-btn"
             [disabled]="form.invalid || saving()"
             (click)="save()"
-          >
-            @if (saving()) {
-              <mat-spinner diameter="16" />
-            } @else {
-              <mat-icon aria-hidden="true">save</mat-icon>
-            }
+            [appButtonSpinner]="saving()">
+            @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
             Save policy
           </button>
         </div>
@@ -44,6 +40,11 @@
           >
         </div>
         <div class="settings-meta-chip">
+          <span class="settings-meta-chip__label">Privileged without MFA</span>
+          <span class="settings-meta-chip__value">{{ s.metrics.privilegedWithoutMfa }}</span>
+          <span class="settings-meta-chip__hint">Super Admin / HR Admin</span>
+        </div>
+        <div class="settings-meta-chip">
           <span class="settings-meta-chip__label">Locked accounts</span>
           <span class="settings-meta-chip__value">{{ s.metrics.lockedUsers }}</span>
           <span class="settings-meta-chip__hint">Active lockouts</span>
@@ -51,22 +52,24 @@
         <div class="settings-meta-chip">
           <span class="settings-meta-chip__label">Failed logins (24h)</span>
           <span class="settings-meta-chip__value">{{ s.metrics.failedLogins24h }}</span>
-          <span class="settings-meta-chip__hint">Across company</span>
-        </div>
-        <div class="settings-meta-chip">
-          <span class="settings-meta-chip__label">JWT secrets</span>
-          <span class="settings-meta-chip__value">{{
-            s.runtime.jwtSecretsLookStrong ? 'OK' : 'Weak'
-          }}</span>
-          <span class="settings-meta-chip__hint">{{ s.runtime.nodeEnv }}</span>
+          <span class="settings-meta-chip__hint">
+            JWT {{ s.runtime.jwtSecretsLookStrong ? 'OK' : 'weak' }} · {{ s.runtime.nodeEnv }}
+          </span>
         </div>
       </div>
     }
 
     <div class="settings-panel-card">
-      <h3 class="settings-page-heading">Hardening review</h3>
+      <div class="settings-action-bar">
+        <h3 class="settings-page-heading">Hardening review</h3>
+        @if (review(); as r) {
+          <p class="settings-page-sub">
+            {{ r.summary.pass }} pass · {{ r.summary.warn }} warn · {{ r.summary.fail }} fail
+          </p>
+        }
+      </div>
       <div class="settings-table-wrap">
-        <table class="settings-table">
+        <table class="settings-table" data-responsive>
           <thead>
             <tr>
               <th scope="col">Check</th>
@@ -77,16 +80,17 @@
           <tbody>
             @for (check of checks(); track check.id) {
               <tr>
-                <td>{{ check.title }}</td>
-                <td>
+                <td data-label="Check">{{ check.title }}</td>
+                <td data-label="Status">
                   <span
                     class="settings-badge"
                     [class.settings-badge--ok]="check.status === 'pass'"
-                    [class.settings-badge--warn]="check.status !== 'pass'"
-                    >{{ check.status }}</span
+                    [class.settings-badge--warn]="check.status === 'warn'"
+                    [class.settings-badge--fail]="check.status === 'fail'"
+                    >{{ statusLabel(check.status) }}</span
                   >
                 </td>
-                <td>{{ check.detail }}</td>
+                <td data-label="Detail">{{ check.detail }}</td>
               </tr>
             }
           </tbody>
@@ -113,6 +117,7 @@
           <mat-form-field appearance="outline">
             <mat-label>Refresh rate limit / window</mat-label>
             <input matInput type="number" formControlName="refreshRateLimitPerWindow" />
+            <mat-hint>Stored for policy; runtime refresh limiter uses the platform default</mat-hint>
           </mat-form-field>
           <div class="settings-form__full">
             <mat-checkbox formControlName="passwordRequireLetter">Require letter</mat-checkbox>
@@ -125,7 +130,7 @@
           </div>
           <div class="settings-form__full">
             <mat-checkbox formControlName="requireMfaForPrivileged"
-              >Warn privileged accounts without MFA</mat-checkbox
+              >Warn privileged accounts without MFA on sign-in</mat-checkbox
             >
           </div>
           <div class="settings-form__full">
@@ -142,7 +147,23 @@
     </div>
 
     <div class="settings-panel-card">
-      <h3 class="settings-page-heading">Recent login attempts</h3>
+      <div class="settings-action-bar">
+        <h3 class="settings-page-heading">Recent login attempts</h3>
+        <div class="settings-action-bar__actions">
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput [formControl]="attemptEmail" placeholder="Filter by email" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Result</mat-label>
+            <mat-select [formControl]="attemptSuccess">
+              <mat-option value="all">All</mat-option>
+              <mat-option value="true">Success</mat-option>
+              <mat-option value="false">Failed</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
       <div class="settings-table-wrap">
         <table class="settings-table">
           <thead>
@@ -162,8 +183,8 @@
                   <span
                     class="settings-badge"
                     [class.settings-badge--ok]="item.success"
-                    [class.settings-badge--warn]="!item.success"
-                    >{{ item.success ? 'success' : 'failed' }}</span
+                    [class.settings-badge--fail]="!item.success"
+                    >{{ item.success ? 'Success' : 'Failed' }}</span
                   >
                 </td>
                 <td>{{ item.reason || '—' }}</td>

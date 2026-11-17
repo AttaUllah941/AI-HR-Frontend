@@ -1,12 +1,12 @@
+import { ActivatedRoute } from '@angular/router';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { filter } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, Subscription, Observable } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
   LeaveRequest,
@@ -17,8 +17,11 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { LeaveRequestFormDialogComponent } from '../../dialogs/leave-request-form-dialog.component';
+import { optimistic } from '../../../../core/utils/optimistic';
 
 const STATUS_OPTIONS: Array<{ value: LeaveRequestStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -38,15 +41,18 @@ const STATUS_OPTIONS: Array<{ value: LeaveRequestStatus | ''; label: string }> =
     MatSelectModule,
     MatIconModule,
     MatMenuModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationSectionHeaderComponent,
+    ErrorStateComponent,
+    TableSkeletonComponent,
   ],
   templateUrl: './leave-requests-page.component.html',
   styleUrl: './leave-requests-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeaveRequestsPageComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private inflight: Subscription | null = null;
   private readonly leave = inject(LeaveService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -70,17 +76,24 @@ export class LeaveRequestsPageComponent implements OnInit {
   readonly statusControl = new FormControl<LeaveRequestStatus | ''>('', { nonNullable: true });
 
   ngOnInit(): void {
-    this.statusControl.valueChanges.subscribe(() => {
-      this.page.set(1);
-      this.reload();
-    });
+    if (this.canCreate && this.route.snapshot.queryParamMap.get('action') === 'apply') {
+      // Deep link from the command palette ("Request leave").
+      queueMicrotask(() => this.openApply());
+    }
+    this.statusControl.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged())
+      .subscribe(() => {
+        this.page.set(1);
+        this.reload();
+      });
     this.reload();
   }
 
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.leave
+    this.inflight?.unsubscribe();
+    this.inflight = this.leave
       .listRequests({
         status: this.statusControl.value || undefined,
         page: this.page(),
@@ -155,18 +168,13 @@ export class LeaveRequestsPageComponent implements OnInit {
       })
       .pipe(filter((confirmed) => confirmed === true))
       .subscribe(() => {
-        this.actionId.set(item.id);
-        this.leave.approveRequest(item.id).subscribe({
-          next: () => {
-            this.toast.success('Leave approved');
-            this.actionId.set(null);
-            this.reload();
-          },
-          error: (err: Error) => {
-            this.actionId.set(null);
-            this.toast.error(err.message || 'Unable to approve leave');
-          },
-        });
+        this.decide(
+          item,
+          'APPROVED',
+          this.leave.approveRequest(item.id),
+          'Leave approved',
+          'Unable to approve leave',
+        );
       });
   }
 
@@ -181,19 +189,43 @@ export class LeaveRequestsPageComponent implements OnInit {
       })
       .pipe(filter((confirmed) => confirmed === true))
       .subscribe(() => {
-        this.actionId.set(item.id);
-        this.leave.rejectRequest(item.id).subscribe({
-          next: () => {
-            this.toast.success('Leave rejected');
-            this.actionId.set(null);
-            this.reload();
-          },
-          error: (err: Error) => {
-            this.actionId.set(null);
-            this.toast.error(err.message || 'Unable to reject leave');
-          },
-        });
+        this.decide(
+          item,
+          'REJECTED',
+          this.leave.rejectRequest(item.id),
+          'Leave rejected',
+          'Unable to reject leave',
+        );
       });
+  }
+
+  /** Optimistically marks the request, then confirms with the server (rolls back on failure). */
+  private decide(
+    item: LeaveRequest,
+    status: LeaveRequest['status'],
+    request$: Observable<LeaveRequest>,
+    success: string,
+    failure: string,
+  ): void {
+    this.actionId.set(item.id);
+    optimistic({
+      apply: () => this.patchItem(item.id, { status }),
+      rollback: () => this.patchItem(item.id, item),
+      request$,
+      onSuccess: (updated) => {
+        this.patchItem(item.id, updated);
+        this.actionId.set(null);
+        this.toast.success(success);
+      },
+      onError: (err) => {
+        this.actionId.set(null);
+        this.toast.error((err as Error).message || failure);
+      },
+    });
+  }
+
+  private patchItem(id: string, patch: Partial<LeaveRequest>): void {
+    this.items.update((list) => list.map((i) => (i.id === id ? { ...i, ...patch } : i)));
   }
 
   cancel(item: LeaveRequest): void {

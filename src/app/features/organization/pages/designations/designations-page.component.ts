@@ -97,9 +97,9 @@ export class DesignationsPageComponent implements OnInit {
             this.deletingId.set(null);
             this.reload();
           },
-          error: () => {
+          error: (err: { error?: { message?: string } }) => {
             this.deletingId.set(null);
-            this.toast.error('Unable to delete designation');
+            this.toast.error(err?.error?.message || 'Unable to delete designation');
           },
         });
       });

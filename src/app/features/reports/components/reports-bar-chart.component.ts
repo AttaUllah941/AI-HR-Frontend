@@ -8,28 +8,15 @@ import {
   input,
   viewChild,
 } from '@angular/core';
-import * as echarts from 'echarts/core';
-import { BarChart } from 'echarts/charts';
-import { GridComponent, TooltipComponent } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
+import { echarts } from '../../../shared/charts/echarts-setup';
 import { ChartPoint } from '../../../core/services/reports.service';
 
-echarts.use([BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
 @Component({
   selector: 'app-reports-bar-chart',
   standalone: true,
-  template: `<div #host class="chart-host" role="img" [attr.aria-label]="title() || 'Bar chart'"></div>`,
-  styles: `
-    :host {
-      display: block;
-      width: 100%;
-    }
-    .chart-host {
-      width: 100%;
-      height: 16.5rem;
-    }
-  `,
+  templateUrl: './reports-bar-chart.component.html',
+  styleUrl: './reports-bar-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportsBarChartComponent implements AfterViewInit, OnDestroy {
@@ -66,13 +53,14 @@ export class ReportsBarChartComponent implements AfterViewInit, OnDestroy {
   }
 
   private buildOption(
-    points: ChartPoint[],
+    points: ChartPoint[] | null | undefined,
     title: string,
     suffix: string,
   ): echarts.EChartsCoreOption {
-    const labels = points.map((p) => p.label);
-    const values = points.map((p) => p.value);
-    const maxY = Math.max(5, ...values) * 1.15;
+    const safePoints = points ?? [];
+    const labels = safePoints.map((p) => p.label);
+    const values = safePoints.map((p) => p.value);
+    const maxY = Math.max(5, ...values, 0) * 1.15;
 
     return {
       animation: true,

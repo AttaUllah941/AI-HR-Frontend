@@ -6,9 +6,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AttendanceService, Shift } from '../../../core/services/attendance.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-shift-form-dialog',
@@ -21,7 +22,7 @@ import { ToastService } from '../../../core/services/toast.service';
     MatButtonModule,
     MatCheckboxModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ButtonSpinnerDirective,
   ],
   templateUrl: './shift-form-dialog.component.html',
   styleUrl: './shift-form-dialog.component.scss',
@@ -32,6 +33,10 @@ export class ShiftFormDialogComponent {
   private readonly attendance = inject(AttendanceService);
   private readonly toast = inject(ToastService);
   private readonly dialogRef = inject(MatDialogRef<ShiftFormDialogComponent, boolean>);
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
   readonly data = inject<{ shift: Shift | null }>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);

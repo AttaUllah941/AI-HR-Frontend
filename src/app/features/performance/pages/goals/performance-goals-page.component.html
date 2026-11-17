@@ -30,34 +30,22 @@
   }
 </app-organization-section-header>
 
-<div class="performance-table-card">
-  @if (loading()) {
-    <div class="performance-table-state">
-      <mat-spinner diameter="32" />
-      <span>Loading goals…</span>
-    </div>
+<div class="performance-table-card" [class.is-refetching]="loading() && items().length > 0" [attr.aria-busy]="loading()">
+  @if (loading() && items().length === 0) {
+    <app-table-skeleton [rows]="6" [cols]="6" />
   } @else if (error()) {
-    <div class="performance-table-state performance-table-state--error">
-      <mat-icon>error_outline</mat-icon>
-      <p>{{ error() }}</p>
-      <button mat-stroked-button type="button" (click)="reload()">Try again</button>
-    </div>
+    <app-error-state [message]="error() ?? ''" (retry)="reload()" />
   } @else if (items().length === 0) {
     <app-empty-state
       title="No goals"
       message="Create a goal or adjust the filters."
       icon="flag"
-    >
-      @if (canCreate) {
-        <button mat-flat-button color="primary" type="button" (click)="openCreate()">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          New goal
-        </button>
-      }
-    </app-empty-state>
+      [actionLabel]="canCreate ? 'New goal' : ''"
+      (action)="openCreate()"
+    />
   } @else {
     <div class="performance-table-wrap">
-      <table class="performance-table">
+      <table class="performance-table" data-responsive>
         <thead>
           <tr>
             <th scope="col">Goal</th>
@@ -71,7 +59,7 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="performance-table__row">
-              <td>
+              <td data-label="Goal">
                 <strong>{{ item.title }}</strong>
                 @if (item.dueDate) {
                   <div style="font-size: 0.8rem; color: var(--zh-muted-foreground)">
@@ -79,21 +67,21 @@
                   </div>
                 }
               </td>
-              <td>{{ employeeLabel(item) }}</td>
-              <td>{{ item.progress }}%</td>
-              <td>
+              <td data-label="Employee">{{ employeeLabel(item) }}</td>
+              <td data-label="Progress">{{ item.progress }}%</td>
+              <td data-label="Priority">
                 <span [class]="statusClass(item.priority)">
                   <span class="performance-status-pill__dot" aria-hidden="true"></span>
                   {{ statusLabel(item.priority) }}
                 </span>
               </td>
-              <td>
+              <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="performance-status-pill__dot" aria-hidden="true"></span>
                   {{ statusLabel(item.status) }}
                 </span>
               </td>
-              <td class="performance-table__actions-col">
+              <td class="performance-table__actions-col" data-label="">
                 <button
                   mat-icon-button
                   type="button"

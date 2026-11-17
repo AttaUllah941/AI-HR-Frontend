@@ -49,34 +49,22 @@
     </div>
   }
 
-  <div class="att-table-card">
-    @if (loading()) {
-      <div class="att-table-state">
-        <mat-spinner diameter="32" />
-        <span>Loading attendance…</span>
-      </div>
+  <div class="att-table-card" [class.is-refetching]="loading() && items().length > 0" [attr.aria-busy]="loading()">
+    @if (loading() && items().length === 0) {
+      <app-table-skeleton [rows]="6" [cols]="8" />
     } @else if (error()) {
-      <div class="att-table-state att-table-state--error">
-        <mat-icon>error_outline</mat-icon>
-        <p>{{ error() }}</p>
-        <button mat-stroked-button type="button" (click)="reload()">Try again</button>
-      </div>
+      <app-error-state [message]="error() ?? ''" (retry)="reload()" />
     } @else if (items().length === 0) {
       <app-empty-state
         title="No attendance records"
         message="Try another date or add a manual attendance record."
         icon="fact_check"
-      >
-        @if (canCreate) {
-          <button mat-flat-button color="primary" type="button" (click)="openForm()">
-            <mat-icon aria-hidden="true">add</mat-icon>
-            Add record
-          </button>
-        }
-      </app-empty-state>
+      [actionLabel]="canCreate ? 'Add record' : ''"
+      (action)="openForm()"
+    />
     } @else {
       <div class="att-table-wrap">
-        <table class="att-table">
+        <table class="att-table" data-responsive>
           <thead>
             <tr>
               <th scope="col">Employee</th>
@@ -92,7 +80,7 @@
           <tbody>
             @for (item of items(); track item.id) {
               <tr class="att-table__row">
-                <td>
+                <td data-label="Employee">
                   <div class="att-table__employee">
                     <span
                       class="att-table__avatar"
@@ -109,18 +97,18 @@
                     </div>
                   </div>
                 </td>
-                <td>{{ item.employee?.department?.name ?? '—' }}</td>
-                <td>
+                <td data-label="Department">{{ item.employee?.department?.name ?? '—' }}</td>
+                <td data-label="Status">
                   <span [class]="statusClass(item.status)">
                     <span class="att-status-pill__dot" aria-hidden="true"></span>
                     {{ statusLabel(item.status) }}
                   </span>
                 </td>
-                <td>{{ formatTime(item.checkInAt) }}</td>
-                <td>{{ formatTime(item.checkOutAt) }}</td>
-                <td>{{ formatHours(item.workMinutes) }}</td>
-                <td>{{ formatLate(item.lateMinutes) }}</td>
-                <td class="att-table__actions-col">
+                <td data-label="Check-in">{{ formatTime(item.checkInAt) }}</td>
+                <td data-label="Check-out">{{ formatTime(item.checkOutAt) }}</td>
+                <td data-label="Work hrs">{{ formatHours(item.workMinutes) }}</td>
+                <td data-label="Late">{{ formatLate(item.lateMinutes) }}</td>
+                <td class="att-table__actions-col" data-label="">
                   <button
                     mat-icon-button
                     type="button"

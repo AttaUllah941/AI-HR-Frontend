@@ -37,10 +37,8 @@
     type="submit"
     form="resume-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : 'Attach resume' }}
   </button>
 </mat-dialog-actions>

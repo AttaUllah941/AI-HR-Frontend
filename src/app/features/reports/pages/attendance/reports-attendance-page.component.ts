@@ -16,6 +16,10 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ReportsBarChartComponent } from '../../components/reports-bar-chart.component';
+import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
+import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
+import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
+import { Subscription } from 'rxjs';
 
 function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -42,12 +46,16 @@ function defaultRange(): { from: string; to: string } {
     EmptyStateComponent,
     OrganizationStatusComponent,
     ReportsBarChartComponent,
+    SmartLoaderComponent,
+    ChartSkeletonComponent,
   ],
   templateUrl: './reports-attendance-page.component.html',
   styleUrl: './reports-attendance-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportsAttendancePageComponent implements OnInit {
+  private inflight: Subscription | null = null;
+  protected readonly exportMessages = LOADER_MESSAGES.export;
   private readonly reports = inject(ReportsService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
@@ -71,7 +79,8 @@ export class ReportsAttendancePageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.reports
+    this.inflight?.unsubscribe();
+    this.inflight = this.reports
       .getAttendance({
         dateFrom: this.dateFrom.value,
         dateTo: this.dateTo.value,
@@ -104,7 +113,7 @@ export class ReportsAttendancePageComponent implements OnInit {
       })
       .subscribe({
         next: () => {
-          this.toast.success(`${format} export started.`);
+          this.toast.success(`${format} download ready.`);
           this.exporting.set(false);
         },
         error: (err: { error?: { message?: string }; message?: string }) => {

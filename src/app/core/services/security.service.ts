@@ -50,6 +50,7 @@ export interface SecurityStatus {
     corsConfigured: boolean;
     globalRateLimit: { windowMs: number; max: number };
     authRateLimit: { windowMs: number; max: number };
+    refreshRateLimit: { windowMs: number; max: number };
     jwtAccessExpiresIn: string;
     jwtRefreshExpiresIn: string;
     jwtSecretsLookStrong: boolean;

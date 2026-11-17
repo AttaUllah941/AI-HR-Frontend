@@ -1,19 +1,42 @@
-@if (loading()) {
-  <div class="org-status org-status--loading" role="status" aria-live="polite" aria-busy="true">
-    <mat-progress-spinner mode="indeterminate" diameter="36" />
-    <p>{{ loadingMessage() }}</p>
+@if (loading() && !hasData()) {
+  <div class="org-status-region" role="status" aria-live="polite">
+    <span class="sr-only">{{ loadingMessage() }}</span>
+    @switch (skeleton()) {
+      @case ('profile') {
+        <app-profile-skeleton />
+      }
+      @case ('table') {
+        <app-table-skeleton [rows]="6" [cols]="5" />
+      }
+      @case ('list') {
+        <app-list-skeleton [rows]="6" />
+      }
+      @case ('kpi') {
+        <div class="org-status-kpis">
+          @for (n of kpiPlaceholders; track n) {
+            <app-kpi-card-skeleton />
+          }
+        </div>
+        <div class="org-status-charts">
+          <app-chart-skeleton />
+          <app-chart-skeleton />
+        </div>
+      }
+      @default {
+        <div class="org-status org-status--loading" aria-hidden="true">
+          <mat-progress-spinner mode="indeterminate" diameter="36" />
+          <p>{{ loadingMessage() }}</p>
+        </div>
+      }
+    }
   </div>
 } @else if (error()) {
-  <mat-card class="org-status org-status--error" role="alert">
-    <mat-icon aria-hidden="true">error_outline</mat-icon>
-    <div>
-      <h3>{{ errorTitle() }}</h3>
-      <p>{{ error() }}</p>
-      @if (showRetry()) {
-        <button mat-stroked-button type="button" (click)="retry.emit()">Try again</button>
-      }
-    </div>
-  </mat-card>
+  <app-error-state
+    [title]="errorTitle()"
+    [message]="error() ?? ''"
+    [showRetry]="showRetry()"
+    (retry)="retry.emit()"
+  />
 } @else {
   <ng-content />
 }

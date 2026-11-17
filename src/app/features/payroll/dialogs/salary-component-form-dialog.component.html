@@ -68,10 +68,8 @@
     type="submit"
     form="salary-component-form"
     [disabled]="form.invalid || saving()"
-  >
-    @if (saving()) {
-      <mat-spinner class="save-spinner" diameter="16" />
-    }
+    [appButtonSpinner]="saving()">
+    
     {{ saving() ? 'Saving…' : 'Save component' }}
   </button>
 </mat-dialog-actions>
