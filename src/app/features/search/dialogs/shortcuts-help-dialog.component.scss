@@ -1,0 +1,44 @@
+.shortcuts-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: min(24rem, 90vw);
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--zh-border);
+    font-size: 0.9rem;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+}
+
+.shortcuts-keys {
+  display: inline-flex;
+  gap: 0.25rem;
+
+  kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    padding: 0.15rem 0.4rem;
+    border: 1px solid var(--zh-border);
+    border-radius: 0.35rem;
+    background: color-mix(in srgb, var(--zh-muted) 40%, transparent);
+    font-size: 0.75rem;
+    font-family: inherit;
+  }
+}
+
+h2[mat-dialog-title] {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}

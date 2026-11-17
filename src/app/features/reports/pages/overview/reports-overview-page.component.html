@@ -1,0 +1,202 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  loadingMessage="Loading reports overview…"
+  errorTitle="Reports overview unavailable"
+  (retry)="reload()"
+>
+  @if (exporting()) {
+    <app-smart-loader class="long-op" [messages]="exportMessages" [diameter]="28" />
+  }
+  <section class="reports-page" aria-label="Reports overview">
+    <div class="reports-action-bar">
+      <div>
+        <h2 class="reports-heading">Overview</h2>
+        <p class="reports-sub">
+          Cross-module KPIs and recent exports
+          @if (summary(); as s) {
+            · generated {{ s.generatedAt | date: 'medium' }}
+          }
+        </p>
+      </div>
+      <div class="reports-action-bar__actions">
+        <button mat-stroked-button type="button" (click)="reload()">
+          <mat-icon aria-hidden="true">refresh</mat-icon>
+          Refresh
+        </button>
+        @if (canExport) {
+          <button
+            mat-flat-button
+            color="primary"
+            class="reports-add-btn"
+            type="button"
+            [matMenuTriggerFor]="exportMenu"
+            [disabled]="exporting()"
+          >
+            <mat-icon aria-hidden="true">download</mat-icon>
+            Export
+          </button>
+          <mat-menu #exportMenu="matMenu">
+            <button mat-menu-item type="button" (click)="exportOverview('CSV')">CSV</button>
+            <button mat-menu-item type="button" (click)="exportOverview('XLSX')">Excel (.xlsx)</button>
+            <button mat-menu-item type="button" (click)="exportOverview('PDF')">PDF</button>
+            <button mat-menu-item type="button" (click)="exportOverview('JSON')">JSON</button>
+          </mat-menu>
+        }
+      </div>
+    </div>
+
+    <div class="reports-kpi-grid">
+      @for (card of kpis(); track card.key) {
+        <mat-card class="reports-kpi-card">
+          <div class="reports-kpi-card__header">
+            <span class="reports-kpi-card__icon reports-kpi-card__icon--{{ card.tone }}">
+              <mat-icon aria-hidden="true">{{ card.icon }}</mat-icon>
+            </span>
+          </div>
+          <p class="reports-kpi-card__label">{{ card.label }}</p>
+          <strong class="reports-kpi-card__value">{{ formatNumber(card.value) }}</strong>
+        </mat-card>
+      }
+    </div>
+
+    @if (summary(); as s) {
+      <div class="reports-chart-grid">
+        <mat-card class="reports-chart-card">
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.attendanceByStatus"
+              title="Attendance by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
+        </mat-card>
+        <mat-card class="reports-chart-card">
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.leaveByStatus"
+              title="Leave by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
+        </mat-card>
+        <mat-card class="reports-chart-card">
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.payrollByStatus"
+              title="Payroll by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
+        </mat-card>
+        <mat-card class="reports-chart-card">
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.jobsByStatus"
+              title="Jobs by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
+        </mat-card>
+        <mat-card class="reports-chart-card">
+          @defer (on viewport) {
+            <app-reports-bar-chart
+              [points]="s.charts.applicationsByStatus"
+              title="Applications by status"
+            />
+          } @placeholder {
+            <app-chart-skeleton />
+          }
+        </mat-card>
+      </div>
+
+      <div>
+        <div class="reports-action-bar">
+          <h3 class="reports-heading">Report catalog</h3>
+        </div>
+        <div class="reports-module-grid">
+          @for (mod of s.modules; track mod.key) {
+            <article class="reports-module-card">
+              <a class="reports-module-card__body" [routerLink]="['/reports', mod.path]">
+                <span class="reports-module-card__icon" aria-hidden="true">
+                  <mat-icon>{{ moduleIcons[mod.key] || 'insights' }}</mat-icon>
+                </span>
+                <div>
+                  <h4>{{ mod.label }}</h4>
+                  <p>{{ moduleDescription(mod.key, mod.description) }}</p>
+                </div>
+              </a>
+              @if (canExport) {
+                <div class="reports-module-card__actions">
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="exporting()"
+                    (click)="exportModule(mod.key, 'PDF', $event)"
+                  >
+                    {{ exportingKey() === mod.key ? '…' : 'PDF' }}
+                  </button>
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="exporting()"
+                    (click)="exportModule(mod.key, 'XLSX', $event)"
+                  >
+                    Excel
+                  </button>
+                </div>
+              }
+            </article>
+          }
+        </div>
+      </div>
+
+      <div>
+        <div class="reports-action-bar">
+          <h3 class="reports-heading">Recent exports</h3>
+        </div>
+        @if (s.recentExports.length === 0) {
+          <app-empty-state
+            title="No exports yet"
+            message="Export a report to see history here."
+            icon="download"
+          />
+        } @else {
+          <div class="reports-table-card">
+            <div class="reports-table-wrap">
+              <table class="reports-table" data-responsive>
+                <thead>
+                  <tr>
+                    <th scope="col">Report</th>
+                    <th scope="col">Format</th>
+                    <th scope="col">File</th>
+                    <th scope="col">When</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of s.recentExports; track row.id) {
+                    <tr class="reports-table__row">
+                      <td data-label="Report">{{ reportTypeLabel(row.reportType) }}</td>
+                      <td data-label="Format">
+                        <span [class]="statusClass('info')">
+                          <span class="reports-status-pill__dot" aria-hidden="true"></span>
+                          {{ row.format }}
+                        </span>
+                      </td>
+                      <td data-label="File">{{ row.fileName || '—' }}</td>
+                      <td data-label="When">{{ row.createdAt | date: 'short' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+</app-organization-status>

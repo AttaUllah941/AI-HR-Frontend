@@ -1,0 +1,19 @@
+<header class="org-section-header">
+  <div class="org-section-header__main">
+    <div class="org-section-header__icon" aria-hidden="true">
+      <mat-icon>{{ icon() }}</mat-icon>
+    </div>
+    <div class="org-section-header__text">
+      <h2>{{ title() }}</h2>
+      @if (description()) {
+        <p>{{ description() }}</p>
+      }
+    </div>
+    @if (count() !== null) {
+      <span class="org-section-header__count" aria-label="Total items">{{ count() }}</span>
+    }
+  </div>
+  <div class="org-section-header__actions">
+    <ng-content />
+  </div>
+</header>

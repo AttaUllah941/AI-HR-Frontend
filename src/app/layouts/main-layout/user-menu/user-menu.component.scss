@@ -1,0 +1,21 @@
+.topbar__avatar {
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--zh-primary), #60a5fa);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.topbar__avatar-btn {
+  padding: 0 !important;
+}
+
+.user-menu__check {
+  margin-inline: auto 0 !important;
+  color: var(--zh-primary);
+}

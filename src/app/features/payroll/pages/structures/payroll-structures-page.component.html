@@ -1,0 +1,102 @@
+<app-organization-section-header
+  title="Salary structures"
+  description="Employee basic pay, bank details, and assigned salary components."
+  icon="account_tree"
+  [count]="loading() || error() ? null : items().length"
+>
+  @if (canCreate) {
+    <button mat-flat-button color="primary" type="button" (click)="openForm()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Add structure
+    </button>
+  }
+</app-organization-section-header>
+
+<div class="payroll-table-card" [class.is-refetching]="loading() && items().length > 0" [attr.aria-busy]="loading()">
+  @if (loading() && items().length === 0) {
+    <app-table-skeleton [rows]="6" [cols]="6" />
+  } @else if (error()) {
+    <app-error-state [message]="error() ?? ''" (retry)="reload()" />
+  } @else if (items().length === 0) {
+    <app-empty-state
+      title="No salary structures"
+      message="Create a structure to include an employee in payroll runs."
+      icon="account_tree"
+      [actionLabel]="canCreate ? 'Add structure' : ''"
+      (action)="openForm()"
+    />
+  } @else {
+    <div class="payroll-table-wrap">
+      <table class="payroll-table" data-responsive>
+        <thead>
+          <tr>
+            <th scope="col">Employee</th>
+            <th scope="col">Basic</th>
+            <th scope="col">Effective</th>
+            <th scope="col">Bank</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="payroll-table__actions-col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr class="payroll-table__row">
+              <td data-label="Employee">
+                <div class="payroll-table__employee-text">
+                  <strong>
+                    {{ item.employee?.firstName }} {{ item.employee?.lastName }}
+                  </strong>
+                  <span>{{ item.employee?.employeeCode || '—' }}</span>
+                </div>
+              </td>
+              <td data-label="Basic">{{ formatMoney(item.basicSalary, item.currency) }}</td>
+              <td data-label="Effective">
+                {{ formatDate(item.effectiveFrom) }}
+                @if (item.effectiveTo) {
+                  – {{ formatDate(item.effectiveTo) }}
+                }
+              </td>
+              <td data-label="Bank">{{ item.bankName || '—' }}</td>
+              <td data-label="Status">
+                <span
+                  [class]="
+                    item.isActive
+                      ? 'payroll-status-pill payroll-status-pill--approved'
+                      : 'payroll-status-pill payroll-status-pill--cancelled'
+                  "
+                >
+                  <span class="payroll-status-pill__dot" aria-hidden="true"></span>
+                  {{ item.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="payroll-table__actions-col" data-label="">
+                @if (canUpdate) {
+                  <button
+                    mat-icon-button
+                    type="button"
+                    aria-label="Edit structure"
+                    [disabled]="deletingId() === item.id"
+                    (click)="openForm(item)"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                }
+                @if (canDelete) {
+                  <button
+                    mat-icon-button
+                    type="button"
+                    aria-label="Delete structure"
+                    [disabled]="deletingId() === item.id"
+                    (click)="remove(item)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

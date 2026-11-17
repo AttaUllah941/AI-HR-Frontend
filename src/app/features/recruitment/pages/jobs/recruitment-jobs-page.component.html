@@ -1,0 +1,143 @@
+<app-organization-section-header
+  title="Job openings"
+  description="Create, publish, hold, and close hiring roles."
+  icon="work"
+  [count]="loading() || error() ? null : total()"
+>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Status</mat-label>
+    <mat-select [formControl]="statusControl">
+      @for (opt of statusOptions; track opt.value) {
+        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (canCreate) {
+    <button mat-flat-button color="primary" type="button" (click)="openCreate()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Create job
+    </button>
+  }
+</app-organization-section-header>
+
+<div class="recruitment-table-card" [class.is-refetching]="loading() && items().length > 0" [attr.aria-busy]="loading()">
+  @if (loading() && items().length === 0) {
+    <app-table-skeleton [rows]="6" [cols]="6" />
+  } @else if (error()) {
+    <app-error-state [message]="error() ?? ''" (retry)="reload()" />
+  } @else if (items().length === 0) {
+    <app-empty-state
+      title="No job openings"
+      message="Create a job or adjust the status filter."
+      icon="work"
+      [actionLabel]="canCreate ? 'Create job' : ''"
+      (action)="openCreate()"
+    />
+  } @else {
+    <div class="recruitment-table-wrap">
+      <table class="recruitment-table" data-responsive>
+        <thead>
+          <tr>
+            <th scope="col">Role</th>
+            <th scope="col">Type</th>
+            <th scope="col">Openings</th>
+            <th scope="col">Applications</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="recruitment-table__actions-col">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr class="recruitment-table__row">
+              <td data-label="Role">
+                <div class="recruitment-table__employee-text">
+                  <strong>{{ item.title }}</strong>
+                  <span>{{ item.code }} · {{ item.location || 'Remote / unspecified' }}</span>
+                </div>
+              </td>
+              <td data-label="Type">{{ statusLabel(item.employmentType) }}</td>
+              <td data-label="Openings">{{ item.openings }}</td>
+              <td data-label="Applications">{{ applicationCount(item) }}</td>
+              <td data-label="Status">
+                <span [class]="statusClass(item.status)">
+                  <span class="recruitment-status-pill__dot" aria-hidden="true"></span>
+                  {{ statusLabel(item.status) }}
+                </span>
+              </td>
+              <td class="recruitment-table__actions-col" data-label="">
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="recruitment-table__menu-btn"
+                  aria-label="Actions"
+                  [matMenuTriggerFor]="rowMenu"
+                  [disabled]="actionId() === item.id"
+                  (click)="setMenuItem(item)"
+                >
+                  <mat-icon>more_horiz</mat-icon>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="recruitment-table-footer">
+        <span>Page {{ page() }} of {{ totalPages() }} · {{ total() }} total</span>
+        <div class="recruitment-table-footer__nav">
+          <button mat-stroked-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+            Previous
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="page() >= totalPages()"
+            (click)="nextPage()"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    }
+
+    <mat-menu #rowMenu="matMenu" xPosition="before">
+      @if (menuItem(); as item) {
+        @if (canEdit(item)) {
+          <button mat-menu-item type="button" (click)="openEdit(item)">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+        }
+        @if (canPublish(item)) {
+          <button mat-menu-item type="button" (click)="publish(item)">
+            <mat-icon>publish</mat-icon>
+            <span>Publish</span>
+          </button>
+        }
+        @if (canHold(item)) {
+          <button mat-menu-item type="button" (click)="hold(item)">
+            <mat-icon>pause_circle</mat-icon>
+            <span>Hold</span>
+          </button>
+        }
+        @if (canClose(item)) {
+          <button mat-menu-item type="button" (click)="close(item)">
+            <mat-icon>lock</mat-icon>
+            <span>Close</span>
+          </button>
+        }
+        @if (canDelete) {
+          <button mat-menu-item type="button" (click)="remove(item)">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+          </button>
+        }
+      }
+    </mat-menu>
+  }
+</div>

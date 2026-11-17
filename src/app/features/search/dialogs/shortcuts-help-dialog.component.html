@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>
+  <mat-icon aria-hidden="true">keyboard</mat-icon>
+  Keyboard shortcuts
+</h2>
+
+<mat-dialog-content>
+  <ul class="shortcuts-list">
+    @for (item of items(); track item.id) {
+      <li>
+        <span>{{ item.action }}</span>
+        <span class="shortcuts-keys">
+          @for (key of keysFor(item); track key) {
+            <kbd>{{ key }}</kbd>
+          }
+        </span>
+      </li>
+    }
+  </ul>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" type="button" mat-dialog-close>Got it</button>
+</mat-dialog-actions>

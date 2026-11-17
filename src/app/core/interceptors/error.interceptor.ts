@@ -1,51 +1,100 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, finalize, throwError } from 'rxjs';
-import { LoadingService } from '../services/loading.service';
+import { catchError, from, of, switchMap, throwError } from 'rxjs';
 import { ToastService } from '../services/toast.service';
 import { AuthService } from '../services/auth.service';
+import { isPublicAuthEndpoint } from './auth-endpoints';
 
+/**
+ * User-facing error toasts.
+ * 401 session clearing is handled by refreshInterceptor after a failed refresh;
+ * this interceptor only redirects when a 401 still surfaces (refresh already failed
+ * or no refresh token was available).
+ */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-  const loading = inject(LoadingService);
   const toast = inject(ToastService);
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  const skipLoading = req.headers.has('X-Skip-Loading');
   const skipErrorToast = req.headers.has('X-Skip-Error-Toast');
 
-  if (!skipLoading) {
-    loading.show();
-  }
-
   return next(req).pipe(
-    catchError((error: HttpErrorResponse) => {
-      const message =
-        (error.error && typeof error.error === 'object' && 'message' in error.error
-          ? String((error.error as { message: string }).message)
-          : null) ||
-        error.message ||
-        'Something went wrong';
+    catchError((raw: HttpErrorResponse) =>
+      parseBlobError(raw).pipe(switchMap((error) => handleError(error)))),
+  );
 
-      const isAuthRoute = req.url.includes('/auth/');
+  function handleError(error: HttpErrorResponse) {
+    const message = extractErrorMessage(error);
 
-      if (error.status === 401 && !isAuthRoute) {
+    const isAuthRoute = isPublicAuthEndpoint(req.url);
+
+    if (error.status === 401 && !isAuthRoute) {
+      if (auth.isAuthenticated()) {
         auth.clearSession();
-        void router.navigate(['/auth/login']);
-        if (!skipErrorToast) {
-          toast.error('Session expired. Please sign in again.');
-        }
-      } else if (error.status >= 400 && !skipErrorToast) {
-        toast.error(message);
       }
+      void router.navigate(['/auth/login']);
+      if (!skipErrorToast) {
+        toast.error('Session expired. Please sign in again.');
+      }
+    } else if (error.status >= 400 && !skipErrorToast) {
+      toast.serverError(message);
+    }
 
-      return throwError(() => error);
-    }),
-    finalize(() => {
-      if (!skipLoading) {
-        loading.hide();
+    return throwError(() => error);
+  }
+};
+
+/** Blob downloads (exports, files) return errors as a Blob; decode the JSON body so the message surfaces. */
+export function parseBlobError(error: HttpErrorResponse) {
+  if (!(error.error instanceof Blob) || !error.error.type.includes('json')) {
+    return of(error);
+  }
+  return from(error.error.text()).pipe(
+    switchMap((text) => {
+      try {
+        return of(
+          new HttpErrorResponse({
+            error: JSON.parse(text),
+            headers: error.headers,
+            status: error.status,
+            statusText: error.statusText,
+            url: error.url ?? undefined,
+          }),
+        );
+      } catch {
+        return of(error);
       }
     }),
   );
-};
+}
+
+function extractErrorMessage(error: HttpErrorResponse): string {
+  const body = error.error;
+  if (!body || typeof body !== 'object') {
+    return error.message || 'Something went wrong';
+  }
+
+  const fieldErrors =
+    'errors' in body &&
+    body.errors &&
+    typeof body.errors === 'object' &&
+    'fieldErrors' in (body.errors as object)
+      ? ((body.errors as { fieldErrors: Record<string, string[]> }).fieldErrors ?? {})
+      : null;
+
+  if (fieldErrors) {
+    const details = Object.values(fieldErrors)
+      .flat()
+      .filter(Boolean);
+    if (details.length > 0) {
+      return details.join('. ');
+    }
+  }
+
+  if ('message' in body && body.message) {
+    return String(body.message);
+  }
+
+  return error.message || 'Something went wrong';
+}

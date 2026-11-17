@@ -1,0 +1,191 @@
+import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
+import {
+  LoginAttemptItem,
+  SecurityReview,
+  SecurityReviewCheck,
+  SecurityService,
+  SecurityStatus,
+} from '../../../../core/services/security.service';
+import { ToastService } from '../../../../core/services/toast.service';
+import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
+
+@Component({
+  selector: 'app-settings-security-page',
+  standalone: true,
+  imports: [
+    DatePipe,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    OrganizationStatusComponent,
+    ButtonSpinnerDirective,
+  ],
+  templateUrl: './settings-security-page.component.html',
+  styleUrl: './settings-security-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges {
+  private readonly fb = inject(FormBuilder);
+  private readonly security = inject(SecurityService);
+  private readonly auth = inject(AuthService);
+  private readonly toast = inject(ToastService);
+
+  readonly loading = signal(true);
+  readonly saving = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly status = signal<SecurityStatus | null>(null);
+  readonly review = signal<SecurityReview | null>(null);
+  readonly checks = signal<SecurityReviewCheck[]>([]);
+  readonly attempts = signal<LoginAttemptItem[]>([]);
+  readonly canUpdate = this.auth.hasPermission('settings:update');
+
+  readonly attemptEmail = new FormControl('', { nonNullable: true });
+  readonly attemptSuccess = new FormControl<'all' | 'true' | 'false'>('all', {
+    nonNullable: true,
+  });
+
+  readonly form = this.fb.nonNullable.group({
+    maxFailedLogins: [5, [Validators.required, Validators.min(1), Validators.max(50)]],
+    lockoutMinutes: [15, [Validators.required, Validators.min(1), Validators.max(1440)]],
+    passwordMinLength: [8, [Validators.required, Validators.min(8), Validators.max(128)]],
+    passwordRequireLetter: [true],
+    passwordRequireNumber: [true],
+    passwordRequireSpecial: [false],
+    requireMfaForPrivileged: [false],
+    allowSelfRegistration: [true],
+    refreshRateLimitPerWindow: [60, [Validators.required, Validators.min(5)]],
+    ipAllowlistText: [''],
+  });
+
+  ngOnInit(): void {
+    this.reload();
+    this.attemptEmail.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => this.reloadAttempts());
+    this.attemptSuccess.valueChanges.subscribe(() => this.reloadAttempts());
+  }
+
+  reload(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.security.getStatus().subscribe({
+      next: (status) => {
+        this.status.set(status);
+        const p = status.policy;
+        this.form.reset({
+          maxFailedLogins: p.maxFailedLogins,
+          lockoutMinutes: p.lockoutMinutes,
+          passwordMinLength: p.passwordMinLength,
+          passwordRequireLetter: p.passwordRequireLetter,
+          passwordRequireNumber: p.passwordRequireNumber,
+          passwordRequireSpecial: p.passwordRequireSpecial,
+          requireMfaForPrivileged: p.requireMfaForPrivileged,
+          allowSelfRegistration: p.allowSelfRegistration,
+          refreshRateLimitPerWindow: p.refreshRateLimitPerWindow,
+          ipAllowlistText: (p.ipAllowlist ?? []).join('\n'),
+        });
+        if (!this.canUpdate) this.form.disable();
+        this.security.getReview().subscribe({
+          next: (review) => {
+            this.review.set(review);
+            this.checks.set(review.checks);
+          },
+          error: () => {
+            this.review.set(null);
+            this.checks.set([]);
+          },
+        });
+        this.reloadAttempts();
+        this.loading.set(false);
+      },
+      error: (err: { error?: { message?: string }; message?: string }) => {
+        this.error.set(err?.error?.message || err?.message || 'Unable to load security settings.');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  reloadAttempts(): void {
+    const success =
+      this.attemptSuccess.value === 'all'
+        ? undefined
+        : this.attemptSuccess.value === 'true';
+    this.security
+      .listLoginAttempts({
+        page: 1,
+        pageSize: 20,
+        email: this.attemptEmail.value.trim() || undefined,
+        success,
+      })
+      .subscribe({
+        next: (res) => this.attempts.set(res.items),
+        error: () => this.attempts.set([]),
+      });
+  }
+
+  save(): void {
+    if (!this.canUpdate || this.form.invalid || this.saving()) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.saving.set(true);
+    const raw = this.form.getRawValue();
+    const ipAllowlist = raw.ipAllowlistText
+      .split(/[\n,]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    this.security
+      .updatePolicy({
+        maxFailedLogins: raw.maxFailedLogins,
+        lockoutMinutes: raw.lockoutMinutes,
+        passwordMinLength: raw.passwordMinLength,
+        passwordRequireLetter: raw.passwordRequireLetter,
+        passwordRequireNumber: raw.passwordRequireNumber,
+        passwordRequireSpecial: raw.passwordRequireSpecial,
+        requireMfaForPrivileged: raw.requireMfaForPrivileged,
+        allowSelfRegistration: raw.allowSelfRegistration,
+        refreshRateLimitPerWindow: raw.refreshRateLimitPerWindow,
+        ipAllowlist,
+      })
+      .subscribe({
+        next: () => {
+          this.form.markAsPristine();
+          this.toast.success('Security policy saved.');
+          this.saving.set(false);
+          this.reload();
+        },
+        error: (err: { error?: { message?: string }; message?: string }) => {
+          this.toast.error(err?.error?.message || err?.message || 'Unable to save policy.');
+          this.saving.set(false);
+        },
+      });
+  }
+
+  statusLabel(status: string): string {
+    if (status === 'pass') return 'Pass';
+    if (status === 'fail') return 'Fail';
+    return 'Warn';
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.form.dirty && !this.saving();
+  }
+
+}

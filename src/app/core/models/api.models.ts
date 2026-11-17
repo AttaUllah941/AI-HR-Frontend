@@ -28,6 +28,7 @@ export interface AuthUser {
   lastName: string;
   roles: string[];
   permissions: string[];
+  companyId?: string | null;
   avatarUrl?: string | null;
   status?: string;
   mfaEnabled?: boolean;
@@ -45,6 +46,7 @@ export interface AuthSessionData extends AuthTokens {
 
 export interface LoginSuccessData extends AuthSessionData {
   mfaRequired: false;
+  securityWarnings?: string[];
 }
 
 export interface LoginMfaChallengeData {

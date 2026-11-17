@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.ai-page-heading {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.ai-page-sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: var(--zh-muted-foreground);
+  max-width: 40rem;
+}
+
+.ai-result-card__body {
+  font-family: var(--zh-font-sans);
+}
+
+mat-spinner {
+  display: inline-block;
+  margin-right: 0.35rem;
+}

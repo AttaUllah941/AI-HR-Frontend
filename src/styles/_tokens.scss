@@ -39,6 +39,10 @@
   --zh-warning-foreground: oklch(20% 0.04 60);
   --zh-destructive: oklch(63% 0.24 25);
   --zh-destructive-foreground: oklch(99% 0 0);
+  /* Text-safe variants (>= 4.5:1 on card/background); the base colours are for fills and borders. */
+  --zh-success-text: oklch(48% 0.13 145);
+  --zh-warning-text: oklch(48% 0.12 70);
+  --zh-destructive-text: oklch(52% 0.2 25);
 
   /* Shape & type */
   --zh-radius: 0.875rem;
@@ -46,4 +50,56 @@
   --zh-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
   --zh-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.08);
   --zh-header-height: 4rem;
+}
+
+/* Dark theme: follows the OS unless the user picked a theme (html[data-theme]). */
+@mixin zh-dark-tokens {
+  color-scheme: dark;
+
+  --zh-primary: oklch(66% 0.19 265);
+  --zh-primary-foreground: oklch(16% 0.02 260);
+  --zh-primary-soft: oklch(30% 0.07 265);
+  --zh-secondary: oklch(70% 0.13 230);
+  --zh-secondary-foreground: oklch(16% 0.02 260);
+
+  --zh-background: oklch(17% 0.015 260);
+  --zh-foreground: oklch(94% 0.008 258);
+  --zh-card: oklch(21% 0.018 260);
+  --zh-card-foreground: oklch(94% 0.008 258);
+  --zh-muted: oklch(25% 0.02 260);
+  --zh-muted-foreground: oklch(74% 0.02 258);
+  --zh-accent: oklch(28% 0.03 260);
+  --zh-accent-foreground: oklch(94% 0.008 258);
+  --zh-border: oklch(32% 0.02 260);
+  --zh-input: oklch(32% 0.02 260);
+  --zh-ring: oklch(66% 0.19 265);
+
+  --zh-sidebar: oklch(14% 0.02 260);
+  --zh-sidebar-border: oklch(26% 0.02 260);
+
+  --zh-success: oklch(74% 0.17 145);
+  --zh-warning: oklch(80% 0.15 75);
+  --zh-destructive: oklch(68% 0.2 25);
+  --zh-destructive-foreground: oklch(16% 0.02 25);
+
+  --zh-success-text: var(--zh-success);
+  --zh-warning-text: var(--zh-warning);
+  --zh-destructive-text: var(--zh-destructive);
+
+  --zh-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --zh-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.55);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include zh-dark-tokens;
+  }
+}
+
+:root[data-theme='dark'] {
+  @include zh-dark-tokens;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
 }

@@ -12,6 +12,7 @@ export const permissionGuard = (...permissions: string[]): CanActivateFn => {
     }
 
     const allowed = permissions.every((permission) => auth.hasPermission(permission));
-    return allowed ? true : router.createUrlTree(['/dashboard']);
+    // Profile is always reachable for authenticated users (no permission gate).
+    return allowed ? true : router.createUrlTree(['/profile']);
   };
 };

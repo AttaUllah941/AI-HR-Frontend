@@ -1,0 +1,25 @@
+<app-breadcrumb [items]="breadcrumbItems()" />
+
+<app-page-header
+  title="Attendance"
+  subtitle="Track daily presence, shifts, holidays, and overtime"
+/>
+
+<nav mat-tab-nav-bar [tabPanel]="tabPanel" class="att-tabs" aria-label="Attendance sections">
+  @for (tab of tabs; track tab.route) {
+    <a
+      mat-tab-link
+      [routerLink]="tab.route"
+      routerLinkActive
+      #rla="routerLinkActive"
+      [active]="rla.isActive"
+    >
+      <mat-icon aria-hidden="true">{{ tab.icon }}</mat-icon>
+      {{ tab.label }}
+    </a>
+  }
+</nav>
+
+<mat-tab-nav-panel #tabPanel class="att-tabs__panel">
+  <router-outlet />
+</mat-tab-nav-panel>

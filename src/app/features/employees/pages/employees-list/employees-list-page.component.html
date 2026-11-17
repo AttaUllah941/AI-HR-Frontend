@@ -1,0 +1,260 @@
+<section class="emp-page">
+  <div class="emp-action-bar">
+    <label class="emp-action-bar__search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        [formControl]="searchControl"
+        placeholder="Search employees..."
+        aria-label="Search employees"
+      />
+    </label>
+
+    <div class="emp-action-bar__actions">
+      <button
+        mat-stroked-button
+        type="button"
+        class="emp-action-btn"
+        [class.emp-action-btn--active]="filtersOpen()"
+        (click)="toggleFilters()"
+      >
+        <mat-icon aria-hidden="true">filter_list</mat-icon>
+        Filter
+      </button>
+      <button
+        mat-stroked-button
+        type="button"
+        class="emp-action-btn"
+        [matMenuTriggerFor]="viewMenu"
+        aria-label="Table view options"
+      >
+        <mat-icon aria-hidden="true">view_column</mat-icon>
+        View
+      </button>
+      <button
+        mat-stroked-button
+        type="button"
+        class="emp-action-btn"
+        [matMenuTriggerFor]="filtersMenu"
+        aria-label="Saved filters"
+      >
+        <mat-icon aria-hidden="true">bookmarks</mat-icon>
+        Saved
+      </button>
+      <mat-menu #viewMenu="matMenu" xPosition="before">
+        <div class="emp-view-menu" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          <p class="emp-view-menu__title">Row density</p>
+          <div class="emp-view-menu__row" role="radiogroup" aria-label="Row density">
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="prefs.density() === 'comfortable'"
+              [class.is-on]="prefs.density() === 'comfortable'"
+              (click)="prefs.setDensity('comfortable')"
+            >
+              Comfortable
+            </button>
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="prefs.density() === 'compact'"
+              [class.is-on]="prefs.density() === 'compact'"
+              (click)="prefs.setDensity('compact')"
+            >
+              Compact
+            </button>
+          </div>
+          <p class="emp-view-menu__title">Columns</p>
+          @for (col of columnOptions; track col.id) {
+            <label class="emp-view-menu__check">
+              <input
+                type="checkbox"
+                [checked]="prefs.isVisible(col.id)"
+                (change)="prefs.toggleColumn(col.id)"
+              />
+              {{ col.label }}
+            </label>
+          }
+          <button type="button" class="emp-view-menu__reset" (click)="prefs.reset()">Reset view</button>
+        </div>
+      </mat-menu>
+      <mat-menu #filtersMenu="matMenu" xPosition="before">
+        <div class="emp-view-menu" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          <p class="emp-view-menu__title">Saved filters</p>
+          @for (preset of savedFilters.filters(); track preset.name) {
+            <div class="emp-view-menu__preset">
+              <button type="button" (click)="applyPreset(preset.value)">{{ preset.name }}</button>
+              <button
+                type="button"
+                class="emp-view-menu__remove"
+                [attr.aria-label]="'Delete saved filter ' + preset.name"
+                (click)="savedFilters.remove(preset.name)"
+              >
+                <mat-icon aria-hidden="true">close</mat-icon>
+              </button>
+            </div>
+          } @empty {
+            <p class="emp-view-menu__empty">Nothing saved yet.</p>
+          }
+          <div class="emp-view-menu__save">
+            <input
+              #presetName
+              type="text"
+              placeholder="Name current filters"
+              aria-label="Saved filter name"
+              (keydown.enter)="savePreset(presetName)"
+            />
+            <button type="button" (click)="savePreset(presetName)">Save</button>
+          </div>
+        </div>
+      </mat-menu>
+
+      @if (canExport) {
+        <button mat-stroked-button type="button" class="emp-action-btn" (click)="exportCsv()">
+          <mat-icon aria-hidden="true">download</mat-icon>
+          Export
+        </button>
+      }
+
+      @if (canCreate) {
+        <button mat-flat-button color="primary" type="button" class="emp-add-btn" (click)="openForm()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add Employee
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (filtersOpen()) {
+    <div class="emp-filters-panel">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Status</mat-label>
+        <mat-select [formControl]="statusControl">
+          @for (opt of statusOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Department</mat-label>
+        <mat-select [formControl]="departmentControl">
+          <mat-option value="">All departments</mat-option>
+          @for (dept of departments(); track dept.id) {
+            <mat-option [value]="dept.id">{{ dept.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  }
+
+  <div class="emp-table-card" [class.is-refetching]="loading() && items().length > 0" [attr.aria-busy]="loading()">
+    @if (loading() && items().length === 0) {
+      <app-table-skeleton [rows]="6" [cols]="7" />
+    } @else if (error()) {
+      <app-error-state [message]="error() ?? ''" (retry)="reload()" />
+    } @else if (items().length === 0) {
+      <app-empty-state
+        title="No employees found"
+        message="Try adjusting your filters or add a new employee to get started."
+        icon="groups"
+      [actionLabel]="canCreate ? 'Add Employee' : ''"
+      (action)="openForm()"
+    />
+    } @else {
+      <div
+        class="emp-table-wrap"
+        [attr.data-density]="prefs.density()"
+        [attr.data-hide]="prefs.hiddenAttr()"
+      >
+        <table class="emp-table" data-responsive>
+          <thead>
+            <tr>
+              <th scope="col">Employee</th>
+              <th scope="col" data-col="department">Department</th>
+              <th scope="col" data-col="position">Position</th>
+              <th scope="col" data-col="manager">Manager</th>
+              <th scope="col" data-col="status">Status</th>
+              <th scope="col" data-col="joined">Joined</th>
+              <th scope="col" class="emp-table__actions-col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items(); track item.id) {
+              <tr class="emp-table__row" (click)="view(item)">
+                <td data-label="Employee">
+                  <div class="emp-table__employee">
+                    <span class="emp-table__avatar" [style.background]="avatarStyle(item).background" [style.color]="avatarStyle(item).color">
+                      {{ initials(item) }}
+                    </span>
+                    <div class="emp-table__employee-text">
+                      <strong>{{ item.firstName }} {{ item.lastName }}</strong>
+                      <span>{{ item.email }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td data-col="department" data-label="Department">{{ item.department?.name ?? '—' }}</td>
+                <td data-col="position" data-label="Position">{{ item.designation?.name ?? '—' }}</td>
+                <td data-col="manager" data-label="Manager">{{ managerName(item) }}</td>
+                <td data-col="status" data-label="Status">
+                  <span [class]="statusClass(item)">
+                    <span class="emp-status-pill__dot" aria-hidden="true"></span>
+                    {{ statusLabel(item) }}
+                  </span>
+                </td>
+                <td data-col="joined" data-label="Joined">{{ formatJoined(item.joinDate) }}</td>
+                <td class="emp-table__actions-col" data-label="">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="emp-table__menu-btn"
+                    aria-label="Actions for {{ item.firstName }} {{ item.lastName }}"
+                    [matMenuTriggerFor]="rowMenu"
+                    (click)="setMenuItem(item); $event.stopPropagation()"
+                  >
+                    <mat-icon>more_horiz</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <mat-menu #rowMenu="matMenu" xPosition="before">
+        @if (menuItem(); as item) {
+          <button mat-menu-item type="button" (click)="view(item)">
+            <mat-icon>visibility</mat-icon>
+            <span>View profile</span>
+          </button>
+          @if (canUpdate) {
+            <button mat-menu-item type="button" (click)="openForm(item)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit employee</span>
+            </button>
+          }
+          @if (canDelete) {
+            <button mat-menu-item type="button" (click)="remove(item)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete employee</span>
+            </button>
+          }
+        }
+      </mat-menu>
+
+      @if (totalPages() > 1) {
+        <div class="emp-table-footer">
+          <span>{{ total() }} employees · Page {{ page() }} of {{ totalPages() }}</span>
+          <div class="emp-table-footer__nav">
+            <button mat-stroked-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+              Previous
+            </button>
+            <button mat-stroked-button type="button" [disabled]="page() >= totalPages()" (click)="nextPage()">
+              Next
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</section>

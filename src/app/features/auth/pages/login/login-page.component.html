@@ -26,7 +26,7 @@
       class="full"
       type="submit"
       [disabled]="form.invalid || submitting()"
-    >
+      [appButtonSpinner]="submitting()">
       {{ submitting() ? 'Signing in…' : 'Sign in' }}
     </button>
   </form>

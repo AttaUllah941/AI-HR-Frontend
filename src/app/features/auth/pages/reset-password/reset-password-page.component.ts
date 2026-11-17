@@ -6,11 +6,18 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import {
+  passwordErrorMessage,
+  passwordValidators,
+} from '../../../../core/validators/password.validators';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-reset-password-page',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule,
+    ButtonSpinnerDirective,
+  ],
   templateUrl: './reset-password-page.component.html',
   styleUrl: './reset-password-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,9 +31,10 @@ export class ResetPasswordPageComponent {
 
   readonly submitting = signal(false);
   readonly token = signal(this.route.snapshot.queryParamMap.get('token') ?? '');
+  readonly passwordErrorMessage = passwordErrorMessage;
 
   readonly form = this.fb.nonNullable.group({
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: ['', passwordValidators],
     confirmPassword: ['', [Validators.required, Validators.minLength(8)]],
   });
 

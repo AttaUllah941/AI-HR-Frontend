@@ -4,14 +4,18 @@ import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import QRCode from 'qrcode';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { MfaSetupData } from '../../../../core/models/api.models';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
   selector: 'app-mfa-setup-page',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule,
+    ButtonSpinnerDirective,
+  ],
   templateUrl: './mfa-setup-page.component.html',
   styleUrl: './mfa-setup-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,38 +27,106 @@ export class MfaSetupPageComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly setup = signal<MfaSetupData | null>(null);
+  readonly qrDataUrl = signal<string | null>(null);
   readonly submitting = signal(false);
   readonly loading = signal(true);
+  readonly mfaEnabled = signal(false);
 
-  readonly form = this.fb.nonNullable.group({
+  readonly enableForm = this.fb.nonNullable.group({
+    code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+  });
+
+  readonly disableForm = this.fb.nonNullable.group({
+    password: ['', [Validators.required, Validators.minLength(8)]],
     code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
   });
 
   ngOnInit(): void {
-    this.auth.setupMfa().subscribe({
-      next: (data) => {
+    const user = this.auth.user();
+    if (user?.mfaEnabled) {
+      this.mfaEnabled.set(true);
+      this.loading.set(false);
+      return;
+    }
+
+    this.startSetup();
+  }
+
+  private startSetup(credentials?: { password: string; code: string }): void {
+    this.loading.set(true);
+    this.auth.setupMfa(credentials).subscribe({
+      next: async (data) => {
+        this.mfaEnabled.set(false);
         this.setup.set(data);
+        try {
+          const url = await QRCode.toDataURL(data.otpauthUrl, {
+            width: 200,
+            margin: 2,
+            errorCorrectionLevel: 'M',
+          });
+          this.qrDataUrl.set(url);
+        } catch {
+          this.qrDataUrl.set(null);
+        }
         this.loading.set(false);
       },
       error: () => {
         this.loading.set(false);
+        if (credentials) {
+          // Stay on the re-authentication form so the user can correct the password or code.
+          this.mfaEnabled.set(true);
+          return;
+        }
         void this.router.navigate(['/dashboard']);
       },
     });
   }
 
-  onSubmit(): void {
-    if (this.form.invalid || this.submitting()) {
-      this.form.markAllAsTouched();
+  onEnable(): void {
+    if (this.enableForm.invalid || this.submitting()) {
+      this.enableForm.markAllAsTouched();
       return;
     }
 
     this.submitting.set(true);
-    this.auth.enableMfa(this.form.controls.code.value).subscribe({
+    this.auth.enableMfa(this.enableForm.controls.code.value).subscribe({
       next: () => {
         this.submitting.set(false);
+        this.mfaEnabled.set(true);
         this.toast.success('Two-factor authentication enabled');
-        void this.router.navigate(['/dashboard']);
+        this.auth.me().subscribe({ error: () => undefined });
+      },
+      error: () => this.submitting.set(false),
+    });
+  }
+
+  onReset(): void {
+    if (this.disableForm.invalid || this.submitting()) {
+      this.disableForm.markAllAsTouched();
+      return;
+    }
+
+    const { password, code } = this.disableForm.getRawValue();
+    this.disableForm.reset();
+    this.startSetup({ password, code });
+  }
+
+  onDisable(): void {
+    if (this.disableForm.invalid || this.submitting()) {
+      this.disableForm.markAllAsTouched();
+      return;
+    }
+
+    this.submitting.set(true);
+    const { password, code } = this.disableForm.getRawValue();
+    this.auth.disableMfa(password, code).subscribe({
+      next: () => {
+        this.submitting.set(false);
+        this.mfaEnabled.set(false);
+        this.setup.set(null);
+        this.qrDataUrl.set(null);
+        this.toast.success('Two-factor authentication disabled');
+        this.startSetup();
       },
       error: () => this.submitting.set(false),
     });

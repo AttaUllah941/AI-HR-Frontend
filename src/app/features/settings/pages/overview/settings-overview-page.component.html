@@ -1,0 +1,68 @@
+<app-organization-status
+  [loading]="loading()"
+  [error]="error()"
+  skeleton="kpi"
+  [hasData]="!!summary()"
+  loadingMessage="Loading settings…"
+  errorTitle="Settings unavailable"
+  (retry)="reload()"
+>
+  @if (summary(); as s) {
+    <section class="settings-page" aria-label="Settings overview">
+      <div class="settings-action-bar">
+        <div>
+          <h2 class="settings-page-heading">{{ s.company.name }}</h2>
+          <p class="settings-page-sub">
+            {{ s.company.legalName || 'Company workspace' }} · {{ s.company.timezone }} ·
+            {{ s.company.locale }}
+          </p>
+        </div>
+        <div class="settings-action-bar__actions">
+          <button mat-stroked-button type="button" class="settings-add-btn" (click)="reload()">
+            <mat-icon aria-hidden="true">refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-meta-grid">
+        <div class="settings-meta-chip">
+          <span class="settings-meta-chip__label">Users</span>
+          <span class="settings-meta-chip__value">{{ s.counts.users }}</span>
+          <span class="settings-meta-chip__hint">{{ s.counts.activeUsers }} active</span>
+        </div>
+        <div class="settings-meta-chip">
+          <span class="settings-meta-chip__label">Roles</span>
+          <span class="settings-meta-chip__value">{{ s.counts.roles }}</span>
+          <span class="settings-meta-chip__hint">{{ s.counts.permissions }} permissions</span>
+        </div>
+        <div class="settings-meta-chip">
+          <span class="settings-meta-chip__label">Email</span>
+          <span class="settings-meta-chip__value">{{ s.config.emailProvider }}</span>
+          <span class="settings-meta-chip__hint">
+            API key {{ s.config.emailApiKeySet ? 'set' : 'not set' }}
+          </span>
+        </div>
+        <div class="settings-meta-chip">
+          <span class="settings-meta-chip__label">Storage</span>
+          <span class="settings-meta-chip__value">{{ s.config.storageProvider }}</span>
+          <span class="settings-meta-chip__hint">File provider</span>
+        </div>
+      </div>
+
+      <div class="settings-catalog-grid" aria-label="Settings catalog">
+        @for (card of cards(); track card.route) {
+          <a class="settings-catalog-card" [routerLink]="card.route">
+            <span class="settings-catalog-card__icon" aria-hidden="true">
+              <mat-icon>{{ card.icon }}</mat-icon>
+            </span>
+            <div>
+              <h3>{{ card.title }}</h3>
+              <p>{{ card.description }}</p>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+  }
+</app-organization-status>

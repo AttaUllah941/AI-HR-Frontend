@@ -1,0 +1,86 @@
+<section class="att-page">
+  <div class="att-toolbar">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Employee</mat-label>
+      <mat-select [formControl]="employeeControl">
+        @for (emp of employees(); track emp.id) {
+          <mat-option [value]="emp.id">
+            {{ emp.firstName }} {{ emp.lastName }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput type="date" [formControl]="dateFromControl" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput type="date" [formControl]="dateToControl" />
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" type="button" class="att-add-btn" (click)="load()">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      Load timesheet
+    </button>
+  </div>
+
+  <div class="att-table-card" [class.is-refetching]="loading() && !!timesheet()" [attr.aria-busy]="loading()">
+    @if (loading() && !timesheet()) {
+      <app-table-skeleton [rows]="6" [cols]="7" />
+    } @else if (error()) {
+      <app-error-state [message]="error() ?? ''" (retry)="load()" />
+    } @else if (!loaded()) {
+      <app-empty-state
+        title="Select a range"
+        message="Choose an employee and date range, then load the timesheet."
+        icon="calendar_month"
+      />
+    } @else if (!(timesheet()?.items?.length)) {
+      <app-empty-state
+        title="No timesheet entries"
+        message="No attendance days found for the selected range."
+        icon="calendar_month"
+      />
+    } @else if (timesheet(); as sheet) {
+      <div class="att-table-wrap">
+        <table class="att-table" data-responsive>
+          <thead>
+            <tr>
+              <th scope="col">Day</th>
+              <th scope="col">Status</th>
+              <th scope="col">Check-in</th>
+              <th scope="col">Check-out</th>
+              <th scope="col">Work</th>
+              <th scope="col">Overtime</th>
+              <th scope="col">Late</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of sheet.items; track item.id) {
+              <tr>
+                <td data-label="Day">{{ formatDate(item.date) }}</td>
+                <td data-label="Status">{{ statusLabel(item) }}</td>
+                <td data-label="Check-in">{{ formatTime(item.checkInAt) }}</td>
+                <td data-label="Check-out">{{ formatTime(item.checkOutAt) }}</td>
+                <td data-label="Work">{{ formatHours(item.workMinutes) }}</td>
+                <td data-label="Overtime">{{ formatHours(item.overtimeMinutes) }}</td>
+                <td data-label="Late">{{ formatHours(item.lateMinutes) }}</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr class="att-table__totals">
+              <td colspan="4"><strong>Totals</strong></td>
+              <td><strong>{{ formatHours(sheet.totals.workMinutes) }}</strong></td>
+              <td><strong>{{ formatHours(sheet.totals.overtimeMinutes) }}</strong></td>
+              <td><strong>{{ formatHours(sheet.totals.lateMinutes) }}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    }
+  </div>
+</section>

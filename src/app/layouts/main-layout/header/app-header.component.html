@@ -1,0 +1,53 @@
+<header class="topbar">
+  <app-top-progress-bar />
+  <div class="topbar__left">
+    <button
+      mat-icon-button
+      type="button"
+      class="topbar__menu-mobile"
+      aria-label="Open navigation"
+      [attr.aria-expanded]="mobileOpen()"
+      aria-controls="primary-sidebar"
+      (click)="menuToggle.emit()"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+    <h1 class="topbar__greeting">
+      @if (pageTitle()) {
+        {{ pageTitle() }}
+      } @else {
+        {{ greeting() }}
+      }
+    </h1>
+  </div>
+
+  <form class="topbar__search" role="search" (submit)="$event.preventDefault(); onSearchSubmit()">
+    <mat-icon aria-hidden="true">search</mat-icon>
+    <input
+      type="search"
+      name="q"
+      placeholder="Search employees, docs, policies..."
+      aria-label="Global search"
+      [ngModel]="searchQuery()"
+      (ngModelChange)="searchQuery.set($event)"
+    />
+    <kbd class="topbar__kbd" aria-hidden="true">⌘K</kbd>
+  </form>
+
+  <div class="topbar__right">
+    <button mat-stroked-button type="button" class="company-chip" [matMenuTriggerFor]="companyMenu">
+      <mat-icon>apartment</mat-icon>
+      <span>{{ companyName() }}</span>
+      <mat-icon class="company-chip__chevron">expand_more</mat-icon>
+    </button>
+    <mat-menu #companyMenu="matMenu" class="zh-menu" xPosition="before">
+      <button mat-menu-item type="button" disabled>
+        <mat-icon>check</mat-icon>
+        <span>{{ companyName() }}</span>
+      </button>
+    </mat-menu>
+
+    <app-notification-bell />
+    <app-user-menu />
+  </div>
+</header>

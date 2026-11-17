@@ -1,0 +1,28 @@
+:host {
+  display: block;
+}
+
+.payroll-report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.payroll-overview-heading {
+  margin: 0 0 0.85rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.payroll-overview-sub {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--zh-muted-foreground);
+}
+
+@media (max-width: 900px) {
+  .payroll-report-grid {
+    grid-template-columns: 1fr;
+  }
+}

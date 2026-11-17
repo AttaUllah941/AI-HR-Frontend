@@ -1,28 +1,156 @@
-<app-page-header
-  title="Dashboard"
-  subtitle="Signed in — KPI widgets and charts arrive in Phase 3"
-/>
+@if (loading() && !summary()) {
+  <div role="status" aria-live="polite">
+    <span class="sr-only">Loading dashboard…</span>
+    <section class="kpi-grid" aria-hidden="true">
+      @for (n of kpiPlaceholders; track n) {
+        <app-kpi-card-skeleton />
+      }
+    </section>
+    <section class="dashboard-grid" aria-hidden="true">
+      <app-chart-skeleton />
+      <app-chart-skeleton />
+      <app-chart-skeleton />
+      <app-chart-skeleton />
+    </section>
+  </div>
+} @else if (error()) {
+  <app-error-state
+    title="Dashboard unavailable"
+    [message]="error() ?? ''"
+    (retry)="reload()"
+  />
+} @else if (summary(); as data) {
+  <app-dashboard-clock-card />
 
-<div class="kpi-grid">
-  @for (card of cards; track card.title) {
-    <mat-card class="kpi-card">
-      <div class="kpi-card__icon" [style.background]="card.tone">
-        <mat-icon>{{ card.icon }}</mat-icon>
+  @if (data.kpis.length === 0) {
+    <p class="state-msg">No metrics are available for your account yet.</p>
+  }
+
+  <section class="kpi-grid" aria-label="Key metrics">
+    @for (card of data.kpis; track card.key) {
+      <mat-card class="kpi-card">
+        <div class="kpi-card__header">
+          <div
+            class="kpi-card__icon"
+            [style.background]="iconStyles[card.tone]?.bg || iconStyles['primary'].bg"
+          >
+            <mat-icon [style.color]="iconStyles[card.tone]?.color || iconStyles['primary'].color">
+              {{ card.icon }}
+            </mat-icon>
+          </div>
+          @if (card.trend) {
+            <div class="kpi-card__trend" [class]="trendClass(card.trend)">
+              @if (trendIcon(card.trend); as icon) {
+                <mat-icon>{{ icon }}</mat-icon>
+              }
+              <span>{{ card.trend.value }}</span>
+            </div>
+          }
+        </div>
+        <p class="kpi-card__label">{{ card.label }}</p>
+        <strong class="kpi-card__value">{{ formatKpiValue(card.value) }}</strong>
+      </mat-card>
+    }
+  </section>
+
+  @if (data.aiInsights.items.length > 0) {
+    <mat-card class="ai-banner">
+      <div class="ai-banner__header">
+        <div class="ai-banner__title">
+          <span class="ai-banner__icon" aria-hidden="true">
+            <mat-icon>auto_awesome</mat-icon>
+          </span>
+          <h2>{{ data.aiInsights.title }}</h2>
+          @if (data.aiInsights.live) {
+            <span class="ai-banner__live">LIVE</span>
+          }
+        </div>
       </div>
-      <div>
-        <p class="kpi-card__label">{{ card.title }}</p>
-        <strong>{{ card.value }}</strong>
-      </div>
+      <ul class="ai-banner__list">
+        @for (item of data.aiInsights.items; track $index) {
+          <li>
+            {{ item.prefix }}<strong>{{ item.highlight }}</strong>{{ item.suffix }}
+          </li>
+        }
+      </ul>
+      <a class="ai-banner__cta" [routerLink]="data.aiInsights.ctaRoute">
+        {{ data.aiInsights.ctaLabel }}
+        <mat-icon>arrow_outward</mat-icon>
+      </a>
     </mat-card>
   }
-</div>
 
-<mat-card class="phase-note">
-  <h3>Authentication ready</h3>
-  <p>
-    JWT sessions, refresh tokens, RBAC claims, and MFA flows are live. Enable two-factor
-    authentication from
-    <a routerLink="/mfa-setup">MFA setup</a>
-    when you are ready.
-  </p>
-</mat-card>
+  <section class="dashboard-grid">
+    <mat-card class="panel panel--attendance">
+      <header class="panel__header">
+        <div>
+          <h3>Attendance Trend</h3>
+          <p>{{ data.attendanceTrend.period }}</p>
+        </div>
+      </header>
+      @if (hasAttendanceData(data)) {
+        @defer (on viewport) {
+          <app-attendance-trend-chart [series]="data.attendanceTrend.series" />
+        } @placeholder {
+          <app-chart-skeleton />
+        }
+      } @else {
+        <p class="state-msg state-msg--panel">No attendance recorded for this period yet.</p>
+      }
+    </mat-card>
+
+    <mat-card class="panel panel--departments">
+      <header class="panel__header">
+        <div>
+          <h3>Department Distribution</h3>
+          <p>{{ data.departmentDistribution.total | number }} employees</p>
+        </div>
+      </header>
+      @if (data.departmentDistribution.total > 0) {
+        @defer (on viewport) {
+          <app-department-donut-chart [slices]="data.departmentDistribution.slices" />
+        } @placeholder {
+          <app-chart-skeleton />
+        }
+      } @else {
+        <p class="state-msg state-msg--panel">No employees assigned to departments yet.</p>
+      }
+    </mat-card>
+
+    <mat-card class="panel panel--funnel">
+      <header class="panel__header">
+        <div>
+          <h3>Hiring Funnel</h3>
+          <p>{{ data.hiringFunnel.period }}</p>
+        </div>
+      </header>
+      @if (hasFunnelData(data)) {
+        @defer (on viewport) {
+          <app-hiring-funnel-chart [stages]="data.hiringFunnel.stages" />
+        } @placeholder {
+          <app-chart-skeleton />
+        }
+      } @else {
+        <p class="state-msg state-msg--panel">No candidates in the hiring pipeline yet.</p>
+      }
+    </mat-card>
+
+    <mat-card class="panel panel--growth">
+      <header class="panel__header">
+        <div>
+          <h3>Employee Growth</h3>
+          <p>{{ data.employeeGrowth.period }}</p>
+        </div>
+      </header>
+      @if (hasGrowthData(data)) {
+        @defer (on viewport) {
+          <app-employee-growth-chart [points]="data.employeeGrowth.points" />
+        } @placeholder {
+          <app-chart-skeleton />
+        }
+      } @else {
+        <p class="state-msg state-msg--panel">No employee growth data yet.</p>
+      }
+    </mat-card>
+  </section>
+}

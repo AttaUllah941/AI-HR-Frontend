@@ -1,0 +1,64 @@
+<aside
+  id="primary-sidebar"
+  class="sidebar"
+  [class.sidebar--open]="open()"
+  [attr.aria-label]="'Primary navigation'"
+>
+  <div class="sidebar__brand">
+    <div class="sidebar__logo" aria-hidden="true">
+      <mat-icon>auto_awesome</mat-icon>
+    </div>
+    <div class="sidebar__brand-text">
+      <strong>{{ appName }}</strong>
+      <span>AI Workspace</span>
+    </div>
+  </div>
+
+  <nav class="sidebar__nav">
+    @for (item of navItems(); track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+        (click)="closeMenu.emit()"
+      >
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+    <div class="sidebar__divider" aria-hidden="true"></div>
+    @for (item of secondaryItems(); track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+        (click)="closeMenu.emit()"
+      >
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span>{{ item.label }}</span>
+        @if (item.badge) {
+          <span class="sidebar__badge">{{ item.badge }}</span>
+        }
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar__footer">
+    <div class="sidebar__profile">
+      <span class="sidebar__avatar" aria-hidden="true">{{ initials() }}</span>
+      <div class="sidebar__profile-meta">
+        <strong>{{ displayName() }}</strong>
+        <span>{{ roleLabel() }}</span>
+      </div>
+    </div>
+    <button
+      mat-icon-button
+      type="button"
+      class="sidebar__logout"
+      aria-label="Sign out"
+      (click)="logout()"
+    >
+      <mat-icon>logout</mat-icon>
+    </button>
+  </div>
+</aside>

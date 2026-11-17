@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+.save-spinner {
+  display: inline-block;
+  margin-right: 0.35rem;
+}
+
+.structure-components {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.structure-components__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.structure-components__row {
+  display: grid;
+  grid-template-columns: 1fr 8rem auto;
+  gap: 0.5rem;
+  align-items: start;
+}
+
+@media (max-width: 640px) {
+  .structure-components__row {
+    grid-template-columns: 1fr;
+  }
+}
