@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ApiService } from './api.service';
 import { ApiResponse } from '../models/api.models';
+import { formatDate, formatDateTime } from '../utils/date-format';
 
 export type ProfileTheme = 'system' | 'light' | 'dark';
 export type ProfileTimeFormat = '12h' | '24h';
@@ -219,7 +220,7 @@ export class ProfileService {
     if (Number.isNaN(date.getTime())) {
       return iso;
     }
-    return date.toLocaleString();
+    return formatDateTime(date);
   }
 
   relativeTime(iso: string | null | undefined): string {
@@ -247,7 +248,7 @@ export class ProfileService {
     if (day < 7) {
       return `${day}d ago`;
     }
-    return date.toLocaleDateString();
+    return formatDate(date);
   }
 
   private unwrap<T>(res: ApiResponse<T>): T {

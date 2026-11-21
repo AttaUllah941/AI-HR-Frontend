@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,12 +19,13 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
+import { AppDatePipe } from '../../../../shared/pipes/app-date.pipe';
 
 @Component({
   selector: 'app-settings-security-page',
   standalone: true,
   imports: [
-    DatePipe,
+    AppDatePipe,
     ReactiveFormsModule,
     MatButtonModule,
     MatCheckboxModule,

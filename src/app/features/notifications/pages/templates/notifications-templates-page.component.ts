@@ -15,6 +15,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { SendNotificationDialogComponent } from '../../dialogs/send-notification-dialog.component';
 import { TemplateFormDialogComponent } from '../../dialogs/template-form-dialog.component';
+import { formatDateTime } from '../../../../core/utils/date-format';
 
 @Component({
   selector: 'app-notifications-templates-page',
@@ -150,7 +151,7 @@ export class NotificationsTemplatesPageComponent implements OnInit {
 
   createdLabel(iso: string): string {
     try {
-      return new Date(iso).toLocaleString();
+      return formatDateTime(iso);
     } catch {
       return iso;
     }

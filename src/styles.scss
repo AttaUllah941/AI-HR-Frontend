@@ -35,8 +35,30 @@ body {
   font-family: var(--zh-font-sans);
   font-size: 0.875rem;
   line-height: 1.5;
+  /* Inter: single-storey "a", clearer 1/l/I, and fixed-width digits so columns of numbers line up. */
+  font-feature-settings: 'cv11';
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+.mat-mdc-dialog-title,
+.mat-mdc-card-title {
+  font-family: var(--zh-font-display);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  letter-spacing: 0;
+}
+
+table,
+time,
+.kpi-card__value {
+  font-variant-numeric: tabular-nums;
 }
 
 a {
@@ -222,6 +244,7 @@ select {
   padding-block: 0.4rem;
 }
 
+[data-hide~='code'] [data-col='code'],
 [data-hide~='department'] [data-col='department'],
 [data-hide~='position'] [data-col='position'],
 [data-hide~='manager'] [data-col='manager'],

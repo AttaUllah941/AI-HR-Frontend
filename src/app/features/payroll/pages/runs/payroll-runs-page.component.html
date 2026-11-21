@@ -56,8 +56,9 @@
         <thead>
           <tr>
             <th scope="col">Period</th>
-            <th scope="col">Title</th>
-            <th scope="col">Entries</th>
+            <th scope="col" class="payroll-table__num">Employees</th>
+            <th scope="col" class="payroll-table__num">Gross pay</th>
+            <th scope="col" class="payroll-table__num">Net pay</th>
             <th scope="col">Status</th>
             <th scope="col" class="payroll-table__actions-col"><span class="sr-only">Actions</span></th>
           </tr>
@@ -68,8 +69,9 @@
               <td data-label="Period">
                 <strong>{{ monthLabel(item.month) }} {{ item.year }}</strong>
               </td>
-              <td data-label="Title">{{ item.title || '—' }}</td>
-              <td data-label="Entries">{{ entryCount(item) }}</td>
+              <td data-label="Employees" class="payroll-table__num">{{ entryCount(item) }}</td>
+              <td data-label="Gross pay" class="payroll-table__num">{{ money(item, item.totalGross) }}</td>
+              <td data-label="Net pay" class="payroll-table__num">{{ money(item, item.totalNet) }}</td>
               <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="payroll-status-pill__dot" aria-hidden="true"></span>

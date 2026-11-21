@@ -495,8 +495,13 @@ export class RecruitmentService {
     }
   }
 
+  /** "ON_HOLD" -> "On hold", "TECHNICAL" -> "Technical" (sentence case; "HR" stays an acronym). */
   statusLabel(status: string): string {
-    return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    if (status === 'HR') {
+      return 'HR';
+    }
+    const text = status.replace(/_/g, ' ').toLowerCase();
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   private unwrap<T>(res: ApiResponse<T>): T {

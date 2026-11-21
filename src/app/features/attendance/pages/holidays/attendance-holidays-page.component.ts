@@ -12,6 +12,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { HolidayFormDialogComponent } from '../../dialogs/holiday-form-dialog.component';
+import { formatWeekdayDate } from '../../../../core/utils/date-format';
 
 @Component({
   selector: 'app-attendance-holidays-page',
@@ -104,11 +105,6 @@ export class AttendanceHolidaysPageComponent implements OnInit {
   }
 
   formatDate(value: string): string {
-    return new Date(value).toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    return formatWeekdayDate(value);
   }
 }

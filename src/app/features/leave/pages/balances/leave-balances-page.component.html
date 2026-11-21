@@ -54,11 +54,11 @@
             <th scope="col">Employee</th>
             <th scope="col">Leave type</th>
             <th scope="col">Year</th>
-            <th scope="col">Entitled</th>
-            <th scope="col">Carried</th>
-            <th scope="col">Used</th>
-            <th scope="col">Pending</th>
-            <th scope="col">Available</th>
+            <th scope="col" class="leave-table__num">Entitled</th>
+            <th scope="col" class="leave-table__num">Carried</th>
+            <th scope="col" class="leave-table__num">Used</th>
+            <th scope="col" class="leave-table__num">Pending</th>
+            <th scope="col" class="leave-table__num">Available</th>
             <th scope="col" class="leave-table__actions-col"><span class="sr-only">Actions</span></th>
           </tr>
         </thead>
@@ -79,11 +79,16 @@
                 </span>
               </td>
               <td data-label="Year">{{ item.year }}</td>
-              <td data-label="Entitled">{{ item.entitled }}</td>
-              <td data-label="Carried">{{ item.carriedForward }}</td>
-              <td data-label="Used">{{ item.used }}</td>
-              <td data-label="Pending">{{ item.pending }}</td>
-              <td data-label="Available"><strong>{{ available(item) }}</strong></td>
+              <td data-label="Entitled" class="leave-table__num">{{ item.entitled }}</td>
+              <td data-label="Carried" class="leave-table__num">{{ item.carriedForward }}</td>
+              <td data-label="Used" class="leave-table__num">{{ item.used }}</td>
+              <td data-label="Pending" class="leave-table__num">{{ item.pending }}</td>
+              <td data-label="Available" class="leave-table__num">
+                <span class="leave-avail" [style.--ev]="item.leaveType?.color || 'var(--zh-primary)'">
+                  <strong [class.is-low]="tone(item) === 'low'" [class.is-warn]="tone(item) === 'warn'">{{ available(item) }}</strong>
+                  <span class="leave-meter" aria-hidden="true"><span [style.width.%]="usedPercent(item)"></span></span>
+                </span>
+              </td>
               <td class="leave-table__actions-col" data-label="">
                 @if (canUpdate) {
                   <button

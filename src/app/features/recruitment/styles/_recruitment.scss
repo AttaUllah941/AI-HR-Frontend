@@ -230,73 +230,60 @@
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
+  background: var(--zh-muted);
+  color: var(--zh-muted-foreground);
 
   &__dot {
     width: 0.45rem;
     height: 0.45rem;
     border-radius: 999px;
     flex-shrink: 0;
+    background: currentColor;
   }
 
+  // Healthy / done
   &--open,
   &--hired,
   &--accepted,
   &--completed {
-    background: #ecfdf5;
-    color: #059669;
-
-    .recruitment-status-pill__dot {
-      background: #10b981;
-    }
+    background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+    color: var(--zh-success-text);
   }
 
+  // Waiting on someone
   &--draft,
   &--applied,
   &--screening,
   &--scheduled,
   &--sent,
   &--pending {
-    background: #fff7ed;
-    color: #ea580c;
-
-    .recruitment-status-pill__dot {
-      background: #f97316;
-    }
+    background: color-mix(in oklab, var(--zh-warning) 22%, transparent);
+    color: var(--zh-warning-text);
   }
 
+  // In progress
   &--interview,
   &--offer,
   &--on_hold {
-    background: #eff6ff;
-    color: #2563eb;
-
-    .recruitment-status-pill__dot {
-      background: #3b82f6;
-    }
+    background: color-mix(in oklab, var(--zh-primary) 14%, transparent);
+    color: var(--zh-primary);
   }
 
+  // Negative outcome
   &--rejected,
   &--declined,
-  &--cancelled,
   &--no_show,
   &--expired {
-    background: #fef2f2;
-    color: #dc2626;
-
-    .recruitment-status-pill__dot {
-      background: #ef4444;
-    }
+    background: color-mix(in oklab, var(--zh-destructive) 14%, transparent);
+    color: var(--zh-destructive-text);
   }
 
+  // Closed / neutral
   &--closed,
   &--cancelled,
   &--withdrawn {
     background: var(--zh-muted);
     color: var(--zh-muted-foreground);
-
-    .recruitment-status-pill__dot {
-      background: var(--zh-muted-foreground);
-    }
   }
 }
 
@@ -323,45 +310,51 @@
 }
 
 .recruitment-kpi-card {
-  padding: 1.1rem 1.15rem !important;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.15rem !important;
   border: 1px solid var(--zh-border) !important;
-  border-radius: calc(var(--zh-radius) - 2px) !important;
+  border-radius: var(--zh-radius) !important;
   background: var(--zh-card) !important;
-  box-shadow: none !important;
+  box-shadow: var(--zh-shadow-sm) !important;
 
   &__header {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 1rem;
+    flex-shrink: 0;
   }
 
   &__icon {
-    width: 2.35rem;
-    height: 2.35rem;
-    border-radius: 999px;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.7rem;
     display: grid;
     place-items: center;
 
     mat-icon {
-      font-size: 1.1rem;
-      width: 1.1rem;
-      height: 1.1rem;
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
     }
 
     &--success {
-      background: #ecfdf5;
-      color: #059669;
+      background: color-mix(in oklab, var(--zh-success) 15%, transparent);
+      color: var(--zh-success);
     }
 
     &--warning {
-      background: #fff7ed;
-      color: #ea580c;
+      background: color-mix(in oklab, var(--zh-warning) 18%, transparent);
+      color: var(--zh-warning);
     }
 
     &--info {
-      background: #eff6ff;
-      color: #2563eb;
+      background: color-mix(in oklab, var(--zh-primary) 14%, transparent);
+      color: var(--zh-primary);
+    }
+
+    &--purple {
+      background: color-mix(in oklab, oklch(62% 0.2 300) 15%, transparent);
+      color: oklch(62% 0.2 300);
     }
 
     &--neutral {
@@ -371,57 +364,27 @@
   }
 
   &__label {
-    margin: 0 0 0.25rem;
-    font-size: 0.8rem;
+    margin: 0;
+    font-size: 0.8125rem;
     font-weight: 500;
     color: var(--zh-muted-foreground);
   }
 
   &__value {
     display: block;
-    font-size: 1.45rem;
+    margin-top: 0.1rem;
+    font-family: var(--zh-font-display);
+    font-size: 1.65rem;
     font-weight: 700;
-    letter-spacing: -0.03em;
     line-height: 1.15;
+    font-variant-numeric: tabular-nums;
   }
 }
 
-.recruitment-quick-links {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.recruitment-quick-link {
-  display: flex;
+/* mat-card is a column flex whose component styles load after global ones: match its specificity + 1. */
+.recruitment-kpi-grid > .recruitment-kpi-card.mat-mdc-card {
+  flex-direction: row;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.15rem;
-  border: 1px solid var(--zh-border);
-  border-radius: calc(var(--zh-radius) - 2px);
-  background: var(--zh-card);
-  color: var(--zh-foreground);
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-
-  mat-icon {
-    color: var(--zh-primary);
-  }
-
-  strong {
-    display: block;
-    font-size: 0.9rem;
-  }
-
-  span {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--zh-muted-foreground);
-  }
-
-  &:hover {
-    border-color: color-mix(in srgb, var(--zh-primary) 35%, var(--zh-border));
-    background: color-mix(in srgb, var(--zh-primary) 4%, var(--zh-card));
-  }
 }
 
 .recruitment-dialog-title {
@@ -466,82 +429,290 @@
   gap: 0.5rem;
 }
 
-.recruitment-pipeline {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+/* ---- Pipeline board: horizontally scrolling stage columns with compact cards ---- */
+.rp-board {
+  display: flex;
+  align-items: flex-start;
   gap: 0.85rem;
-  align-items: start;
+  padding-bottom: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
 }
 
-.recruitment-pipeline-column {
-  border: 1px solid var(--zh-border);
-  border-radius: calc(var(--zh-radius) - 2px);
-  background: color-mix(in srgb, var(--zh-muted) 25%, var(--zh-card));
-  min-height: 12rem;
+.rp-col {
+  --stage: var(--zh-muted-foreground);
+  // Five stages fit a normal screen side by side; the two closed lanes scroll in after them.
+  flex: 1 0 15.5rem;
+  max-width: 21rem;
   display: flex;
   flex-direction: column;
-}
+  border: 1px solid var(--zh-border);
+  border-top: 3px solid var(--stage);
+  border-radius: var(--zh-radius);
+  background: color-mix(in oklab, var(--zh-muted) 55%, var(--zh-card));
+  scroll-snap-align: start;
 
-.recruitment-pipeline-column__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.75rem 0.9rem;
-  border-bottom: 1px solid var(--zh-border);
-
-  strong {
-    font-size: 0.8125rem;
-    font-weight: 600;
+  &--closed {
+    flex: 0 0 13.5rem;
+    max-width: none;
   }
 
-  span {
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.7rem 0.9rem;
+
+    strong {
+      font-size: 0.8125rem;
+      font-weight: 700;
+    }
+  }
+
+  &__count {
+    min-width: 1.5rem;
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--stage) 16%, var(--zh-card));
+    color: var(--zh-foreground);
     font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 68vh;
+    padding: 0 0.6rem 0.7rem;
+    overflow-y: auto;
+  }
+
+  &__empty {
+    margin: 0;
+    padding: 1.25rem 0.5rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--zh-muted-foreground);
+    border: 1px dashed var(--zh-border);
+    border-radius: 0.6rem;
+  }
+}
+
+.rp-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.2rem 0.65rem;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 0.65rem;
+  background: var(--zh-card);
+  box-shadow: var(--zh-shadow-sm);
+  transition:
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
+
+  &:hover,
+  &:focus-within {
+    border-color: color-mix(in oklab, var(--zh-primary) 35%, var(--zh-border));
+    box-shadow: var(--zh-shadow-md);
+  }
+
+  &__avatar {
+    --hue: 250;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    background: color-mix(in oklab, oklch(66% 0.17 var(--hue)) 20%, var(--zh-card));
+    color: color-mix(in oklab, oklch(50% 0.19 var(--hue)) 72%, var(--zh-foreground));
+  }
+
+  &__text {
+    min-width: 0;
+
+    strong {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    span {
+      display: block;
+      overflow: hidden;
+      font-size: 0.75rem;
+      color: var(--zh-muted-foreground);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  // Actions stay out of the way until the card is hovered or focused (always visible on touch screens).
+  &__actions {
+    display: flex;
+    gap: 0.1rem;
+    margin: -0.25rem -0.3rem 0 0;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+
+    button {
+      width: 1.9rem;
+      height: 1.9rem;
+      padding: 0;
+      line-height: 1.9rem;
+      color: var(--zh-muted-foreground);
+
+      mat-icon {
+        font-size: 1.15rem;
+        width: 1.15rem;
+        height: 1.15rem;
+      }
+
+      &:hover {
+        color: var(--zh-primary);
+      }
+
+      &.is-danger:hover {
+        color: var(--zh-destructive-text);
+      }
+    }
+  }
+
+  &:hover &__actions,
+  &:focus-within &__actions {
+    opacity: 1;
+  }
+
+  &__meta {
+    grid-column: 2 / -1;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.6rem;
+    margin-top: 0.15rem;
+    font-size: 0.6875rem;
     color: var(--zh-muted-foreground);
   }
 }
 
-.recruitment-pipeline-column__body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  padding: 0.75rem;
-  flex: 1;
+@media (hover: none) {
+  .rp-card__actions {
+    opacity: 1;
+  }
 }
 
-.recruitment-pipeline-card {
-  padding: 0.75rem 0.85rem;
-  border: 1px solid var(--zh-border);
-  border-radius: 0.55rem;
-  background: var(--zh-card);
-  display: flex;
+/* ---- Small shared pieces for the recruitment tables ---- */
+.rc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--zh-muted);
+  color: var(--zh-muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 0.95rem;
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  &--ok {
+    background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+    color: var(--zh-success-text);
+  }
+}
+
+.rc-score {
+  display: inline-flex;
   flex-direction: column;
-  gap: 0.35rem;
+  align-items: flex-start;
+  gap: 0.25rem;
+  min-width: 4.5rem;
+  font-variant-numeric: tabular-nums;
 
   strong {
     font-size: 0.875rem;
-    font-weight: 600;
   }
 
-  span {
-    font-size: 0.75rem;
-    color: var(--zh-muted-foreground);
+  &__bar {
+    display: block;
+    width: 100%;
+    height: 0.3rem;
+    border-radius: 999px;
+    background: var(--zh-muted);
+    overflow: hidden;
+
+    > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--zh-success);
+    }
+  }
+
+  &--mid .rc-score__bar > span {
+    background: var(--zh-warning);
+  }
+
+  &--low .rc-score__bar > span {
+    background: var(--zh-destructive);
+  }
+
+  &--mid strong {
+    color: var(--zh-warning-text);
+  }
+
+  &--low strong {
+    color: var(--zh-destructive-text);
   }
 }
 
-.recruitment-pipeline-card__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.35rem;
+.rc-sub {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.75rem;
+  color: var(--zh-muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.rc-muted {
+  color: var(--zh-muted-foreground);
+}
+
+.recruitment-table thead th {
+  padding: 0.6rem 1rem;
+}
+
+.recruitment-table tbody td {
+  padding: 0.7rem 1rem;
+}
+
+.recruitment-table th.recruitment-table__num,
+.recruitment-table td.recruitment-table__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Header action buttons ("Add candidate", "Create job") must never wrap onto two lines. */
+app-organization-section-header .mat-mdc-unelevated-button {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 @media (max-width: 1100px) {
   .recruitment-kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .recruitment-quick-links {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -557,8 +728,7 @@
     max-width: none;
   }
 
-  .recruitment-kpi-grid,
-  .recruitment-quick-links {
+  .recruitment-kpi-grid {
     grid-template-columns: 1fr;
   }
 

@@ -10,9 +10,18 @@ import {
   PerformanceSummary,
 } from '../../../../core/services/performance.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { EchartComponent } from '../../../../shared/charts/echart.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { goalsOption, reviewsOption, statusText } from '../../charts/performance-chart-options';
 import { GoalFormDialogComponent } from '../../dialogs/goal-form-dialog.component';
+
+const GOAL_LEGEND: Record<string, string> = {
+  ACTIVE: 'var(--zh-primary)',
+  COMPLETED: 'var(--zh-success)',
+  DRAFT: 'var(--zh-muted-foreground)',
+  CANCELLED: 'var(--zh-destructive)',
+};
 
 @Component({
   selector: 'app-performance-overview-page',
@@ -22,6 +31,7 @@ import { GoalFormDialogComponent } from '../../dialogs/goal-form-dialog.componen
     MatCardModule,
     MatIconModule,
     RouterLink,
+    EchartComponent,
     EmptyStateComponent,
     OrganizationStatusComponent,
   ],
@@ -127,6 +137,35 @@ export class PerformanceOverviewPageComponent implements OnInit {
       : (this.companySummary()?.recentReviews ?? []),
   );
 
+  private readonly goalCounts = computed(() =>
+    this.isEmployeeView() ? undefined : this.companySummary()?.goalsByStatus,
+  );
+  private readonly reviewCounts = computed(() =>
+    this.isEmployeeView() ? undefined : this.companySummary()?.reviewsByStatus,
+  );
+
+  /** Company view only: how goals and reviews are spread across their statuses. */
+  readonly goalChart = computed(() => {
+    const counts = this.goalCounts();
+    return (theme: Parameters<typeof goalsOption>[1]) => goalsOption(counts, theme);
+  });
+  readonly reviewChart = computed(() => {
+    const counts = this.reviewCounts();
+    return (theme: Parameters<typeof reviewsOption>[1]) => reviewsOption(counts, theme);
+  });
+
+  readonly goalLegend = computed(() => this.legend(this.goalCounts(), GOAL_LEGEND));
+  readonly totalGoals = computed(() => this.goalLegend().reduce((s, l) => s + l.value, 0));
+  readonly totalReviews = computed(() =>
+    Object.values(this.reviewCounts() ?? {}).reduce((s, v) => s + v, 0),
+  );
+
+  private legend(counts: Record<string, number> | undefined, colors: Record<string, string>) {
+    return Object.keys(colors)
+      .filter((k) => (counts?.[k] ?? 0) > 0)
+      .map((k) => ({ key: k, label: statusText(k), value: counts![k]!, color: colors[k]! }));
+  }
+
   ngOnInit(): void {
     this.reload();
   }
@@ -220,7 +259,17 @@ export class PerformanceOverviewPageComponent implements OnInit {
   }
 
   statusLabel(status: string): string {
-    return this.performance.statusLabel(status);
+    return statusText(status);
+  }
+
+  /** Goal progress clamped to 0-100 for the bar. */
+  progressWidth(progress: number | null | undefined): number {
+    return Math.max(0, Math.min(100, progress ?? 0));
+  }
+
+  /** Review rating out of 5 as a number, or an em dash when not yet rated. */
+  rating(value: number | null | undefined): string {
+    return this.performance.formatRating(value);
   }
 
   employeeLabel(emp: { firstName: string; lastName: string } | null | undefined): string {

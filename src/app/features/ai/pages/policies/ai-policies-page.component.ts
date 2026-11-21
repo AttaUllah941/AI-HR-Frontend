@@ -21,6 +21,7 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
 import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
 import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { formatDateTime } from '../../../../core/utils/date-format';
 
 @Component({
   selector: 'app-ai-policies-page',
@@ -152,7 +153,7 @@ export class AiPoliciesPageComponent implements OnInit {
       return '—';
     }
     try {
-      return new Date(iso).toLocaleString();
+      return formatDateTime(iso);
     } catch {
       return iso;
     }

@@ -43,7 +43,7 @@
           >
             <strong>{{ item.title }}</strong>
             <span>{{ item.body }}</span>
-            <time>{{ item.createdAt | date: 'short' }}</time>
+            <time>{{ item.createdAt | appDate: 'datetime' }}</time>
           </li>
         }
       </ul>

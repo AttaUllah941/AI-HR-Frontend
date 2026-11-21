@@ -15,6 +15,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ScreeningRunDialogComponent } from '../../dialogs/screening-run-dialog.component';
+import { formatDateTime } from '../../../../core/utils/date-format';
 
 @Component({
   selector: 'app-ai-screening-page',
@@ -129,7 +130,7 @@ export class AiScreeningPageComponent implements OnInit {
       return '—';
     }
     try {
-      return new Date(iso).toLocaleString();
+      return formatDateTime(iso);
     } catch {
       return iso;
     }

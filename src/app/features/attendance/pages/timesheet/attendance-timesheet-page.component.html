@@ -11,15 +11,9 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>From</mat-label>
-      <input matInput type="date" [formControl]="dateFromControl" />
-    </mat-form-field>
+    <app-date-field label="From" [formControl]="dateFromControl" subscriptSizing="dynamic" />
 
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>To</mat-label>
-      <input matInput type="date" [formControl]="dateToControl" />
-    </mat-form-field>
+    <app-date-field label="To" [formControl]="dateToControl" subscriptSizing="dynamic" />
 
     <button mat-flat-button color="primary" type="button" class="att-add-btn" (click)="load()">
       <mat-icon aria-hidden="true">search</mat-icon>

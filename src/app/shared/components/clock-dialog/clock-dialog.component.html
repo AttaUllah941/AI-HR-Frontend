@@ -1,0 +1,52 @@
+<div class="clock-dialog">
+  <div class="clock-dialog__icon" aria-hidden="true">
+    <mat-icon>{{ icon }}</mat-icon>
+  </div>
+
+  <h2 mat-dialog-title>{{ title }}</h2>
+
+  <mat-dialog-content>
+    <div class="clock-dialog__clock" role="timer" aria-live="off">
+      <span class="clock-dialog__time">{{ time() }}</span>
+      <span class="clock-dialog__meridiem">{{ meridiem() }}</span>
+    </div>
+    <p class="clock-dialog__date">{{ dateLine() }}</p>
+
+    @if (isOut && data.checkInAt) {
+      <dl class="clock-dialog__summary">
+        <div>
+          <dt>Checked in</dt>
+          <dd>{{ checkedInAt }}</dd>
+        </div>
+        <div>
+          <dt>Time worked</dt>
+          <dd>{{ worked() ?? '—' }}</dd>
+        </div>
+      </dl>
+    }
+
+    <mat-form-field appearance="outline" class="clock-dialog__note" subscriptSizing="dynamic">
+      <mat-label>Note (optional)</mat-label>
+      <textarea
+        matInput
+        rows="2"
+        [formControl]="note"
+        [maxlength]="noteMax"
+        placeholder="e.g. Working from the client site"></textarea>
+      <mat-hint align="end">{{ note.value.length }}/{{ noteMax }}</mat-hint>
+    </mat-form-field>
+
+    <p class="clock-dialog__fineprint">
+      <mat-icon aria-hidden="true">info</mat-icon>
+      Your time and network address are recorded with this entry.
+    </p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="confirm()" cdkFocusInitial>
+      <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+      {{ confirmLabel }}
+    </button>
+  </mat-dialog-actions>
+</div>

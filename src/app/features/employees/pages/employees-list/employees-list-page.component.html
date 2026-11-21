@@ -20,6 +20,9 @@
       >
         <mat-icon aria-hidden="true">filter_list</mat-icon>
         Filter
+        @if (activeFilterCount() > 0) {
+          <span class="emp-action-btn__count">{{ activeFilterCount() }}</span>
+        }
       </button>
       <button
         mat-stroked-button
@@ -110,9 +113,15 @@
       </mat-menu>
 
       @if (canExport) {
-        <button mat-stroked-button type="button" class="emp-action-btn" (click)="exportCsv()">
+        <button
+          mat-stroked-button
+          type="button"
+          class="emp-action-btn"
+          [disabled]="exporting()"
+          (click)="exportCsv()"
+        >
           <mat-icon aria-hidden="true">download</mat-icon>
-          Export
+          {{ exporting() ? 'Exporting…' : 'Export' }}
         </button>
       }
 
@@ -148,6 +157,20 @@
     </div>
   }
 
+  @if (activeChips().length > 0) {
+    <div class="emp-chips" role="list" aria-label="Active filters">
+      @for (chip of activeChips(); track chip.key) {
+        <span class="emp-chip" role="listitem">
+          <span class="emp-chip__label">{{ chip.label }}</span>
+          <button type="button" class="emp-chip__remove" [attr.aria-label]="'Remove filter ' + chip.label" (click)="clearFilter(chip.key)">
+            <mat-icon aria-hidden="true">close</mat-icon>
+          </button>
+        </span>
+      }
+      <button type="button" class="emp-chips__clear" (click)="clearAllFilters()">Clear all</button>
+    </div>
+  }
+
   <div class="emp-table-card" [class.is-refetching]="loading() && items().length > 0" [attr.aria-busy]="loading()">
     @if (loading() && items().length === 0) {
       <app-table-skeleton [rows]="6" [cols]="7" />
@@ -170,12 +193,37 @@
         <table class="emp-table" data-responsive>
           <thead>
             <tr>
-              <th scope="col">Employee</th>
-              <th scope="col" data-col="department">Department</th>
-              <th scope="col" data-col="position">Position</th>
+              <th scope="col" [attr.aria-sort]="ariaSort('lastName')">
+                <button type="button" class="emp-sort" (click)="sort('lastName')">
+                  Employee <mat-icon aria-hidden="true">{{ sortIcon('lastName') }}</mat-icon>
+                </button>
+              </th>
+              <th scope="col" data-col="code" [attr.aria-sort]="ariaSort('employeeCode')">
+                <button type="button" class="emp-sort" (click)="sort('employeeCode')">
+                  ID <mat-icon aria-hidden="true">{{ sortIcon('employeeCode') }}</mat-icon>
+                </button>
+              </th>
+              <th scope="col" data-col="department" [attr.aria-sort]="ariaSort('department')">
+                <button type="button" class="emp-sort" (click)="sort('department')">
+                  Department <mat-icon aria-hidden="true">{{ sortIcon('department') }}</mat-icon>
+                </button>
+              </th>
+              <th scope="col" data-col="position" [attr.aria-sort]="ariaSort('designation')">
+                <button type="button" class="emp-sort" (click)="sort('designation')">
+                  Position <mat-icon aria-hidden="true">{{ sortIcon('designation') }}</mat-icon>
+                </button>
+              </th>
               <th scope="col" data-col="manager">Manager</th>
-              <th scope="col" data-col="status">Status</th>
-              <th scope="col" data-col="joined">Joined</th>
+              <th scope="col" data-col="status" [attr.aria-sort]="ariaSort('status')">
+                <button type="button" class="emp-sort" (click)="sort('status')">
+                  Status <mat-icon aria-hidden="true">{{ sortIcon('status') }}</mat-icon>
+                </button>
+              </th>
+              <th scope="col" data-col="joined" [attr.aria-sort]="ariaSort('joinDate')">
+                <button type="button" class="emp-sort" (click)="sort('joinDate')">
+                  Joined <mat-icon aria-hidden="true">{{ sortIcon('joinDate') }}</mat-icon>
+                </button>
+              </th>
               <th scope="col" class="emp-table__actions-col"><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
@@ -184,15 +232,25 @@
               <tr class="emp-table__row" (click)="view(item)">
                 <td data-label="Employee">
                   <div class="emp-table__employee">
-                    <span class="emp-table__avatar" [style.background]="avatarStyle(item).background" [style.color]="avatarStyle(item).color">
-                      {{ initials(item) }}
-                    </span>
+                    @if (item.avatarUrl) {
+                      <img class="emp-table__avatar emp-table__avatar--photo" [src]="item.avatarUrl" alt="" />
+                    } @else {
+                      <span class="emp-table__avatar" [style.--avatar-hue]="avatarHue(item)" aria-hidden="true">
+                        {{ initials(item) }}
+                      </span>
+                    }
                     <div class="emp-table__employee-text">
-                      <strong>{{ item.firstName }} {{ item.lastName }}</strong>
+                      <a
+                        class="emp-table__name"
+                        [routerLink]="['/employees', item.id]"
+                        (click)="$event.stopPropagation()"
+                        >{{ item.firstName }} {{ item.lastName }}</a
+                      >
                       <span>{{ item.email }}</span>
                     </div>
                   </div>
                 </td>
+                <td data-col="code" data-label="ID"><span class="emp-table__code">{{ item.employeeCode }}</span></td>
                 <td data-col="department" data-label="Department">{{ item.department?.name ?? '—' }}</td>
                 <td data-col="position" data-label="Position">{{ item.designation?.name ?? '—' }}</td>
                 <td data-col="manager" data-label="Manager">{{ managerName(item) }}</td>
@@ -242,19 +300,28 @@
         }
       </mat-menu>
 
-      @if (totalPages() > 1) {
-        <div class="emp-table-footer">
-          <span>{{ total() }} employees · Page {{ page() }} of {{ totalPages() }}</span>
-          <div class="emp-table-footer__nav">
-            <button mat-stroked-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
-              Previous
-            </button>
-            <button mat-stroked-button type="button" [disabled]="page() >= totalPages()" (click)="nextPage()">
-              Next
-            </button>
-          </div>
+      <div class="emp-table-footer">
+        <span class="emp-table-footer__range" aria-live="polite">
+          Showing <strong>{{ rangeStart() }}–{{ rangeEnd() }}</strong> of <strong>{{ total() }}</strong> employees
+        </span>
+        <label class="emp-table-footer__size">
+          Rows per page
+          <select [value]="pageSize()" (change)="setPageSize($any($event.target).value)" aria-label="Rows per page">
+            @for (n of pageSizes; track n) {
+              <option [value]="n" [selected]="n === pageSize()">{{ n }}</option>
+            }
+          </select>
+        </label>
+        <div class="emp-table-footer__nav">
+          <span class="emp-table-footer__page">Page {{ page() }} of {{ totalPages() }}</span>
+          <button mat-stroked-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+            <mat-icon aria-hidden="true">chevron_left</mat-icon> Previous
+          </button>
+          <button mat-stroked-button type="button" [disabled]="page() >= totalPages()" (click)="nextPage()">
+            Next <mat-icon aria-hidden="true">chevron_right</mat-icon>
+          </button>
         </div>
-      }
+      </div>
     }
   </div>
 </section>

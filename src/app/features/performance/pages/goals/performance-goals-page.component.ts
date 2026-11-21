@@ -225,4 +225,8 @@ export class PerformanceGoalsPageComponent implements OnInit {
   statusLabel(status: string): string {
     return this.api.statusLabel(status);
   }
+
+  progressWidth(progress: number | null | undefined): number {
+    return Math.max(0, Math.min(100, progress ?? 0));
+  }
 }

@@ -7,7 +7,6 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,11 +24,13 @@ import {
 } from '../../../core/services/notifications.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { optimistic } from '../../../core/utils/optimistic';
+import { AppDatePipe } from '../../../shared/pipes/app-date.pipe';
 
 @Component({
   selector: 'app-notification-bell',
   standalone: true,
-  imports: [DatePipe, RouterLink, MatBadgeModule, MatButtonModule, MatIconModule, MatMenuModule],
+  imports: [
+    AppDatePipe, RouterLink, MatBadgeModule, MatButtonModule, MatIconModule, MatMenuModule],
   templateUrl: './notification-bell.component.html',
   styleUrl: './notification-bell.component.scss',
   host: { style: 'display: contents' },

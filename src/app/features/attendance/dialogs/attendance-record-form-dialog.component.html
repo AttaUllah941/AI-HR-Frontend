@@ -32,23 +32,11 @@
         </mat-form-field>
       }
 
-      <mat-form-field appearance="outline">
-        <mat-label>Date</mat-label>
-        <input matInput type="date" formControlName="date" />
-        @if (form.controls.date.touched && form.controls.date.hasError('required')) {
-          <mat-error>Date is required</mat-error>
-        }
-      </mat-form-field>
+      <app-date-field label="Date" formControlName="date" [error]="form.controls.date.touched && form.controls.date.hasError('required') ? 'Date is required' : ''" />
 
-      <mat-form-field appearance="outline">
-        <mat-label>Check-in</mat-label>
-        <input matInput type="datetime-local" formControlName="checkInAt" />
-      </mat-form-field>
+      <app-datetime-field label="Check-in" formControlName="checkInAt" />
 
-      <mat-form-field appearance="outline">
-        <mat-label>Check-out</mat-label>
-        <input matInput type="datetime-local" formControlName="checkOutAt" />
-      </mat-form-field>
+      <app-datetime-field label="Check-out" formControlName="checkOutAt" />
 
       <mat-form-field appearance="outline">
         <mat-label>Status</mat-label>

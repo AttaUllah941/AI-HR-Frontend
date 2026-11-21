@@ -189,7 +189,7 @@
                 </td>
                 <td>{{ item.reason || '—' }}</td>
                 <td>{{ item.ipAddress || '—' }}</td>
-                <td>{{ item.createdAt | date: 'medium' }}</td>
+                <td>{{ item.createdAt | appDate: 'datetime' }}</td>
               </tr>
             } @empty {
               <tr>

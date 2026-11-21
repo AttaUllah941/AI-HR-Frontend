@@ -64,6 +64,9 @@ export interface DashboardAttendancePoint {
 
   label: string;
 
+  /** ISO day (yyyy-MM-dd); lets the chart tell weekends from absences. */
+  date?: string;
+
   present: number;
 
   absent: number;

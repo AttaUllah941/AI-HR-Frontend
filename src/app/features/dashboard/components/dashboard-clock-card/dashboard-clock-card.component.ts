@@ -4,6 +4,7 @@ import {
   OnInit,
   computed,
   inject,
+  output,
   signal,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +17,8 @@ import {
 } from '../../../../core/services/attendance.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { ClockDialogService } from '../../../../core/services/clock-dialog.service';
+import { formatTime, formatWeekdayDate } from '../../../../core/utils/date-format';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
@@ -38,6 +41,10 @@ export class DashboardClockCardComponent implements OnInit {
   private readonly attendance = inject(AttendanceService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly clockDialog = inject(ClockDialogService);
+
+  /** Emits after a successful check-in or check-out, so a parent page can refresh its own numbers. */
+  readonly clocked = output<void>();
 
   readonly myToday = signal<MyTodayResponse | null>(null);
   readonly loading = signal(true);
@@ -81,46 +88,74 @@ export class DashboardClockCardComponent implements OnInit {
     });
   }
 
+  /** Asks for confirmation (and an optional note) in a modal before recording the check-in. */
   clockIn(): void {
     if (this.clocking()) {
       return;
     }
-    this.clocking.set(true);
-    this.attendance.clockIn().subscribe({
-      next: () => {
-        this.toast.success('Clocked in');
-        this.clocking.set(false);
-        this.reload();
-      },
-      error: (err: Error) => {
-        this.clocking.set(false);
-        this.toast.error(err.message || 'Unable to clock in');
-      },
+    this.clockDialog.confirm('in').subscribe(({ note }) => {
+      this.clocking.set(true);
+      this.attendance.clockIn(note || undefined).subscribe({
+        next: () => {
+          this.toast.success('Checked in');
+          this.clocking.set(false);
+          this.reload();
+          this.clocked.emit();
+        },
+        error: (err: Error) => {
+          this.clocking.set(false);
+          this.toast.error(err.message || 'Unable to check in');
+        },
+      });
     });
   }
 
+  /** Asks for confirmation (showing time worked so far) before recording the check-out. */
   clockOut(): void {
     if (this.clocking()) {
       return;
     }
-    this.clocking.set(true);
-    this.attendance.clockOut().subscribe({
-      next: () => {
-        this.toast.success('Clocked out');
-        this.clocking.set(false);
-        this.reload();
-      },
-      error: (err: Error) => {
-        this.clocking.set(false);
-        this.toast.error(err.message || 'Unable to clock out');
-      },
+    this.clockDialog.confirm('out', this.myToday()?.record?.checkInAt).subscribe(({ note }) => {
+      this.clocking.set(true);
+      this.attendance.clockOut(note || undefined).subscribe({
+        next: () => {
+          this.toast.success('Checked out');
+          this.clocking.set(false);
+          this.reload();
+          this.clocked.emit();
+        },
+        error: (err: Error) => {
+          this.clocking.set(false);
+          this.toast.error(err.message || 'Unable to check out');
+        },
+      });
     });
   }
 
-  formatTime(value: string | null | undefined): string {
-    if (!value) {
-      return '—';
+  readonly formatTime = formatTime;
+  readonly todayLabel = formatWeekdayDate(new Date());
+
+  statusLabel(status: string | null | undefined): string {
+    if (!status) {
+      return 'Not started';
     }
-    return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const text = status.replace(/_/g, ' ').toLowerCase();
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
+  statusTone(status: string | null | undefined): 'success' | 'warning' | 'danger' | 'neutral' {
+    switch (status) {
+      case 'PRESENT':
+      case 'REMOTE':
+        return 'success';
+      case 'LATE':
+      case 'HALF_DAY':
+      case 'EARLY_LEAVE':
+        return 'warning';
+      case 'ABSENT':
+        return 'danger';
+      default:
+        return 'neutral';
+    }
   }
 }

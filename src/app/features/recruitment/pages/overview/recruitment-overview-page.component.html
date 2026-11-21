@@ -11,18 +11,10 @@
     <div class="recruitment-action-bar">
       <div>
         <h2 class="recruitment-overview-heading">Recruitment overview</h2>
-        <p class="recruitment-overview-sub">
-          Open roles, talent pipeline, interviews, and offers at a glance
-        </p>
+        <p class="recruitment-overview-sub">Open roles, talent pipeline, interviews, and offers at a glance</p>
       </div>
       @if (canCreate) {
-        <button
-          mat-flat-button
-          color="primary"
-          type="button"
-          class="recruitment-add-btn"
-          (click)="openCreateJob()"
-        >
+        <button mat-flat-button color="primary" type="button" class="recruitment-add-btn" (click)="openCreateJob()">
           <mat-icon aria-hidden="true">add</mat-icon>
           Create job
         </button>
@@ -37,25 +29,12 @@
               <mat-icon aria-hidden="true">{{ card.icon }}</mat-icon>
             </span>
           </div>
-          <p class="recruitment-kpi-card__label">{{ card.label }}</p>
-          <strong class="recruitment-kpi-card__value">{{ card.value }}</strong>
+          <div>
+            <p class="recruitment-kpi-card__label">{{ card.label }}</p>
+            <strong class="recruitment-kpi-card__value">{{ card.value }}</strong>
+          </div>
         </mat-card>
       }
-    </div>
-
-    <div>
-      <h3 class="recruitment-overview-heading">Quick links</h3>
-      <div class="recruitment-quick-links">
-        @for (link of quickLinks; track link.route) {
-          <a class="recruitment-quick-link" [routerLink]="link.route">
-            <mat-icon aria-hidden="true">{{ link.icon }}</mat-icon>
-            <span>
-              <strong>{{ link.label }}</strong>
-              <span>{{ link.description }}</span>
-            </span>
-          </a>
-        }
-      </div>
     </div>
 
     @if ((summary()?.openJobs ?? 0) === 0 && (summary()?.candidates ?? 0) === 0) {
@@ -63,9 +42,109 @@
         title="No hiring activity yet"
         message="Create a job opening to start building your talent pipeline."
         icon="work"
-      [actionLabel]="canCreate ? 'Create job' : ''"
-      (action)="openCreateJob()"
-    />
+        [actionLabel]="canCreate ? 'Create job' : ''"
+        (action)="openCreateJob()"
+      />
+    } @else {
+      <div class="ro-grid">
+        <section class="ro-card ro-funnel" aria-labelledby="ro-funnel-title">
+          <header class="ro-card__head">
+            <div>
+              <h3 id="ro-funnel-title">Hiring funnel</h3>
+              <p>{{ funnelTotal() }} applications in the funnel</p>
+            </div>
+            <a routerLink="/recruitment/pipeline" class="ro-link">Open pipeline</a>
+          </header>
+
+          <ul class="ro-funnel__list">
+            @for (stage of funnel(); track stage.key) {
+              <li [style.--stage]="stage.color">
+                <span class="ro-funnel__label">{{ stage.label }}</span>
+                <span class="ro-funnel__track" aria-hidden="true">
+                  <span class="ro-funnel__bar" [style.width.%]="stage.percent"></span>
+                </span>
+                <strong class="ro-funnel__count">{{ stage.count }}</strong>
+              </li>
+            }
+          </ul>
+
+          @if (closedCount() > 0) {
+            <p class="ro-funnel__note">
+              <mat-icon aria-hidden="true">remove_circle_outline</mat-icon>
+              {{ closedCount() }} rejected or withdrawn
+            </p>
+          }
+        </section>
+
+        <section class="ro-card" aria-labelledby="ro-int-title">
+          <header class="ro-card__head">
+            <div>
+              <h3 id="ro-int-title">Upcoming interviews</h3>
+              <p>Next scheduled</p>
+            </div>
+            <a routerLink="/recruitment/interviews" class="ro-link">View all</a>
+          </header>
+
+          @if (upcoming().length === 0) {
+            <p class="ro-empty">
+              <mat-icon aria-hidden="true">event_available</mat-icon>
+              Nothing scheduled right now.
+            </p>
+          } @else {
+            <ul class="ro-list">
+              @for (item of upcoming(); track item.id) {
+                <li>
+                  <span class="ro-date" aria-hidden="true">
+                    <strong>{{ interviewDate(item).slice(0, 6) }}</strong>
+                    <span>{{ interviewTime(item) }}</span>
+                  </span>
+                  <div class="ro-list__text">
+                    <strong>{{ candidateName(item) }}</strong>
+                    <span>{{ jobTitle(item) }}</span>
+                  </div>
+                  <span class="rc-chip">{{ typeLabel(item.type) }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <section class="ro-card ro-roles" aria-labelledby="ro-roles-title">
+          <header class="ro-card__head">
+            <div>
+              <h3 id="ro-roles-title">Open roles</h3>
+              <p>Where you are hiring now</p>
+            </div>
+            <a routerLink="/recruitment/jobs" class="ro-link">View all jobs</a>
+          </header>
+
+          @if (openRoles().length === 0) {
+            <p class="ro-empty">
+              <mat-icon aria-hidden="true">work_off</mat-icon>
+              No open roles.
+            </p>
+          } @else {
+            <ul class="ro-list">
+              @for (job of openRoles(); track job.id) {
+                <li>
+                  <div class="ro-list__text">
+                    <strong>{{ job.title }}</strong>
+                    <span>{{ job.code }} · {{ job.location || 'Location not set' }}</span>
+                  </div>
+                  <span class="ro-roles__stat">
+                    <strong>{{ job.openings }}</strong>
+                    <span>{{ job.openings === 1 ? 'opening' : 'openings' }}</span>
+                  </span>
+                  <span class="ro-roles__stat">
+                    <strong>{{ applicationCount(job) }}</strong>
+                    <span>applicants</span>
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </div>
     }
   </section>
 </app-organization-status>

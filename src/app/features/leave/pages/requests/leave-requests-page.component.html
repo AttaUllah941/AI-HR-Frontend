@@ -67,10 +67,7 @@
                 </span>
               </td>
               <td data-label="Dates">
-                {{ formatDate(item.startDate) }}
-                @if (item.startDate.slice(0, 10) !== item.endDate.slice(0, 10)) {
-                  – {{ formatDate(item.endDate) }}
-                }
+                {{ dateRange(item) }}
                 <div class="leave-day-type">{{ dayTypeLabel(item.dayType) }}</div>
               </td>
               <td data-label="Days">{{ item.days }}</td>

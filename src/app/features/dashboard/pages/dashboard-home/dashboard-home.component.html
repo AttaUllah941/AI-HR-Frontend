@@ -49,6 +49,9 @@
         </div>
         <p class="kpi-card__label">{{ card.label }}</p>
         <strong class="kpi-card__value">{{ formatKpiValue(card.value) }}</strong>
+        @if (card.subValue) {
+          <span class="kpi-card__sub">{{ card.subValue }}</span>
+        }
       </mat-card>
     }
   </section>
@@ -108,7 +111,10 @@
       </header>
       @if (data.departmentDistribution.total > 0) {
         @defer (on viewport) {
-          <app-department-donut-chart [slices]="data.departmentDistribution.slices" />
+          <app-department-donut-chart
+            [slices]="data.departmentDistribution.slices"
+            [total]="data.departmentDistribution.total"
+          />
         } @placeholder {
           <app-chart-skeleton />
         }

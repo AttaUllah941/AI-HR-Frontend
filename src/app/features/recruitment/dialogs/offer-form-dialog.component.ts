@@ -13,6 +13,7 @@ import {
 } from '../../../core/services/recruitment.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { DateFieldComponent } from '../../../shared/components/date-field/date-field.component';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface OfferFormDialogData {
@@ -24,6 +25,7 @@ export interface OfferFormDialogData {
   selector: 'app-offer-form-dialog',
   standalone: true,
   imports: [
+    DateFieldComponent,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,

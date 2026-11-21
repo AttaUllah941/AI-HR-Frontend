@@ -2,6 +2,16 @@
   display: block;
 }
 
+/* The status wrapper lays children out as a grid; this block keeps the report full width. */
+.payroll-report-body {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.payroll-report-chart {
+  margin-bottom: 1rem;
+}
+
 .payroll-report-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -10,9 +20,14 @@
 }
 
 .payroll-overview-heading {
-  margin: 0 0 0.85rem;
-  font-size: 1.05rem;
-  font-weight: 600;
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.payroll-report-chart .payroll-overview-sub {
+  margin-bottom: 0.5rem;
 }
 
 .payroll-overview-sub {
@@ -25,4 +40,9 @@
   .payroll-report-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* The shared policy-card class caps width for narrow settings forms; reports use the full width. */
+.payroll-report-body .payroll-policy-card {
+  max-width: none;
 }

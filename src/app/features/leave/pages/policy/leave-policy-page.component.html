@@ -13,15 +13,34 @@
 >
   <mat-card class="leave-policy-card">
     <form [formGroup]="form" class="leave-form" (ngSubmit)="save()">
-      <mat-checkbox formControlName="allowNegativeBalance">
-        Allow negative leave balance
-      </mat-checkbox>
-      <mat-checkbox formControlName="countWeekends">Count weekends as leave days</mat-checkbox>
-      <mat-checkbox formControlName="countHolidays">Count holidays as leave days</mat-checkbox>
+      <div class="lp-rule">
+        <div class="lp-rule__text">
+          <strong id="lp-neg">Allow negative leave balance</strong>
+          <span>Let employees book more days than they have left. The overdraft is tracked as a negative balance.</span>
+        </div>
+        <mat-slide-toggle formControlName="allowNegativeBalance" aria-labelledby="lp-neg" />
+      </div>
+
+      <div class="lp-rule">
+        <div class="lp-rule__text">
+          <strong id="lp-weekends">Count weekends as leave days</strong>
+          <span>When off, Saturdays and Sundays inside a request are not deducted from the balance.</span>
+        </div>
+        <mat-slide-toggle formControlName="countWeekends" aria-labelledby="lp-weekends" />
+      </div>
+
+      <div class="lp-rule">
+        <div class="lp-rule__text">
+          <strong id="lp-holidays">Count holidays as leave days</strong>
+          <span>When off, company holidays inside a request are not deducted from the balance.</span>
+        </div>
+        <mat-slide-toggle formControlName="countHolidays" aria-labelledby="lp-holidays" />
+      </div>
 
       <mat-form-field appearance="outline">
-        <mat-label>Minimum notice days</mat-label>
+        <mat-label>Minimum notice (days)</mat-label>
         <input matInput type="number" formControlName="minNoticeDays" min="0" max="90" />
+        <mat-hint>How many days ahead a request must be made. Use 0 for no minimum.</mat-hint>
         @if (form.controls.minNoticeDays.touched && form.controls.minNoticeDays.invalid) {
           <mat-error>Enter a value between 0 and 90</mat-error>
         }

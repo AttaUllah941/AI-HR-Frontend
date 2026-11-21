@@ -11,6 +11,7 @@ import { EmployeeListItem, EmployeeService } from '../../../core/services/employ
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { DateFieldComponent } from '../../../shared/components/date-field/date-field.component';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface LeaveRequestFormDialogData {
@@ -41,6 +42,7 @@ function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
   selector: 'app-leave-request-form-dialog',
   standalone: true,
   imports: [
+    DateFieldComponent,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,

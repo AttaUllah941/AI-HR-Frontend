@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { PerformanceService, PromotionRequest } from '../../../core/services/performance.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { DateFieldComponent } from '../../../shared/components/date-field/date-field.component';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface PromotionReviewDialogData {
@@ -19,6 +20,7 @@ export interface PromotionReviewDialogData {
   selector: 'app-promotion-review-dialog',
   standalone: true,
   imports: [
+    DateFieldComponent,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,

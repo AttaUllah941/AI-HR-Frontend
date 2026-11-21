@@ -62,13 +62,20 @@
               <td data-label="Goal">
                 <strong>{{ item.title }}</strong>
                 @if (item.dueDate) {
-                  <div style="font-size: 0.8rem; color: var(--zh-muted-foreground)">
+                  <div class="performance-table__sub">
                     Due {{ item.dueDate.substring(0, 10) }}
                   </div>
                 }
               </td>
               <td data-label="Employee">{{ employeeLabel(item) }}</td>
-              <td data-label="Progress">{{ item.progress }}%</td>
+              <td data-label="Progress">
+                <div class="performance-progress">
+                  <span class="performance-progress__track" aria-hidden="true">
+                    <span class="performance-progress__fill" [style.width.%]="progressWidth(item.progress)"></span>
+                  </span>
+                  <span class="performance-progress__value">{{ item.progress }}%</span>
+                </div>
+              </td>
               <td data-label="Priority">
                 <span [class]="statusClass(item.priority)">
                   <span class="performance-status-pill__dot" aria-hidden="true"></span>

@@ -10,10 +10,7 @@
 
   <form [formGroup]="form" class="performance-form" id="promotion-review-form" (ngSubmit)="submit()">
     @if (approve) {
-      <mat-form-field appearance="outline">
-        <mat-label>Effective date</mat-label>
-        <input matInput type="date" formControlName="effectiveDate" />
-      </mat-form-field>
+      <app-date-field label="Effective date" formControlName="effectiveDate" />
     }
 
     <mat-form-field appearance="outline">

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ApiService } from './api.service';
 import { ApiResponse } from '../models/api.models';
+import { formatDateTime } from '../utils/date-format';
 
 export interface SettingsSummary {
   company: {
@@ -298,7 +299,7 @@ export class SettingsService {
     if (!iso) return '—';
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return '—';
-    return d.toLocaleString();
+    return formatDateTime(d);
   }
 
   relativeTime(iso: string | null | undefined): string {

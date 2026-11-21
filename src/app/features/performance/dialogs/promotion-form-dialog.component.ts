@@ -11,6 +11,7 @@ import { EmployeeListItem, EmployeeService } from '../../../core/services/employ
 import { Designation, OrganizationService } from '../../../core/services/organization.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { DateFieldComponent } from '../../../shared/components/date-field/date-field.component';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface PromotionFormDialogData {
@@ -21,6 +22,7 @@ export interface PromotionFormDialogData {
   selector: 'app-promotion-form-dialog',
   standalone: true,
   imports: [
+    DateFieldComponent,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
