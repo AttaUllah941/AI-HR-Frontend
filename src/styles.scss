@@ -91,35 +91,40 @@ select {
   border: 0;
 }
 
-/* Inline spinner injected by ButtonSpinnerDirective. */
-.app-btn-spinner {
-  display: inline-block;
-  flex: none;
-  box-sizing: border-box;
-  width: 1rem;
-  height: 1rem;
-  margin-inline-end: 0.5rem;
-  vertical-align: -0.15em;
-  border: 2px solid currentColor;
-  border-inline-end-color: transparent;
-  border-radius: 50%;
-  animation: app-btn-spin 0.8s linear infinite;
-}
-
+/*
+ * Pending action buttons (ButtonSpinnerDirective): a skeleton-style shimmer sweeps across the button.
+ * Nothing is inserted into the button, so its size never changes while it saves.
+ */
 .app-btn-pending {
+  position: relative;
+  overflow: hidden;
   cursor: progress;
-  opacity: 0.75;
+  opacity: 0.85;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.38) 50%, transparent 100%);
+    background-size: 60% 100%;
+    background-repeat: no-repeat;
+    background-position: -80% 0;
+    animation: app-btn-shimmer 1.2s ease-in-out infinite;
+  }
 }
 
-@keyframes app-btn-spin {
+@keyframes app-btn-shimmer {
   to {
-    transform: rotate(360deg);
+    background-position: 180% 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .app-btn-spinner {
-    animation-duration: 2.4s;
+  .app-btn-pending::after {
+    animation: none;
+    background-position: 50% 0;
+    opacity: 0.4;
   }
 }
 
@@ -276,4 +281,9 @@ select {
   [class*='-form'] {
     min-width: 0 !important;
   }
+}
+
+/* Reserve the scrollbar width so the page does not jump sideways when content grows past the viewport. */
+html {
+  scrollbar-gutter: stable;
 }

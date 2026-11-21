@@ -169,3 +169,34 @@
     width: 100%;
   }
 }
+
+/* Loading placeholder: the same row (identity, times, action) as the real card, at its height. */
+.clock-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 4.5rem;
+}
+
+.clock-skeleton__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.clock-skeleton__action {
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .clock-skeleton {
+    flex-wrap: wrap;
+    min-height: 11rem;
+  }
+
+  .clock-skeleton__action {
+    margin-left: 0;
+    width: 100% !important;
+  }
+}

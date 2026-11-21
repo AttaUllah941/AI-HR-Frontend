@@ -23,9 +23,9 @@
 
 <div class="performance-table-card" style="margin-bottom: 1.5rem">
   @if (cyclesLoading()) {
-    <div class="performance-table-state">
-      <mat-spinner diameter="32" />
-      <span>Loading cycles…</span>
+    <div role="status">
+      <span class="sr-only">Loading cycles…</span>
+      <app-table-skeleton [rows]="3" [cols]="5" />
     </div>
   } @else if (cyclesError()) {
     <div class="performance-table-state performance-table-state--error">

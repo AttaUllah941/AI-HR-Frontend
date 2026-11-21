@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FormSkeletonComponent } from '../../../shared/skeleton/form-skeleton.component';
 import {
   PayrollEntryLine,
   Payslip,
@@ -16,7 +16,7 @@ export interface PayslipDetailDialogData {
 @Component({
   selector: 'app-payslip-detail-dialog',
   standalone: true,
-  imports: [MatDialogModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [MatDialogModule, MatButtonModule, MatIconModule, FormSkeletonComponent],
   templateUrl: './payslip-detail-dialog.component.html',
   styleUrl: './payslip-detail-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

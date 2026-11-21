@@ -12,21 +12,28 @@
         <app-list-skeleton [rows]="6" />
       }
       @case ('kpi') {
+        <div class="org-status-head">
+          <div class="org-status-head__text">
+            <app-skeleton width="14rem" height="1.1rem" />
+            <app-skeleton width="22rem" height="0.8rem" />
+          </div>
+          <app-skeleton width="7.5rem" height="2.5rem" style="border-radius: 0.65rem" />
+        </div>
         <div class="org-status-kpis">
           @for (n of kpiPlaceholders; track n) {
             <app-kpi-card-skeleton />
           }
         </div>
         <div class="org-status-charts">
-          <app-chart-skeleton />
-          <app-chart-skeleton />
+          <app-chart-skeleton height="13rem" />
+          <app-chart-skeleton height="13rem" />
         </div>
       }
+      @case ('form') {
+        <app-form-skeleton [fields]="8" />
+      }
       @default {
-        <div class="org-status org-status--loading" aria-hidden="true">
-          <mat-progress-spinner mode="indeterminate" diameter="36" />
-          <p>{{ loadingMessage() }}</p>
-        </div>
+        <app-cards-skeleton [count]="4" />
       }
     }
   </div>

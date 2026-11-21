@@ -105,9 +105,9 @@
 
 <div class="performance-table-card" [class.is-refetching]="loading() && kpis().length > 0" [attr.aria-busy]="loading()">
   @if (assignmentsLoading()) {
-    <div class="performance-table-state">
-      <mat-spinner diameter="32" />
-      <span>Loading assignments…</span>
+    <div role="status">
+      <span class="sr-only">Loading assignments…</span>
+      <app-table-skeleton [rows]="6" [cols]="6" />
     </div>
   } @else if (assignmentsError()) {
     <div class="performance-table-state performance-table-state--error">

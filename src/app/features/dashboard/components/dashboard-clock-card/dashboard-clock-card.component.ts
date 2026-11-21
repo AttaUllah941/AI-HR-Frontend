@@ -10,7 +10,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 import {
   AttendanceService,
   MyTodayResponse,
@@ -20,6 +20,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { ClockDialogService } from '../../../../core/services/clock-dialog.service';
 import { formatTime, formatWeekdayDate } from '../../../../core/utils/date-format';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { SkeletonComponent } from '../../../../shared/skeleton/skeleton.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 
 @Component({
@@ -29,7 +30,7 @@ import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button
     MatButtonModule,
     MatCardModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    SkeletonComponent,
     EmptyStateComponent,
     ButtonSpinnerDirective,
   ],

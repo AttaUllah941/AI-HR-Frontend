@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -25,6 +24,7 @@ import {
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
+import { FormSkeletonComponent } from '../../../shared/skeleton/form-skeleton.component';
 
 const STATUSES: EmployeeStatus[] = [
   'DRAFT',
@@ -56,7 +56,7 @@ const EMPLOYMENT_TYPES: EmploymentType[] = [
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    FormSkeletonComponent,
     MatDatepickerModule,
     MatNativeDateModule,
     ButtonSpinnerDirective,

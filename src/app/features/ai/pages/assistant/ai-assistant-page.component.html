@@ -65,9 +65,11 @@
 
         <div class="ai-chat-thread" #threadEl>
           @if (loadingThread()) {
-            <div class="ai-chat-empty">
-              <mat-spinner diameter="28" />
-              <p>Loading messages…</p>
+            <div class="ai-chat-skeleton" role="status">
+              <span class="sr-only">Loading messages…</span>
+              <app-skeleton width="55%" height="3.5rem" style="border-radius: 1rem" />
+              <app-skeleton class="ai-chat-skeleton__mine" width="40%" height="2.5rem" style="border-radius: 1rem" />
+              <app-skeleton width="70%" height="5rem" style="border-radius: 1rem" />
             </div>
           } @else if (messages().length === 0) {
             <div class="ai-chat-empty">
