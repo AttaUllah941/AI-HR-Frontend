@@ -4,7 +4,7 @@
   z-index: 20;
   min-height: var(--zh-header-height);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(16rem, 28rem) minmax(0, 1fr);
+  grid-template-columns: minmax(max-content, 1fr) minmax(14rem, 28rem) minmax(max-content, 1fr);
   align-items: center;
   gap: 1rem;
   padding: 0.65rem 1.35rem;

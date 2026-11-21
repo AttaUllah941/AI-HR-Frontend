@@ -1,17 +1,83 @@
 @if (loading() && !summary()) {
   <div role="status" aria-live="polite">
     <span class="sr-only">Loading dashboard…</span>
-    <section class="kpi-grid" aria-hidden="true">
-      @for (n of kpiPlaceholders; track n) {
-        <app-kpi-card-skeleton />
-      }
-    </section>
-    <section class="dashboard-grid" aria-hidden="true">
-      <app-chart-skeleton />
-      <app-chart-skeleton />
-      <app-chart-skeleton />
-      <app-chart-skeleton />
-    </section>
+    <div aria-hidden="true">
+      <!-- Mirrors the real page: clock card, 2 rows of KPI tiles, AI banner, then the four chart panels. -->
+      <div class="sk-clock">
+        <app-skeleton shape="circle" width="2.75rem" height="2.75rem" />
+        <div class="sk-stack">
+          <app-skeleton width="9rem" height="1rem" />
+          <app-skeleton width="6rem" height="0.75rem" />
+        </div>
+        <div class="sk-clock__times">
+          @for (n of [0, 1, 2]; track n) {
+            <div class="sk-stack">
+              <app-skeleton width="3.5rem" height="0.65rem" />
+              <app-skeleton width="5rem" height="1.1rem" />
+            </div>
+          }
+        </div>
+        <app-skeleton class="sk-clock__action" width="8rem" height="2.5rem" style="border-radius: 999px" />
+      </div>
+
+      <section class="kpi-grid">
+        @for (n of kpiPlaceholders; track n) {
+          <div class="kpi-card sk-kpi">
+            <div class="kpi-card__header">
+              <app-skeleton width="2.5rem" height="2.5rem" style="border-radius: 0.75rem" />
+              <app-skeleton width="3rem" height="1.25rem" style="border-radius: 999px" />
+            </div>
+            <div class="sk-line" style="height: 1.2rem"><app-skeleton width="55%" height="0.8rem" /></div>
+            <div class="sk-line" style="height: 2.1rem"><app-skeleton width="40%" height="1.5rem" /></div>
+            <div class="sk-line" style="height: 1.1rem"><app-skeleton width="35%" height="0.7rem" /></div>
+          </div>
+        }
+      </section>
+
+      <div class="ai-banner sk-ai">
+        <div class="sk-ai__title">
+          <app-skeleton width="2rem" height="2rem" style="border-radius: 0.6rem" />
+          <app-skeleton width="12rem" height="1rem" />
+        </div>
+        <div class="sk-stack sk-ai__lines">
+          <app-skeleton width="62%" height="0.85rem" />
+          <app-skeleton width="48%" height="0.85rem" />
+          <app-skeleton width="55%" height="0.85rem" />
+        </div>
+        <app-skeleton width="8rem" height="0.85rem" />
+      </div>
+
+      <section class="dashboard-grid">
+        <div class="panel panel--attendance">
+          <div class="sk-panel__head">
+            <app-skeleton width="9rem" height="1rem" />
+            <app-skeleton width="5rem" height="0.75rem" />
+          </div>
+          <app-chart-skeleton [bare]="true" variant="bars" height="17rem" />
+        </div>
+        <div class="panel panel--departments">
+          <div class="sk-panel__head">
+            <app-skeleton width="11rem" height="1rem" />
+            <app-skeleton width="6rem" height="0.75rem" />
+          </div>
+          <app-chart-skeleton [bare]="true" variant="donut" height="19rem" />
+        </div>
+        <div class="panel panel--funnel">
+          <div class="sk-panel__head">
+            <app-skeleton width="8rem" height="1rem" />
+            <app-skeleton width="5rem" height="0.75rem" />
+          </div>
+          <app-chart-skeleton [bare]="true" variant="funnel" height="17rem" />
+        </div>
+        <div class="panel panel--growth">
+          <div class="sk-panel__head">
+            <app-skeleton width="10rem" height="1rem" />
+            <app-skeleton width="4rem" height="0.75rem" />
+          </div>
+          <app-chart-skeleton [bare]="true" variant="ascending" height="17rem" />
+        </div>
+      </section>
+    </div>
   </div>
 } @else if (error()) {
   <app-error-state
@@ -95,7 +161,7 @@
         @defer (on viewport) {
           <app-attendance-trend-chart [series]="data.attendanceTrend.series" />
         } @placeholder {
-          <app-chart-skeleton />
+          <app-chart-skeleton [bare]="true" variant="bars" height="17rem" />
         }
       } @else {
         <p class="state-msg state-msg--panel">No attendance recorded for this period yet.</p>
@@ -116,7 +182,7 @@
             [total]="data.departmentDistribution.total"
           />
         } @placeholder {
-          <app-chart-skeleton />
+          <app-chart-skeleton [bare]="true" variant="donut" height="19rem" />
         }
       } @else {
         <p class="state-msg state-msg--panel">No employees assigned to departments yet.</p>
@@ -134,7 +200,7 @@
         @defer (on viewport) {
           <app-hiring-funnel-chart [stages]="data.hiringFunnel.stages" />
         } @placeholder {
-          <app-chart-skeleton />
+          <app-chart-skeleton [bare]="true" variant="funnel" height="17rem" />
         }
       } @else {
         <p class="state-msg state-msg--panel">No candidates in the hiring pipeline yet.</p>
@@ -152,7 +218,7 @@
         @defer (on viewport) {
           <app-employee-growth-chart [points]="data.employeeGrowth.points" />
         } @placeholder {
-          <app-chart-skeleton />
+          <app-chart-skeleton [bare]="true" variant="ascending" height="17rem" />
         }
       } @else {
         <p class="state-msg state-msg--panel">No employee growth data yet.</p>

@@ -23,7 +23,7 @@ import {
 
 import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
-import { KpiCardSkeletonComponent } from '../../../../shared/skeleton/kpi-card-skeleton.component';
+import { SkeletonComponent } from '../../../../shared/skeleton/skeleton.component';
 @Component({
   selector: 'app-dashboard-home',
   standalone: true,
@@ -40,7 +40,7 @@ import { KpiCardSkeletonComponent } from '../../../../shared/skeleton/kpi-card-s
     DashboardClockCardComponent,
     ChartSkeletonComponent,
     ErrorStateComponent,
-    KpiCardSkeletonComponent,
+    SkeletonComponent,
   ],
   templateUrl: './dashboard-home.component.html',
   styleUrl: './dashboard-home.component.scss',
@@ -49,7 +49,7 @@ import { KpiCardSkeletonComponent } from '../../../../shared/skeleton/kpi-card-s
 export class DashboardHomeComponent implements OnInit {
   private readonly dashboard = inject(DashboardService);
 
-  protected readonly kpiPlaceholders = [0, 1, 2, 3];
+  protected readonly kpiPlaceholders = [0, 1, 2, 3, 4, 5, 6, 7];
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly summary = signal<DashboardSummary | null>(null);

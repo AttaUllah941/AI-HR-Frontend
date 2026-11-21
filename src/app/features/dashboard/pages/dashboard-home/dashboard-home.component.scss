@@ -308,3 +308,85 @@
   margin: 0;
   text-align: center;
 }
+
+// —— Loading skeleton (mirrors the real layout so nothing moves when data arrives) ——
+.sk-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.sk-line {
+  display: flex;
+  align-items: center;
+}
+
+.sk-clock {
+  @extend %surface;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 5rem;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.sk-clock__times {
+  display: flex;
+  flex: 1;
+  gap: 3rem;
+}
+
+.sk-clock__action {
+  margin-left: auto;
+}
+
+.sk-kpi {
+  justify-content: flex-start;
+}
+
+.sk-ai {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.15rem 1.35rem !important;
+  min-height: 10.5rem;
+  box-sizing: border-box;
+}
+
+.sk-ai__title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.sk-ai__lines {
+  gap: 0.7rem;
+}
+
+.sk-panel__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 0.75rem;
+  min-height: 2.5rem;
+}
+
+@media (max-width: 1000px) {
+  .sk-clock {
+    flex-wrap: wrap;
+    min-height: 11rem;
+  }
+
+  .sk-clock__times {
+    flex-basis: 100%;
+    order: 3;
+    gap: 1.5rem;
+  }
+
+  .sk-clock__action {
+    margin-left: 0;
+  }
+}
