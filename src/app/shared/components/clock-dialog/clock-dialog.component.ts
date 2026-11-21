@@ -9,9 +9,7 @@ import {
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { format } from 'date-fns';
 import { formatDuration, formatTime } from '../../../core/utils/date-format';
 
@@ -35,9 +33,7 @@ const NOTE_MAX = 200;
     ReactiveFormsModule,
     MatDialogModule,
     MatButtonModule,
-    MatFormFieldModule,
     MatIconModule,
-    MatInputModule,
   ],
   templateUrl: './clock-dialog.component.html',
   styleUrl: './clock-dialog.component.scss',
@@ -59,12 +55,24 @@ export class ClockDialogComponent {
   readonly title = this.isOut ? 'Check out' : 'Check in';
   readonly confirmLabel = this.isOut ? 'Check out now' : 'Check in now';
   readonly icon = this.isOut ? 'logout' : 'login';
+  readonly subtitle = this.isOut
+    ? 'Review your day before you finish.'
+    : 'Confirm the start of your working day.';
+  readonly suggestions = this.isOut
+    ? ['All tasks done', 'Leaving early', 'Handover completed']
+    : ['Working from office', 'Working from home', 'At client site'];
   readonly checkedInAt = formatTime(this.data.checkInAt);
   readonly worked = computed(() => formatDuration(this.data.checkInAt, this.now()));
 
   constructor() {
     const timer = setInterval(() => this.now.set(new Date()), 1000);
     inject(DestroyRef).onDestroy(() => clearInterval(timer));
+  }
+
+  /** Quick-note chip: fills the note field (replacing any earlier text). */
+  useSuggestion(text: string): void {
+    this.note.setValue(text.slice(0, NOTE_MAX));
+    this.note.markAsDirty();
   }
 
   confirm(): void {

@@ -69,8 +69,14 @@ export class NotificationBellComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
+          const previous = this.notificationCount();
           this.notifications.set(data.items);
           this.notificationCount.set(data.unreadCount);
+          // A live update that raised the unread count: tell the user what arrived.
+          const newest = data.items.find((n) => !n.read);
+          if (background && data.unreadCount > previous && newest) {
+            this.toast.info(newest.title);
+          }
         },
         error: () => {
           this.dashboard.getNotifications().subscribe({

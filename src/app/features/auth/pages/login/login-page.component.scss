@@ -33,12 +33,15 @@ form {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
   margin: 0.25rem 0 1rem;
   font-size: 0.85rem;
 
   a {
     color: var(--zh-primary);
     font-weight: 500;
+    padding: 0.5rem 0; /* comfortable touch target */
   }
 }
 

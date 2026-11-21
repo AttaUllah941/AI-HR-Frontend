@@ -252,3 +252,28 @@ select {
 [data-hide~='joined'] [data-col='joined'] {
   display: none;
 }
+
+/* Phones: dialogs use (almost) the full width instead of Material's 80vw cap, and their form grids stack. */
+@media (max-width: 640px) {
+  .cdk-overlay-pane.mat-mdc-dialog-panel {
+    width: calc(100vw - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
+  }
+
+  .mat-mdc-dialog-container {
+    --mat-dialog-container-max-width: calc(100vw - 1rem);
+    --mat-dialog-container-min-width: 0;
+  }
+
+  .mat-mdc-dialog-content {
+    max-height: 68vh;
+  }
+
+  [class*='-form__grid'] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  [class*='-form'] {
+    min-width: 0 !important;
+  }
+}
