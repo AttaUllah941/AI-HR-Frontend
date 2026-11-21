@@ -331,3 +331,32 @@
     align-self: flex-end;
   }
 }
+
+/* Phones: section headers stack, and their controls wrap onto full-width rows instead of overflowing. */
+@media (max-width: 720px) {
+  .org-section-header__actions {
+    flex-shrink: 1;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 0.5rem;
+
+    > * {
+      flex: 1 1 100%;
+      min-width: 0;
+      max-width: none;
+    }
+
+    /* Selects and similar compact controls pair up two to a row. */
+    > .mat-mdc-form-field {
+      flex: 1 1 calc(50% - 0.25rem);
+    }
+
+    > button {
+      justify-content: center;
+    }
+  }
+
+  .org-section-header__main {
+    width: 100%;
+  }
+}

@@ -67,9 +67,30 @@
                   </div>
                 }
               </td>
-              <td data-label="Source">{{ item.source || '—' }}</td>
-              <td data-label="Screening">{{ item.screeningScore != null ? item.screeningScore : '—' }}</td>
-              <td data-label="Resume">{{ item.resumeFileName || (item.resumeUrl ? 'Linked' : '—') }}</td>
+              <td data-label="Source">
+                @if (item.source) {
+                  <span class="rc-chip">{{ item.source }}</span>
+                } @else {
+                  <span class="rc-muted">—</span>
+                }
+              </td>
+              <td data-label="Screening">
+                @if (item.screeningScore != null) {
+                  <span [class]="'rc-score rc-score--' + scoreTone(item.screeningScore)">
+                    <strong>{{ item.screeningScore }}</strong>
+                    <span class="rc-score__bar" aria-hidden="true"><span [style.width.%]="item.screeningScore"></span></span>
+                  </span>
+                } @else {
+                  <span class="rc-muted">—</span>
+                }
+              </td>
+              <td data-label="Resume">
+                @if (item.resumeFileName || item.resumeUrl) {
+                  <span class="rc-chip rc-chip--ok"><mat-icon aria-hidden="true">attach_file</mat-icon>Attached</span>
+                } @else {
+                  <span class="rc-muted">None</span>
+                }
+              </td>
               <td class="recruitment-table__actions-col" data-label="">
                 <button
                   mat-icon-button

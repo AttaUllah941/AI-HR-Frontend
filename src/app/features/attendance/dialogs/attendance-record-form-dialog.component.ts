@@ -16,6 +16,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { DateFieldComponent } from '../../../shared/components/date-field/date-field.component';
+import { DateTimeFieldComponent } from '../../../shared/components/date-field/datetime-field.component';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface AttendanceRecordDialogData {
@@ -63,6 +65,8 @@ function fromDateTimeLocal(value: string): string | null {
   selector: 'app-attendance-record-form-dialog',
   standalone: true,
   imports: [
+    DateTimeFieldComponent,
+    DateFieldComponent,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,

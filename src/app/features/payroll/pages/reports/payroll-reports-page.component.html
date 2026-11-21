@@ -13,7 +13,7 @@
   </mat-form-field>
 </app-organization-section-header>
 
-<app-organization-status
+<app-organization-status skeleton="table"
   [loading]="loading()"
   [error]="error()"
   loadingMessage="Loading payroll report…"
@@ -27,6 +27,15 @@
       icon="assessment"
     />
   } @else {
+   <div class="payroll-report-body">
+    @if (report()!.byMonth.length > 0) {
+      <mat-card class="payroll-policy-card payroll-report-chart">
+        <h3 class="payroll-overview-heading">Where each month's pay goes</h3>
+        <p class="payroll-overview-sub">Net pay, tax and other deductions add up to the gross pay</p>
+        <app-echart [build]="chartBuild()" label="Net pay, tax and other deductions by month" height="16rem" />
+      </mat-card>
+    }
+
     <div class="payroll-report-grid">
       <mat-card class="payroll-policy-card">
         <h3 class="payroll-overview-heading">By status</h3>
@@ -70,9 +79,9 @@
                 <tr>
                   <th scope="col">Month</th>
                   <th scope="col">Status</th>
-                  <th scope="col">Entries</th>
-                  <th scope="col">Gross</th>
-                  <th scope="col">Net</th>
+                  <th scope="col" class="payroll-table__num">Employees</th>
+                  <th scope="col" class="payroll-table__num">Gross</th>
+                  <th scope="col" class="payroll-table__num">Net</th>
                 </tr>
               </thead>
               <tbody>
@@ -85,9 +94,9 @@
                         {{ statusLabel(row.status) }}
                       </span>
                     </td>
-                    <td data-label="Entries">{{ row.entryCount }}</td>
-                    <td data-label="Gross">{{ formatMoney(row.grossPay) }}</td>
-                    <td data-label="Net">{{ formatMoney(row.netPay) }}</td>
+                    <td data-label="Employees" class="payroll-table__num">{{ row.entryCount }}</td>
+                    <td data-label="Gross" class="payroll-table__num">{{ formatMoney(row.grossPay) }}</td>
+                    <td data-label="Net" class="payroll-table__num">{{ formatMoney(row.netPay) }}</td>
                   </tr>
                 }
               </tbody>
@@ -96,5 +105,6 @@
         }
       </mat-card>
     </div>
+   </div>
   }
 </app-organization-status>

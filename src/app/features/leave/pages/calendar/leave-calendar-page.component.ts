@@ -6,6 +6,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
 import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
+import { formatMonthYear } from '../../../../core/utils/date-format';
 
 interface CalendarDay {
   date: Date;
@@ -41,8 +42,23 @@ export class LeaveCalendarPageComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
+  /** The leave types that actually appear this month, for the legend. */
+  readonly legend = computed(() => {
+    const seen = new Map<string, { id: string; name: string; color: string }>();
+    for (const event of this.events()) {
+      if (!seen.has(event.leaveTypeId)) {
+        seen.set(event.leaveTypeId, {
+          id: event.leaveTypeId,
+          name: event.leaveTypeName || 'Leave',
+          color: event.color || 'var(--zh-primary)',
+        });
+      }
+    }
+    return [...seen.values()].sort((x, y) => x.name.localeCompare(y.name));
+  });
+
   readonly monthLabel = computed(() =>
-    this.cursor().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+    formatMonthYear(this.cursor()),
   );
 
   readonly days = computed<CalendarDay[]>(() => {
@@ -52,7 +68,8 @@ export class LeaveCalendarPageComponent implements OnInit {
     const first = new Date(year, month, 1);
     const startPad = first.getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const todayIso = new Date().toISOString().slice(0, 10);
+    // Local calendar day (toISOString is UTC, which is the wrong day for part of every day outside UTC).
+    const todayIso = this.toIso(new Date());
     const events = this.events();
     const cells: CalendarDay[] = [];
 
@@ -103,6 +120,12 @@ export class LeaveCalendarPageComponent implements OnInit {
   prevMonth(): void {
     const c = this.cursor();
     this.cursor.set(new Date(c.getFullYear(), c.getMonth() - 1, 1));
+    this.reload();
+  }
+
+  goToday(): void {
+    const now = new Date();
+    this.cursor.set(new Date(now.getFullYear(), now.getMonth(), 1));
     this.reload();
   }
 

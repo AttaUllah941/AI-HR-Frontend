@@ -19,7 +19,9 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
 import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
+import { DateFieldComponent } from '../../../../shared/components/date-field/date-field.component';
 import { AttendanceRecordFormDialogComponent } from '../../dialogs/attendance-record-form-dialog.component';
+import { formatTime } from '../../../../core/utils/date-format';
 
 const STATUS_OPTIONS: Array<{ value: AttendanceStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -49,6 +51,7 @@ const AVATAR_COLORS = [
   selector: 'app-attendance-daily-page',
   standalone: true,
   imports: [
+    DateFieldComponent,
     ReactiveFormsModule,
     MatButtonModule,
     MatFormFieldModule,
@@ -224,12 +227,7 @@ export class AttendanceDailyPageComponent implements OnInit {
     return { background: palette.bg, color: palette.color };
   }
 
-  formatTime(value: string | null): string {
-    if (!value) {
-      return '—';
-    }
-    return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+  readonly formatTime = formatTime;
 
   formatHours(minutes: number): string {
     return `${Math.round((minutes / 60) * 10) / 10}h`;

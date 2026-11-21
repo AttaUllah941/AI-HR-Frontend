@@ -22,13 +22,7 @@
         </p>
       </div>
       @if (canCreate && !isEmployeeView()) {
-        <button
-          mat-flat-button
-          color="primary"
-          type="button"
-          class="payroll-add-btn"
-          (click)="openCreateRun()"
-        >
+        <button mat-flat-button color="primary" type="button" class="payroll-add-btn" (click)="openCreateRun()">
           <mat-icon aria-hidden="true">add</mat-icon>
           Create run
         </button>
@@ -43,61 +37,113 @@
               <mat-icon aria-hidden="true">{{ card.icon }}</mat-icon>
             </span>
           </div>
-          <p class="payroll-kpi-card__label">{{ card.label }}</p>
-          <strong class="payroll-kpi-card__value">{{ card.value }}</strong>
+          <div>
+            <p class="payroll-kpi-card__label">{{ card.label }}</p>
+            <strong class="payroll-kpi-card__value">{{ card.value }}</strong>
+          </div>
         </mat-card>
       }
     </div>
 
     @if (!isEmployeeView()) {
-      <div>
-        <div class="payroll-action-bar">
-          <h3 class="payroll-overview-heading">Recent runs</h3>
-          <a mat-stroked-button routerLink="/payroll/runs">View all</a>
+      @if (recentMonths().length === 0) {
+        <app-empty-state
+          title="No payroll runs yet"
+          message="Create a payroll run to process salaries for the month."
+          icon="payments"
+          [actionLabel]="canCreate ? 'Create run' : ''"
+          (action)="openCreateRun()"
+        />
+      } @else {
+        <div class="po-grid">
+          <section class="po-card po-cost" aria-labelledby="po-cost-title">
+            <header class="po-card__head">
+              <div>
+                <h3 id="po-cost-title">Payroll cost by month</h3>
+                <p>Gross pay against what employees take home</p>
+              </div>
+            </header>
+            <app-echart [build]="chartBuild()" label="Gross and net payroll by month" height="15rem" />
+          </section>
+
+          <section class="po-card po-split" aria-labelledby="po-split-title">
+            <header class="po-card__head">
+              <div>
+                <h3 id="po-split-title">Where the money goes</h3>
+                <p>{{ year }} year to date</p>
+              </div>
+            </header>
+
+            @if (split().length === 0) {
+              <p class="po-empty">No paid payslips yet this year.</p>
+            } @else {
+              <div class="po-split__bar" role="img" aria-label="Split of gross pay between net pay, tax and other deductions">
+                @for (part of split(); track part.key) {
+                  <span [style.width.%]="part.percent" [style.background]="part.color"></span>
+                }
+              </div>
+              <ul class="po-split__list">
+                @for (part of split(); track part.key) {
+                  <li>
+                    <span class="po-split__dot" [style.background]="part.color" aria-hidden="true"></span>
+                    <span class="po-split__label">{{ part.label }}</span>
+                    <strong>{{ formatMoney(part.amount) }}</strong>
+                    <span class="po-split__pct">{{ part.percent | number: '1.0-1' }}%</span>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
         </div>
-        @if (recentMonths().length === 0) {
-          <app-empty-state
-            title="No payroll runs yet"
-            message="Create a payroll run to process salaries for the month."
-            icon="payments"
-      [actionLabel]="canCreate ? 'Create run' : ''"
-      (action)="openCreateRun()"
-    />
-        } @else {
-          <div class="payroll-table-card">
-            <div class="payroll-table-wrap">
-              <table class="payroll-table" data-responsive>
-                <thead>
-                  <tr>
-                    <th scope="col">Period</th>
-                    <th scope="col">Title</th>
-                    <th scope="col">Net</th>
-                    <th scope="col">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (run of recentMonths(); track run.month + '-' + run.status) {
-                    <tr class="payroll-table__row">
-                      <td data-label="Period">{{ payrollMonth(run.month) }} {{ year }}</td>
-                      <td data-label="Title">{{ runTitle(run) }}</td>
-                      <td data-label="Net">{{ formatMoney(run.netPay) }}</td>
-                      <td data-label="Status">
-                        <span [class]="statusClass(run.status)">
-                          <span class="payroll-status-pill__dot" aria-hidden="true"></span>
-                          {{ statusLabel(run.status) }}
-                        </span>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
+
+        <section class="po-card po-runs" aria-labelledby="po-runs-title">
+          <header class="po-card__head">
+            <div>
+              <h3 id="po-runs-title">Recent runs</h3>
+              <p>Latest payroll runs this year</p>
             </div>
+            <a routerLink="/payroll/runs" class="po-link">View all runs</a>
+          </header>
+          <div class="payroll-table-wrap">
+            <table class="payroll-table" data-responsive>
+              <thead>
+                <tr>
+                  <th scope="col">Period</th>
+                  <th scope="col" class="payroll-table__num">Employees</th>
+                  <th scope="col" class="payroll-table__num">Gross pay</th>
+                  <th scope="col" class="payroll-table__num">Net pay</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (run of recentMonths(); track run.month + '-' + run.status) {
+                  <tr class="payroll-table__row">
+                    <td data-label="Period"><strong>{{ payrollMonth(run.month) }} {{ year }}</strong></td>
+                    <td data-label="Employees" class="payroll-table__num">{{ run.entryCount }}</td>
+                    <td data-label="Gross pay" class="payroll-table__num">{{ formatMoney(run.grossPay) }}</td>
+                    <td data-label="Net pay" class="payroll-table__num">{{ formatMoney(run.netPay) }}</td>
+                    <td data-label="Status">
+                      <span [class]="statusClass(run.status)">
+                        <span class="payroll-status-pill__dot" aria-hidden="true"></span>
+                        {{ statusLabel(run.status) }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
-        }
-      </div>
+        </section>
+      }
     } @else {
-      <div>
-        <h3 class="payroll-overview-heading">Recent payslips</h3>
+      <section class="po-card" aria-labelledby="po-slips-title">
+        <header class="po-card__head">
+          <div>
+            <h3 id="po-slips-title">Recent payslips</h3>
+            <p>Your latest payslips</p>
+          </div>
+          <a routerLink="/payroll/payslips" class="po-link">View all</a>
+        </header>
         @if (recentPayslips().length === 0) {
           <app-empty-state
             title="No payslips yet"
@@ -105,37 +151,35 @@
             icon="receipt_long"
           />
         } @else {
-          <div class="payroll-table-card">
-            <div class="payroll-table-wrap">
-              <table class="payroll-table" data-responsive>
-                <thead>
-                  <tr>
-                    <th scope="col">Period</th>
-                    <th scope="col">Gross</th>
-                    <th scope="col">Net</th>
-                    <th scope="col">Status</th>
+          <div class="payroll-table-wrap">
+            <table class="payroll-table" data-responsive>
+              <thead>
+                <tr>
+                  <th scope="col">Period</th>
+                  <th scope="col" class="payroll-table__num">Gross</th>
+                  <th scope="col" class="payroll-table__num">Net</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (slip of recentPayslips(); track slip.id) {
+                  <tr class="payroll-table__row">
+                    <td data-label="Period"><strong>{{ payrollMonth(slip.month) }} {{ slip.year }}</strong></td>
+                    <td data-label="Gross" class="payroll-table__num">{{ formatMoney(slip.grossPay, slip.currency) }}</td>
+                    <td data-label="Net" class="payroll-table__num">{{ formatMoney(slip.netPay, slip.currency) }}</td>
+                    <td data-label="Status">
+                      <span [class]="statusClass(slip.status)">
+                        <span class="payroll-status-pill__dot" aria-hidden="true"></span>
+                        {{ statusLabel(slip.status) }}
+                      </span>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  @for (slip of recentPayslips(); track slip.id) {
-                    <tr class="payroll-table__row">
-                      <td data-label="Period">{{ payrollMonth(slip.month) }} {{ slip.year }}</td>
-                      <td data-label="Gross">{{ formatMoney(slip.grossPay, slip.currency) }}</td>
-                      <td data-label="Net">{{ formatMoney(slip.netPay, slip.currency) }}</td>
-                      <td data-label="Status">
-                        <span [class]="statusClass(slip.status)">
-                          <span class="payroll-status-pill__dot" aria-hidden="true"></span>
-                          {{ statusLabel(slip.status) }}
-                        </span>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+                }
+              </tbody>
+            </table>
           </div>
         }
-      </div>
+      </section>
     }
   </section>
 </app-organization-status>

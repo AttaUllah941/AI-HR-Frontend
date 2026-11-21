@@ -72,6 +72,7 @@ export class NotificationStreamService implements OnDestroy {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private failures = 0;
   private refreshedOnce = false;
+  private connectedBefore = false;
   private readonly onVisibility = () => {
     if (this.mode() === 'polling' && document.visibilityState === 'visible') {
       this.changes.next();
@@ -85,6 +86,7 @@ export class NotificationStreamService implements OnDestroy {
     this.started = true;
     this.failures = 0;
     this.refreshedOnce = false;
+    this.connectedBefore = false;
     void this.connect();
   }
 
@@ -139,6 +141,11 @@ export class NotificationStreamService implements OnDestroy {
 
       this.failures = 0;
       this.mode.set('sse');
+      if (this.connectedBefore) {
+        // Events sent while we were disconnected are gone: tell subscribers to refetch.
+        this.changes.next();
+      }
+      this.connectedBefore = true;
       await this.consume(response.body, abort.signal);
       if (this.started && !abort.signal.aborted) {
         this.scheduleReconnect();

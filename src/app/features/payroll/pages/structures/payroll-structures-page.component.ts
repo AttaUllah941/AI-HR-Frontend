@@ -12,6 +12,7 @@ import { ErrorStateComponent } from '../../../../shared/error-state/error-state.
 import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { SalaryStructureFormDialogComponent } from '../../dialogs/salary-structure-form-dialog.component';
+import { formatDate } from '../../../../core/utils/date-format';
 
 @Component({
   selector: 'app-payroll-structures-page',
@@ -127,14 +128,6 @@ export class PayrollStructuresPageComponent implements OnInit {
     if (!value) {
       return '—';
     }
-    const [y, m, d] = value.slice(0, 10).split('-').map(Number);
-    if (!y || !m || !d) {
-      return value;
-    }
-    return new Date(y, m - 1, d).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    return formatDate(value, value);
   }
 }

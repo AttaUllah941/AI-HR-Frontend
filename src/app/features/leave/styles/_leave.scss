@@ -249,42 +249,27 @@
     height: 0.45rem;
     border-radius: 999px;
     flex-shrink: 0;
+    background: currentColor;
   }
 
   &--approved {
-    background: #ecfdf5;
-    color: #059669;
-
-    .leave-status-pill__dot {
-      background: #10b981;
-    }
+    background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+    color: var(--zh-success-text);
   }
 
   &--pending {
-    background: #fff7ed;
-    color: #ea580c;
-
-    .leave-status-pill__dot {
-      background: #f97316;
-    }
+    background: color-mix(in oklab, var(--zh-warning) 22%, transparent);
+    color: var(--zh-warning-text);
   }
 
   &--rejected {
-    background: #fef2f2;
-    color: #dc2626;
-
-    .leave-status-pill__dot {
-      background: #ef4444;
-    }
+    background: color-mix(in oklab, var(--zh-destructive) 14%, transparent);
+    color: var(--zh-destructive-text);
   }
 
   &--cancelled {
     background: var(--zh-muted);
     color: var(--zh-muted-foreground);
-
-    .leave-status-pill__dot {
-      background: var(--zh-muted-foreground);
-    }
   }
 }
 
@@ -311,50 +296,52 @@
 }
 
 .leave-kpi-card {
-  padding: 1.1rem 1.15rem !important;
+  display: flex;
+  flex-direction: row; // mat-card is a column by default
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.15rem !important;
   border: 1px solid var(--zh-border) !important;
-  border-radius: calc(var(--zh-radius) - 2px) !important;
+  border-radius: var(--zh-radius) !important;
   background: var(--zh-card) !important;
-  box-shadow: none !important;
+  box-shadow: var(--zh-shadow-sm) !important;
 
   &__header {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 1rem;
+    flex-shrink: 0;
   }
 
   &__icon {
-    width: 2.35rem;
-    height: 2.35rem;
-    border-radius: 999px;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.7rem;
     display: grid;
     place-items: center;
 
     mat-icon {
-      font-size: 1.1rem;
-      width: 1.1rem;
-      height: 1.1rem;
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
     }
 
     &--success {
-      background: #ecfdf5;
-      color: #059669;
+      background: color-mix(in oklab, var(--zh-success) 15%, transparent);
+      color: var(--zh-success);
     }
 
     &--warning {
-      background: #fff7ed;
-      color: #ea580c;
+      background: color-mix(in oklab, var(--zh-warning) 18%, transparent);
+      color: var(--zh-warning);
     }
 
     &--info {
-      background: #eff6ff;
-      color: #2563eb;
+      background: color-mix(in oklab, var(--zh-primary) 14%, transparent);
+      color: var(--zh-primary);
     }
 
     &--purple {
-      background: #f5f3ff;
-      color: #7c3aed;
+      background: color-mix(in oklab, oklch(62% 0.2 300) 15%, transparent);
+      color: oklch(62% 0.2 300);
     }
 
     &--neutral {
@@ -364,18 +351,20 @@
   }
 
   &__label {
-    margin: 0 0 0.25rem;
-    font-size: 0.8rem;
+    margin: 0;
+    font-size: 0.8125rem;
     font-weight: 500;
     color: var(--zh-muted-foreground);
   }
 
   &__value {
     display: block;
-    font-size: 1.45rem;
+    margin-top: 0.1rem;
+    font-family: var(--zh-font-display);
+    font-size: 1.65rem;
     font-weight: 700;
-    letter-spacing: -0.03em;
     line-height: 1.15;
+    font-variant-numeric: tabular-nums;
   }
 }
 
@@ -426,13 +415,56 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .leave-calendar-nav__title {
   margin: 0;
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.leave-calendar-nav__today {
+  margin-left: auto;
+  margin-right: 0.25rem;
+}
+
+.leave-calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1.1rem;
+  margin: 0 0 0.9rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  color: var(--zh-muted-foreground);
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  &__swatch {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 3px;
+    background: var(--ev, var(--zh-primary));
+  }
+
+  &__swatch--pending {
+    background: color-mix(in oklab, var(--zh-primary) 16%, var(--zh-card));
+    border-left: 3px solid var(--zh-primary);
+    width: 0.9rem;
+  }
+
+  &__sep {
+    width: 1px;
+    height: 0.9rem;
+    background: var(--zh-border);
+  }
 }
 
 .leave-calendar-grid {
@@ -440,43 +472,56 @@
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 1px;
   border: 1px solid var(--zh-border);
-  border-radius: calc(var(--zh-radius) - 2px);
+  border-radius: var(--zh-radius);
   overflow: hidden;
   background: var(--zh-border);
 }
 
 .leave-calendar-weekday {
-  padding: 0.65rem 0.5rem;
+  padding: 0.6rem 0.5rem;
   text-align: center;
-  font-size: 0.68rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--zh-muted-foreground);
-  background: color-mix(in srgb, var(--zh-muted) 35%, var(--zh-card));
+  background: color-mix(in oklab, var(--zh-muted) 60%, var(--zh-card));
 }
 
 .leave-calendar-day {
   min-height: 6.5rem;
-  padding: 0.45rem;
+  padding: 0.4rem 0.45rem 0.5rem;
   background: var(--zh-card);
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
 
-  &--muted {
-    background: color-mix(in srgb, var(--zh-muted) 20%, var(--zh-card));
-    color: var(--zh-muted-foreground);
+  &--weekend {
+    background: color-mix(in oklab, var(--zh-muted) 85%, var(--zh-card));
   }
 
-  &--today {
-    outline: 2px solid var(--zh-primary);
-    outline-offset: -2px;
+  &--muted {
+    background: color-mix(in oklab, var(--zh-muted) 30%, var(--zh-card));
+    color: var(--zh-muted-foreground);
+    opacity: 0.7;
+  }
+
+  &--today &__num {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 0.3rem;
+    border-radius: 999px;
+    background: var(--zh-primary);
+    color: var(--zh-primary-foreground);
   }
 
   &__num {
     font-size: 0.8rem;
     font-weight: 600;
+    align-self: flex-start;
+    font-variant-numeric: tabular-nums;
   }
 
   &__events {
@@ -487,75 +532,24 @@
   }
 }
 
+// Approved leave is a solid chip in the leave type's colour; pending is a tinted chip with a colour edge.
 .leave-calendar-event {
   display: block;
-  padding: 0.15rem 0.35rem;
+  padding: 0.15rem 0.4rem;
   border-radius: 0.35rem;
-  font-size: 0.65rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   color: #fff;
+  background: var(--ev, var(--zh-primary));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.3;
-}
+  line-height: 1.35;
 
-.leave-balance-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.leave-balance-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.15rem;
-  border: 1px solid var(--zh-border);
-  border-radius: calc(var(--zh-radius) - 2px);
-  background: var(--zh-card);
-
-  &__left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-width: 0;
-  }
-
-  &__swatch {
-    width: 0.65rem;
-    height: 2rem;
-    border-radius: 999px;
-    flex-shrink: 0;
-  }
-
-  &__meta {
-    min-width: 0;
-
-    strong {
-      display: block;
-      font-size: 0.95rem;
-    }
-
-    span {
-      font-size: 0.8rem;
-      color: var(--zh-muted-foreground);
-    }
-  }
-
-  &__stats {
-    display: flex;
-    gap: 1.25rem;
-    flex-wrap: wrap;
-    font-size: 0.8rem;
-    color: var(--zh-muted-foreground);
-
-    strong {
-      display: block;
-      font-size: 1rem;
-      color: var(--zh-foreground);
-    }
+  &--pending {
+    color: var(--zh-foreground);
+    background: color-mix(in oklab, var(--ev, var(--zh-primary)) 16%, var(--zh-card));
+    border-left: 3px solid var(--ev, var(--zh-primary));
   }
 }
 
@@ -575,12 +569,6 @@
   margin-top: 0.5rem;
 }
 
-@media (max-width: 1100px) {
-  .leave-kpi-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 720px) {
   .leave-action-bar,
   .leave-toolbar {
@@ -592,10 +580,6 @@
     max-width: none;
   }
 
-  .leave-kpi-grid {
-    grid-template-columns: 1fr;
-  }
-
   .leave-form__grid {
     grid-template-columns: 1fr;
   }
@@ -604,8 +588,71 @@
     min-height: 4.5rem;
   }
 
-  .leave-balance-card {
-    flex-direction: column;
-    align-items: flex-start;
+}
+
+@media (max-width: 640px) {
+  .leave-kpi-grid {
+    grid-template-columns: 1fr;
   }
+}
+
+/* Tables: tighter rows, right-aligned numbers, and a usage meter. */
+.leave-table thead th {
+  padding: 0.6rem 1rem;
+}
+
+.leave-table tbody td,
+.leave-table tfoot td {
+  padding: 0.7rem 1rem;
+}
+
+.leave-table th.leave-table__num,
+.leave-table td.leave-table__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.leave-avail {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+  min-width: 4.5rem;
+
+  strong.is-low {
+    color: var(--zh-destructive-text);
+  }
+
+  strong.is-warn {
+    color: var(--zh-warning-text);
+  }
+}
+
+.leave-meter {
+  display: block;
+  width: 100%;
+  height: 0.3rem;
+  border-radius: 999px;
+  background: var(--zh-muted);
+  overflow: hidden;
+
+  > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--ev, var(--zh-primary));
+  }
+}
+
+.leave-range__type {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.75rem;
+  color: var(--zh-muted-foreground);
+}
+
+/* mat-card is a column flex and its component styles load after global ones, so match its specificity+1. */
+.leave-kpi-grid > .leave-kpi-card.mat-mdc-card {
+  flex-direction: row;
+  align-items: center;
 }

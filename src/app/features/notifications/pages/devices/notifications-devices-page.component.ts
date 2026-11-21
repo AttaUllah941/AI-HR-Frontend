@@ -18,6 +18,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { formatDateTime } from '../../../../core/utils/date-format';
 
 @Component({
   selector: 'app-notifications-devices-page',
@@ -125,7 +126,7 @@ export class NotificationsDevicesPageComponent implements OnInit {
 
   createdLabel(iso: string): string {
     try {
-      return new Date(iso).toLocaleString();
+      return formatDateTime(iso);
     } catch {
       return iso;
     }

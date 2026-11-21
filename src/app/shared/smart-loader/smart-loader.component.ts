@@ -7,7 +7,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SkeletonComponent } from '../skeleton/skeleton.component';
 import { LOADER_MESSAGES } from './loader-messages';
 
 /** Length of the fade between two messages (kept in sync with the CSS transition). */
@@ -31,10 +31,14 @@ export function shuffle<T>(items: readonly T[], random: () => number = Math.rand
 @Component({
   selector: 'app-smart-loader',
   standalone: true,
-  imports: [MatProgressSpinnerModule],
+  imports: [SkeletonComponent],
   template: `
     <div class="loader" role="status" aria-live="polite" aria-atomic="true">
-      <mat-spinner [diameter]="diameter()" aria-hidden="true" />
+      <div class="loader__bars" aria-hidden="true">
+        <app-skeleton width="100%" height="0.8rem" />
+        <app-skeleton width="86%" height="0.8rem" />
+        <app-skeleton width="64%" height="0.8rem" />
+      </div>
       <p class="loader__message" [class.loader__message--fading]="fading()">{{ current() }}</p>
     </div>
   `,
@@ -51,6 +55,12 @@ export function shuffle<T>(items: readonly T[], random: () => number = Math.rand
       padding: 2rem 1rem;
       text-align: center;
       color: var(--mat-sys-on-surface-variant, var(--zh-muted-foreground, #5b6170));
+    }
+    .loader__bars {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      width: min(20rem, 100%);
     }
     .loader__message {
       margin: 0;
@@ -75,6 +85,7 @@ export class SmartLoaderComponent implements OnInit {
 
   readonly messages = input<readonly string[]>(LOADER_MESSAGES.default);
   readonly intervalMs = input(2200);
+  /** Unused now that the spinner is a skeleton; kept so existing templates still compile. */
   readonly diameter = input(40);
 
   readonly current = signal('');

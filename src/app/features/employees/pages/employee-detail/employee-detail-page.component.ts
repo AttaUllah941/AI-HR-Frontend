@@ -22,6 +22,7 @@ import {
 import { EmployeeFormDialogComponent } from '../../dialogs/employee-form-dialog.component';
 import { EmployeeSubFormDialogComponent } from '../../dialogs/employee-sub-form-dialog.component';
 import type { SubResourceType } from '../../models/employee-sub-resource.types';
+import { formatDate as formatDateValue, formatDateTime as formatDateTimeValue } from '../../../../core/utils/date-format';
 
 @Component({
   selector: 'app-employee-detail-page',
@@ -192,11 +193,10 @@ export class EmployeeDetailPageComponent implements OnInit {
   }
 
   formatDate(value: string | null | undefined): string {
-    if (!value) return '—';
-    return new Date(value).toLocaleDateString();
+    return formatDateValue(value);
   }
 
   formatDateTime(value: string): string {
-    return new Date(value).toLocaleString();
+    return formatDateTimeValue(value);
   }
 }

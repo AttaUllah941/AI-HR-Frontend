@@ -11,7 +11,6 @@ import { FormsModule } from '@angular/forms';
 import { filter } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   AiConversation,
   AiMessage,
@@ -25,6 +24,7 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
 import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
 import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { SkeletonComponent } from '../../../../shared/skeleton/skeleton.component';
 
 @Component({
   selector: 'app-ai-assistant-page',
@@ -33,7 +33,7 @@ import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button
     FormsModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    SkeletonComponent,
     EmptyStateComponent,
     OrganizationStatusComponent,
     SmartLoaderComponent,

@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   ProfileActivityItem,
   ProfileService,
@@ -15,7 +14,6 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
   imports: [
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationStatusComponent,
   ],

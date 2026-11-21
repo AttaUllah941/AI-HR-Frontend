@@ -6,7 +6,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
@@ -44,7 +43,6 @@ const TYPE_LABELS: Record<string, string> = {
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     PageHeaderComponent,
     OrganizationStatusComponent,

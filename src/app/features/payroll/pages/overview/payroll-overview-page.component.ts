@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -10,8 +11,10 @@ import {
   PayrollSummary,
 } from '../../../../core/services/payroll.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { EchartComponent } from '../../../../shared/charts/echart.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { costOption } from '../../charts/payroll-chart-options';
 import { PayrollRunFormDialogComponent } from '../../dialogs/payroll-run-form-dialog.component';
 
 @Component({
@@ -22,6 +25,8 @@ import { PayrollRunFormDialogComponent } from '../../dialogs/payroll-run-form-di
     MatCardModule,
     MatIconModule,
     RouterLink,
+    DecimalPipe,
+    EchartComponent,
     EmptyStateComponent,
     OrganizationStatusComponent,
   ],
@@ -46,31 +51,19 @@ export class PayrollOverviewPageComponent implements OnInit {
   readonly canManage =
     this.auth.hasPermission('payroll:update') || this.auth.hasPermission('payroll:approve');
 
+  /** Every amount on this page is in the company's currency (the API says which one). */
+  readonly currency = computed(
+    () => this.companySummary()?.currency ?? this.mySummary()?.currency ?? 'USD',
+  );
+
   readonly kpis = computed(() => {
+    const cur = this.currency();
     if (this.isEmployeeView()) {
       const s = this.mySummary();
       return [
-        {
-          key: 'payslips',
-          label: 'My payslips',
-          value: s?.payslipCount ?? 0,
-          icon: 'receipt_long',
-          tone: 'info',
-        },
-        {
-          key: 'gross',
-          label: 'YTD gross',
-          value: this.payroll.formatMoney(s?.ytdGross ?? 0),
-          icon: 'trending_up',
-          tone: 'success',
-        },
-        {
-          key: 'net',
-          label: 'YTD net',
-          value: this.payroll.formatMoney(s?.ytdNet ?? 0),
-          icon: 'account_balance_wallet',
-          tone: 'neutral',
-        },
+        { key: 'payslips', label: 'My payslips', value: s?.payslipCount ?? 0, icon: 'receipt_long', tone: 'info' },
+        { key: 'gross', label: 'YTD gross', value: this.payroll.formatMoney(s?.ytdGross ?? 0, cur), icon: 'trending_up', tone: 'success' },
+        { key: 'net', label: 'YTD net', value: this.payroll.formatMoney(s?.ytdNet ?? 0, cur), icon: 'account_balance_wallet', tone: 'neutral' },
       ];
     }
 
@@ -84,38 +77,53 @@ export class PayrollOverviewPageComponent implements OnInit {
       (s?.runsByStatus?.['PROCESSING'] ?? 0);
 
     return [
-      {
-        key: 'runs',
-        label: 'Payroll runs',
-        value: totalRuns,
-        icon: 'payments',
-        tone: 'info',
-      },
-      {
-        key: 'paid',
-        label: 'Paid runs',
-        value: s?.paidRuns ?? 0,
-        icon: 'check_circle',
-        tone: 'success',
-      },
-      {
-        key: 'net',
-        label: 'YTD net pay',
-        value: this.payroll.formatMoney(s?.ytdNet ?? 0),
-        icon: 'account_balance_wallet',
-        tone: 'warning',
-      },
-      {
-        key: 'employees',
-        label: 'On payroll',
-        value: s?.activeSalaryStructures ?? 0,
-        icon: 'groups',
-        tone: 'neutral',
-      },
+      { key: 'runs', label: 'Payroll runs', value: totalRuns, icon: 'payments', tone: 'info' },
+      { key: 'paid', label: 'Paid runs', value: s?.paidRuns ?? 0, icon: 'check_circle', tone: 'success' },
+      { key: 'net', label: 'YTD net pay', value: this.payroll.formatMoney(s?.ytdNet ?? 0, cur), icon: 'account_balance_wallet', tone: 'warning' },
+      { key: 'employees', label: 'On payroll', value: s?.activeSalaryStructures ?? 0, icon: 'groups', tone: 'neutral' },
     ];
   });
 
+  /** Latest six runs, newest first (for the table). */
   readonly recentMonths = computed(() => [...(this.companySummary()?.months ?? [])].reverse().slice(0, 6));
+
+  /** Same runs oldest to newest, for the chart. */
+  readonly chartMonths = computed(() =>
+    [...(this.companySummary()?.months ?? [])]
+      .sort((a, b) => a.month - b.month)
+      .map((m) => ({ month: m.month, grossPay: m.grossPay ?? 0, netPay: m.netPay ?? 0 })),
+  );
+
+  readonly chartBuild = computed(() => {
+    const months = this.chartMonths();
+    const currency = this.currency();
+    return (theme: Parameters<typeof costOption>[2]) => costOption(months, currency, theme);
+  });
+
+  /** Year to date: how each unit of gross pay is split between employees, tax and other deductions. */
+  readonly split = computed(() => {
+    const s = this.companySummary();
+    const gross = s?.ytdGross ?? 0;
+    if (!s || gross <= 0) {
+      return [];
+    }
+    const tax = s.ytdTax ?? 0;
+    const net = s.ytdNet ?? 0;
+    const other = Math.max(0, gross - net - tax);
+    const row = (key: string, label: string, amount: number, color: string) => ({
+      key,
+      label,
+      amount,
+      color,
+      percent: (amount / gross) * 100,
+    });
+    return [
+      row('net', 'Paid to employees', net, 'var(--zh-success)'),
+      row('tax', 'Tax withheld', tax, 'var(--zh-warning)'),
+      row('other', 'Other deductions', other, 'var(--zh-secondary)'),
+    ].filter((r) => r.amount > 0);
+  });
+
   readonly recentPayslips = computed(() => this.mySummary()?.recentPayslips ?? []);
 
   ngOnInit(): void {
@@ -149,8 +157,7 @@ export class PayrollOverviewPageComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err: { error?: { message?: string }; message?: string }) => {
-        const message =
-          err?.error?.message || err?.message || 'Unable to load payroll overview.';
+        const message = err?.error?.message || err?.message || 'Unable to load payroll overview.';
         if (/employee profile/i.test(message)) {
           this.isEmployeeView.set(true);
           this.mySummary.set({
@@ -208,15 +215,13 @@ export class PayrollOverviewPageComponent implements OnInit {
     return `payroll-status-pill payroll-status-pill--${key}`;
   }
 
+  /** "PAID" -> "Paid", "ON_HOLD" -> "On hold". */
   statusLabel(status: string): string {
-    return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const text = status.replace(/_/g, ' ').toLowerCase();
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
-  runTitle(run: { title: string; month: number; year?: number }): string {
-    return run.title || `${this.payroll.monthLabel(run.month)} ${run.year ?? this.year}`;
-  }
-
-  formatMoney(amount: number, currency = 'USD'): string {
+  formatMoney(amount: number, currency = this.currency()): string {
     return this.payroll.formatMoney(amount, currency);
   }
 

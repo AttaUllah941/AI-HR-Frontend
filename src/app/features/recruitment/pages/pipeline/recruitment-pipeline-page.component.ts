@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import {
   ApplicationStatus,
@@ -19,6 +20,7 @@ import { OrganizationSectionHeaderComponent } from '../../../organization/compon
 import { ApplicationFormDialogComponent } from '../../dialogs/application-form-dialog.component';
 import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { formatRelative } from '../../../../core/utils/date-format';
 
 const STAGE_ORDER: ApplicationStatus[] = [
   'APPLIED',
@@ -46,6 +48,7 @@ const NEXT_STATUS: Partial<Record<ApplicationStatus, ApplicationStatus>> = {
     MatFormFieldModule,
     MatSelectModule,
     MatIconModule,
+    MatTooltipModule,
     EmptyStateComponent,
     OrganizationSectionHeaderComponent,
     TableSkeletonComponent,
@@ -171,6 +174,57 @@ export class RecruitmentPipelinePageComponent implements OnInit {
 
   jobTitle(app: JobApplication): string {
     return app.jobOpening?.title ?? 'Job';
+  }
+
+  /** Rejected and withdrawn applications sit in narrower, quieter columns at the end of the board. */
+  isClosed(status: ApplicationStatus): boolean {
+    return status === 'REJECTED' || status === 'WITHDRAWN';
+  }
+
+  stageColor(status: ApplicationStatus): string {
+    switch (status) {
+      case 'SCREENING':
+        return 'var(--zh-secondary)';
+      case 'INTERVIEW':
+        return 'var(--zh-primary)';
+      case 'OFFER':
+        return 'var(--zh-warning)';
+      case 'HIRED':
+        return 'var(--zh-success)';
+      case 'REJECTED':
+        return 'var(--zh-destructive)';
+      default:
+        return 'var(--zh-muted-foreground)';
+    }
+  }
+
+  nextLabel(app: JobApplication): string {
+    const next = NEXT_STATUS[app.status];
+    return next ? this.statusLabel(next) : '';
+  }
+
+  initials(app: JobApplication): string {
+    const c = app.candidate;
+    return c ? `${c.firstName.charAt(0)}${c.lastName.charAt(0)}`.toUpperCase() : '?';
+  }
+
+  /** Same person, same colour: one of eight hues derived from the candidate id. */
+  avatarHue(app: JobApplication): number {
+    const hues = [25, 70, 150, 190, 230, 265, 305, 345];
+    let hash = 0;
+    for (const ch of app.candidateId || app.id) {
+      hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+    }
+    return hues[hash % hues.length]!;
+  }
+
+  score(app: JobApplication): number | null {
+    return app.candidate?.screeningScore ?? null;
+  }
+
+  /** "3 days ago": how long the application has been in its current stage. */
+  since(app: JobApplication): string {
+    return formatRelative(app.stageChangedAt || app.appliedAt, '');
   }
 
   statusLabel(status: ApplicationStatus): string {

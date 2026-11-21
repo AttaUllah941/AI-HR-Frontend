@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { filter, Subscription, forkJoin } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +17,7 @@ import {
 } from '../../../../core/services/notifications.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
+import { NotificationStreamService } from '../../../../core/services/notification-stream.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
@@ -47,6 +49,8 @@ export class NotificationsInboxPageComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly confirm = inject(ConfirmDialogService);
   private readonly dialog = inject(MatDialog);
+  private readonly stream = inject(NotificationStreamService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly items = signal<NotificationItem[]>([]);
   readonly summary = signal<NotificationsSummary | null>(null);
@@ -79,10 +83,16 @@ export class NotificationsInboxPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.reload();
+    // Live: a new notification refreshes the list in place (no spinner, keeps filters and page).
+    this.stream.changes$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.reload(true));
   }
 
-  reload(): void {
-    this.loading.set(true);
+  reload(quiet = false): void {
+    if (!quiet) {
+      this.loading.set(true);
+    }
     this.error.set(null);
     this.notifications.getSummary().subscribe({
       next: (summary) => this.summary.set(summary),
@@ -105,6 +115,9 @@ export class NotificationsInboxPageComponent implements OnInit {
           this.loading.set(false);
         },
         error: (err: { error?: { message?: string }; message?: string }) => {
+          if (quiet) {
+            return; // keep what is on screen; the next tick or reload will retry
+          }
           this.error.set(
             err?.error?.message || err?.message || 'Unable to load notifications.',
           );

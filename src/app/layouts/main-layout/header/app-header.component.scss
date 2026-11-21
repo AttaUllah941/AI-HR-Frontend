@@ -4,7 +4,7 @@
   z-index: 20;
   min-height: var(--zh-header-height);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(16rem, 28rem) minmax(0, 1fr);
+  grid-template-columns: minmax(max-content, 1fr) minmax(14rem, 28rem) minmax(max-content, 1fr);
   align-items: center;
   gap: 1rem;
   padding: 0.65rem 1.35rem;
@@ -129,5 +129,33 @@
 
   .topbar__greeting {
     font-size: 0.92rem;
+  }
+}
+
+/* Phones: keep menu, title, company, bell and avatar on one line without overflowing. */
+@media (max-width: 640px) {
+  .topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .topbar__left {
+    min-width: 0;
+    gap: 0.25rem;
+  }
+
+  .topbar__greeting {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topbar__right {
+    gap: 0.1rem;
+  }
+
+  .company-chip {
+    padding: 0 0.5rem !important;
   }
 }

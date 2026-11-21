@@ -21,6 +21,37 @@
   box-shadow: var(--zh-shadow-sm) !important;
 }
 
+// Icon + label inside a tab link: Material wraps projected content in .mdc-tab__text-label,
+// so that wrapper (not the link) has to lay them out. Used by every module's tab bar.
+.mat-mdc-tab-link .mdc-tab__text-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+// Slide toggles: a clear handle in both states (the default tokens leave the off state a blank pill).
+.mat-mdc-slide-toggle {
+  --mat-slide-toggle-selected-track-color: var(--zh-primary);
+  --mat-slide-toggle-selected-hover-track-color: var(--zh-primary);
+  --mat-slide-toggle-selected-focus-track-color: var(--zh-primary);
+  --mat-slide-toggle-selected-pressed-track-color: var(--zh-primary);
+  --mat-slide-toggle-selected-handle-color: var(--zh-primary-foreground);
+  --mat-slide-toggle-selected-hover-handle-color: var(--zh-primary-foreground);
+  --mat-slide-toggle-selected-focus-handle-color: var(--zh-primary-foreground);
+  --mat-slide-toggle-selected-pressed-handle-color: var(--zh-primary-foreground);
+  --mat-slide-toggle-unselected-track-color: color-mix(in oklab, var(--zh-muted-foreground) 30%, var(--zh-card));
+  --mat-slide-toggle-unselected-hover-track-color: color-mix(in oklab, var(--zh-muted-foreground) 38%, var(--zh-card));
+  --mat-slide-toggle-unselected-focus-track-color: color-mix(in oklab, var(--zh-muted-foreground) 38%, var(--zh-card));
+  --mat-slide-toggle-unselected-pressed-track-color: color-mix(in oklab, var(--zh-muted-foreground) 44%, var(--zh-card));
+  --mat-slide-toggle-unselected-handle-color: var(--zh-card);
+  --mat-slide-toggle-unselected-hover-handle-color: var(--zh-card);
+  --mat-slide-toggle-unselected-focus-handle-color: var(--zh-card);
+  --mat-slide-toggle-unselected-pressed-handle-color: var(--zh-card);
+  --mat-slide-toggle-track-outline-color: transparent;
+  --mat-slide-toggle-selected-icon-color: var(--zh-primary);
+  --mat-slide-toggle-unselected-icon-color: var(--zh-muted-foreground);
+}
+
 .mat-mdc-snack-bar-container {
   --mdc-snackbar-container-shape: calc(var(--zh-radius) - 2px);
 }

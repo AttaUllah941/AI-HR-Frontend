@@ -1,0 +1,68 @@
+<div class="cd" [class.cd--out]="isOut">
+  <button mat-icon-button type="button" class="cd__close" mat-dialog-close aria-label="Close">
+    <mat-icon aria-hidden="true">close</mat-icon>
+  </button>
+
+  <header class="cd__head">
+    <span class="cd__icon" aria-hidden="true"><mat-icon>{{ icon }}</mat-icon></span>
+    <h2 mat-dialog-title class="cd__title">{{ title }}</h2>
+    <p class="cd__subtitle">{{ subtitle }}</p>
+  </header>
+
+  <mat-dialog-content class="cd__body">
+    <div class="cd__clock" role="timer" aria-live="off">
+      <div class="cd__time">
+        <span class="cd__digits">{{ time() }}</span>
+        <span class="cd__meridiem">{{ meridiem() }}</span>
+      </div>
+      <p class="cd__date">{{ dateLine() }}</p>
+    </div>
+
+    @if (isOut && data.checkInAt) {
+      <dl class="cd__summary">
+        <div>
+          <dt>Checked in</dt>
+          <dd>{{ checkedInAt }}</dd>
+        </div>
+        <div>
+          <dt>Time worked</dt>
+          <dd>{{ worked() ?? '—' }}</dd>
+        </div>
+      </dl>
+    }
+
+    <div class="cd__field">
+      <div class="cd__label-row">
+        <label for="clock-note">Add a note <span>(optional)</span></label>
+        <span class="cd__count" [class.cd__count--full]="note.value.length >= noteMax">
+          {{ note.value.length }}/{{ noteMax }}
+        </span>
+      </div>
+      <textarea
+        id="clock-note"
+        class="cd__textarea"
+        rows="3"
+        [formControl]="note"
+        [maxlength]="noteMax"
+        placeholder="e.g. Working from the client site"></textarea>
+      <div class="cd__chips" role="group" aria-label="Quick notes">
+        @for (s of suggestions; track s) {
+          <button type="button" class="cd__chip" (click)="useSuggestion(s)">{{ s }}</button>
+        }
+      </div>
+    </div>
+
+    <p class="cd__fineprint">
+      <mat-icon aria-hidden="true">lock</mat-icon>
+      Your time and network address are recorded with this entry.
+    </p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="cd__actions">
+    <button mat-stroked-button type="button" mat-dialog-close>Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="confirm()" cdkFocusInitial>
+      <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+      {{ confirmLabel }}
+    </button>
+  </mat-dialog-actions>
+</div>

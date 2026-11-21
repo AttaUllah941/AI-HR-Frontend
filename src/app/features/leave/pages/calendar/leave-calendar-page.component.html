@@ -6,14 +6,26 @@
 />
 
 <div class="leave-calendar-nav">
+  <h2 class="leave-calendar-nav__title">{{ monthLabel() }}</h2>
+  <button mat-stroked-button type="button" class="leave-calendar-nav__today" (click)="goToday()">Today</button>
   <button mat-icon-button type="button" aria-label="Previous month" (click)="prevMonth()">
     <mat-icon>chevron_left</mat-icon>
   </button>
-  <h2 class="leave-calendar-nav__title">{{ monthLabel() }}</h2>
   <button mat-icon-button type="button" aria-label="Next month" (click)="nextMonth()">
     <mat-icon>chevron_right</mat-icon>
   </button>
 </div>
+
+@if (legend().length > 0) {
+  <ul class="leave-calendar-legend" aria-label="Legend">
+    @for (type of legend(); track type.id) {
+      <li><span class="leave-calendar-legend__swatch" [style.--ev]="type.color"></span>{{ type.name }}</li>
+    }
+    <li class="leave-calendar-legend__sep" aria-hidden="true"></li>
+    <li><span class="leave-calendar-legend__swatch"></span>Approved</li>
+    <li><span class="leave-calendar-legend__swatch leave-calendar-legend__swatch--pending"></span>Pending</li>
+  </ul>
+}
 
 <div class="leave-table-card" [class.is-refetching]="loading() && events().length > 0" [attr.aria-busy]="loading()">
   @if (loading() && events().length === 0) {
@@ -36,6 +48,7 @@
           class="leave-calendar-day"
           role="gridcell"
           [class.leave-calendar-day--muted]="!cell.inMonth"
+          [class.leave-calendar-day--weekend]="cell.inMonth && (cell.date.getDay() === 0 || cell.date.getDay() === 6)"
           [class.leave-calendar-day--today]="cell.isToday"
         >
           <span class="leave-calendar-day__num">{{ cell.date.getDate() }}</span>
@@ -43,7 +56,8 @@
             @for (event of cell.events.slice(0, 3); track event.id) {
               <span
                 class="leave-calendar-event"
-                [style.background]="event.color || '#3b82f6'"
+                [class.leave-calendar-event--pending]="event.status === 'PENDING'"
+                [style.--ev]="event.color || 'var(--zh-primary)'"
                 [attr.title]="
                   (event.employeeName || '') +
                   ' · ' +

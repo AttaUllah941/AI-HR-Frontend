@@ -7,9 +7,9 @@
   <p class="payroll-dialog-subtitle">Employee payroll lines for this run.</p>
 
   @if (loading()) {
-    <div class="payroll-table-state">
-      <mat-spinner diameter="28" />
-      <span>Loading entries…</span>
+    <div role="status">
+      <span class="sr-only">Loading entries…</span>
+      <app-table-skeleton [rows]="6" [cols]="5" />
     </div>
   } @else if (error()) {
     <div class="payroll-table-state payroll-table-state--error">

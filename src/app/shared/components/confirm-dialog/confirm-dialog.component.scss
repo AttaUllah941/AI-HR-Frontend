@@ -7,7 +7,7 @@
   place-items: center;
   width: 2.75rem;
   height: 2.75rem;
-  margin-bottom: 0.35rem;
+  margin: 1.5rem 1.5rem 0.5rem;
   border-radius: 999px;
   background: var(--zh-primary-soft);
   color: var(--zh-primary);
@@ -19,6 +19,20 @@
   }
 }
 
+// Material's "warn" colour isn't part of this theme, so the destructive button is coloured explicitly.
+.confirm-dialog--destructive button[mat-flat-button] {
+  --mdc-filled-button-container-color: var(--zh-destructive);
+  --mdc-filled-button-label-text-color: var(--zh-destructive-foreground);
+  --mat-button-filled-container-color: var(--zh-destructive);
+  --mat-button-filled-label-text-color: var(--zh-destructive-foreground);
+  background-color: var(--zh-destructive);
+  color: var(--zh-destructive-foreground);
+
+  &:hover {
+    background-color: color-mix(in oklab, var(--zh-destructive) 88%, black);
+  }
+}
+
 .confirm-dialog--destructive .confirm-dialog__icon {
   background: color-mix(in oklab, var(--zh-destructive) 12%, white);
   color: var(--zh-destructive-text);
@@ -26,7 +40,7 @@
 
 h2 {
   margin: 0;
-  padding: 0;
+  padding: 0 1.5rem;
   font-size: 1.125rem;
   font-weight: 600;
   letter-spacing: -0.01em;

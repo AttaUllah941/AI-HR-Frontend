@@ -41,8 +41,8 @@
           <tr>
             <th scope="col">Role</th>
             <th scope="col">Type</th>
-            <th scope="col">Openings</th>
-            <th scope="col">Applications</th>
+            <th scope="col" class="recruitment-table__num">Openings</th>
+            <th scope="col" class="recruitment-table__num">Applications</th>
             <th scope="col">Status</th>
             <th scope="col" class="recruitment-table__actions-col">
               <span class="sr-only">Actions</span>
@@ -58,9 +58,9 @@
                   <span>{{ item.code }} · {{ item.location || 'Remote / unspecified' }}</span>
                 </div>
               </td>
-              <td data-label="Type">{{ statusLabel(item.employmentType) }}</td>
-              <td data-label="Openings">{{ item.openings }}</td>
-              <td data-label="Applications">{{ applicationCount(item) }}</td>
+              <td data-label="Type"><span class="rc-chip">{{ statusLabel(item.employmentType) }}</span></td>
+              <td data-label="Openings" class="recruitment-table__num">{{ item.openings }}</td>
+              <td data-label="Applications" class="recruitment-table__num">{{ applicationCount(item) }}</td>
               <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="recruitment-status-pill__dot" aria-hidden="true"></span>

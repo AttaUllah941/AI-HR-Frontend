@@ -29,56 +29,98 @@
               <mat-icon aria-hidden="true">{{ card.icon }}</mat-icon>
             </span>
           </div>
-          <p class="leave-kpi-card__label">{{ card.label }}</p>
-          <strong class="leave-kpi-card__value">{{ card.value }}</strong>
+          <div>
+            <p class="leave-kpi-card__label">{{ card.label }}</p>
+            <strong class="leave-kpi-card__value">{{ card.value }}</strong>
+          </div>
         </mat-card>
       }
     </div>
 
-    <div>
-      <h3 class="leave-overview-heading">My balances</h3>
-      @if ((summary()?.balances ?? []).length === 0) {
-        <app-empty-state
-          title="No balances yet"
-          message="Your leave balances will appear here once entitlements are assigned."
-          icon="account_balance_wallet"
-        />
-      } @else {
-        <div class="leave-balance-list" role="list" aria-label="My leave balances">
-          @for (balance of summary()!.balances; track balance.id) {
-            <div class="leave-balance-card" role="listitem">
-              <div class="leave-balance-card__left">
-                <span
-                  class="leave-balance-card__swatch"
-                  [style.background]="balance.leaveType?.color || '#3b82f6'"
-                  aria-hidden="true"
-                ></span>
-                <div class="leave-balance-card__meta">
+    <div class="lo-grid">
+      <section class="lo-balances" aria-labelledby="lo-balances-title">
+        <h3 id="lo-balances-title" class="leave-overview-heading">My balances</h3>
+        @if ((summary()?.balances ?? []).length === 0) {
+          <app-empty-state
+            title="No balances yet"
+            message="Your leave balances will appear here once entitlements are assigned."
+            icon="account_balance_wallet"
+          />
+        } @else {
+          <div class="lo-balance-grid" role="list" aria-label="My leave balances">
+            @for (balance of summary()!.balances; track balance.id) {
+              <article class="lo-balance" role="listitem" [style.--ev]="balance.leaveType?.color || 'var(--zh-primary)'">
+                <header class="lo-balance__head">
+                  <span class="lo-balance__swatch" aria-hidden="true"></span>
                   <strong>{{ balance.leaveType?.name || 'Leave type' }}</strong>
-                  <span>{{ balance.leaveType?.code }}</span>
-                </div>
-              </div>
-              <div class="leave-balance-card__stats">
-                <div>
-                  <span>Entitled</span>
-                  <strong>{{ balance.entitled }}</strong>
-                </div>
-                <div>
-                  <span>Used</span>
-                  <strong>{{ balance.used }}</strong>
-                </div>
-                <div>
-                  <span>Pending</span>
-                  <strong>{{ balance.pending }}</strong>
-                </div>
-                <div>
-                  <span>Available</span>
+                  <span class="lo-balance__code">{{ balance.leaveType?.code }}</span>
+                </header>
+
+                <p class="lo-balance__available" [class]="'lo-balance__available lo-balance__available--' + tone(balance)">
                   <strong>{{ available(balance) }}</strong>
+                  <span>of {{ total(balance) }} days left</span>
+                </p>
+
+                <div
+                  class="lo-meter"
+                  role="progressbar"
+                  aria-label="Leave used"
+                  aria-valuemin="0"
+                  [attr.aria-valuemax]="total(balance)"
+                  [attr.aria-valuenow]="balance.used"
+                >
+                  <span class="lo-meter__used" [style.width.%]="usedPercent(balance)"></span>
+                  <span class="lo-meter__pending" [style.width.%]="pendingPercent(balance)"></span>
                 </div>
-              </div>
-            </div>
+
+                <dl class="lo-balance__facts">
+                  <div>
+                    <dt>Used</dt>
+                    <dd>{{ balance.used }}</dd>
+                  </div>
+                  <div>
+                    <dt>Pending</dt>
+                    <dd>{{ balance.pending }}</dd>
+                  </div>
+                  @if (balance.carriedForward > 0) {
+                    <div>
+                      <dt>Carried over</dt>
+                      <dd>{{ balance.carriedForward }}</dd>
+                    </div>
+                  }
+                </dl>
+              </article>
+            }
+          </div>
+        }
+      </section>
+
+      @if (summary()?.employeeId) {
+        <section class="lo-recent" aria-labelledby="lo-recent-title">
+          <div class="lo-recent__head">
+            <h3 id="lo-recent-title" class="leave-overview-heading">Recent requests</h3>
+            <a routerLink="/leave/requests" class="lo-recent__all">View all</a>
+          </div>
+          @if (recent().length === 0) {
+            <p class="lo-recent__empty">
+              <mat-icon aria-hidden="true">event_available</mat-icon>
+              No leave requests yet this year.
+            </p>
+          } @else {
+            <ul class="lo-recent__list">
+              @for (item of recent(); track item.id) {
+                <li [style.--ev]="item.leaveType?.color || 'var(--zh-primary)'">
+                  <span class="lo-recent__bar" aria-hidden="true"></span>
+                  <div class="lo-recent__text">
+                    <strong>{{ item.leaveType?.name || 'Leave' }}</strong>
+                    <span>{{ dateRange(item) }} · {{ item.days }} {{ item.days === 1 ? 'day' : 'days' }}</span>
+                  </div>
+                  <span [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+                </li>
+              }
+            </ul>
           }
-        </div>
+        </section>
       }
     </div>
   </section>

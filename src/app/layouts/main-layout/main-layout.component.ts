@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -79,7 +80,11 @@ export class MainLayoutComponent implements OnInit {
   readonly mobileOpen = signal(false);
   readonly breadcrumbs = signal<BreadcrumbItem[]>([{ label: 'Home', route: '/dashboard' }]);
   readonly companyName = signal(environment.appName);
-  readonly greetingMessage = signal(`${timeOfDayGreeting()} 👋`);
+  /** "Good afternoon, Ahmed" (name from the signed-in user). */
+  readonly greetingMessage = computed(() => {
+    const name = this.auth.user()?.firstName?.trim();
+    return name ? `${timeOfDayGreeting()}, ${name}` : timeOfDayGreeting();
+  });
   readonly pageTitle = signal<string | null>(null);
   readonly showBreadcrumbs = signal(false);
 
@@ -128,19 +133,25 @@ export class MainLayoutComponent implements OnInit {
 
   private shouldShowBreadcrumbs(url: string): boolean {
     const path = url.split('?')[0];
-    if (path.startsWith('/dashboard')) {
-      return false;
-    }
-    if (path === '/employees') {
-      return false;
-    }
-    if (path.startsWith('/attendance')) {
-      return false;
-    }
-    if (path.startsWith('/leave')) {
-      return false;
-    }
-    return true;
+    // Every module below renders its own breadcrumb (and page header) in its shell, so showing the
+    // layout's as well gave two stacked breadcrumbs, the first ending in a raw URL slug like "jobs".
+    const OWN_BREADCRUMB = [
+      '/dashboard',
+      '/employees',
+      '/attendance',
+      '/leave',
+      '/recruitment',
+      '/payroll',
+      '/performance',
+      '/organization',
+      '/reports',
+      '/settings',
+      '/files',
+      '/notifications',
+      '/profile',
+      '/ai',
+    ];
+    return !OWN_BREADCRUMB.some((prefix) => path === prefix || path.startsWith(prefix + '/'));
   }
 
   private updatePageTitle(url: string): void {

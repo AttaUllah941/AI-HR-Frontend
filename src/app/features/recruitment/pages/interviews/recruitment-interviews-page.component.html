@@ -62,10 +62,13 @@
         <tbody>
           @for (item of items(); track item.id) {
             <tr class="recruitment-table__row">
-              <td data-label="When">{{ formatWhen(item.scheduledAt) }}</td>
+              <td data-label="When">
+                <strong>{{ whenDate(item.scheduledAt) }}</strong>
+                <span class="rc-sub">{{ whenTime(item.scheduledAt) }}</span>
+              </td>
               <td data-label="Candidate">{{ candidateName(item) }}</td>
               <td data-label="Job">{{ jobTitle(item) }}</td>
-              <td data-label="Type">{{ statusLabel(item.type) }}</td>
+              <td data-label="Type"><span class="rc-chip">{{ statusLabel(item.type) }}</span></td>
               <td data-label="Interviewer">{{ interviewerName(item) }}</td>
               <td data-label="Status">
                 <span [class]="statusClass(item.status)">

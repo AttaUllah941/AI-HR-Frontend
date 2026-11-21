@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -21,7 +21,7 @@ import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard
     ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
-    MatCheckboxModule,
+    MatSlideToggleModule,
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,

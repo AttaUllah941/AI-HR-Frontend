@@ -23,7 +23,7 @@ import {
 
 import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
-import { KpiCardSkeletonComponent } from '../../../../shared/skeleton/kpi-card-skeleton.component';
+import { SkeletonComponent } from '../../../../shared/skeleton/skeleton.component';
 @Component({
   selector: 'app-dashboard-home',
   standalone: true,
@@ -40,7 +40,7 @@ import { KpiCardSkeletonComponent } from '../../../../shared/skeleton/kpi-card-s
     DashboardClockCardComponent,
     ChartSkeletonComponent,
     ErrorStateComponent,
-    KpiCardSkeletonComponent,
+    SkeletonComponent,
   ],
   templateUrl: './dashboard-home.component.html',
   styleUrl: './dashboard-home.component.scss',
@@ -49,19 +49,22 @@ import { KpiCardSkeletonComponent } from '../../../../shared/skeleton/kpi-card-s
 export class DashboardHomeComponent implements OnInit {
   private readonly dashboard = inject(DashboardService);
 
-  protected readonly kpiPlaceholders = [0, 1, 2, 3];
+  protected readonly kpiPlaceholders = [0, 1, 2, 3, 4, 5, 6, 7];
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly summary = signal<DashboardSummary | null>(null);
 
-  readonly iconStyles: Record<string, { bg: string; color: string }> = {
-    primary: { bg: '#eff6ff', color: '#3b82f6' },
-    secondary: { bg: '#f5f3ff', color: '#8b5cf6' },
-    success: { bg: '#ecfdf5', color: '#22c55e' },
-    warning: { bg: '#fffbeb', color: '#f59e0b' },
-    danger: { bg: '#fef2f2', color: '#ef4444' },
-    info: { bg: '#ecfeff', color: '#06b6d4' },
-  };
+  /** KPI icon colours come from the design tokens (soft tinted background + solid icon), so they work in dark mode. */
+  readonly iconStyles: Record<string, { bg: string; color: string }> = Object.fromEntries(
+    Object.entries({
+      primary: 'var(--zh-primary)',
+      secondary: 'oklch(62% 0.2 300)',
+      success: 'var(--zh-success)',
+      warning: 'var(--zh-warning)',
+      danger: 'var(--zh-destructive)',
+      info: 'oklch(70% 0.12 210)',
+    }).map(([tone, color]) => [tone, { bg: `color-mix(in oklab, ${color} 15%, transparent)`, color }]),
+  );
 
   ngOnInit(): void {
     this.load();

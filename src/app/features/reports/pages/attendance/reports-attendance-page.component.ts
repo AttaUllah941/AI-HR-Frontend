@@ -19,6 +19,7 @@ import { ReportsBarChartComponent } from '../../components/reports-bar-chart.com
 import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
 import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
 import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
+import { DateFieldComponent } from '../../../../shared/components/date-field/date-field.component';
 import { Subscription } from 'rxjs';
 
 function isoDate(d: Date): string {
@@ -36,6 +37,7 @@ function defaultRange(): { from: string; to: string } {
   selector: 'app-reports-attendance-page',
   standalone: true,
   imports: [
+    DateFieldComponent,
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,

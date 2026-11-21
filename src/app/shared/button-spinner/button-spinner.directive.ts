@@ -1,21 +1,14 @@
-import {
-  Directive,
-  ElementRef,
-  Renderer2,
-  booleanAttribute,
-  effect,
-  inject,
-  input,
-} from '@angular/core';
+import { Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
 
 /**
- * Inline spinner for action buttons. While `appButtonSpinner` is true the button shows a
- * spinner, is marked `aria-busy`/`aria-disabled`, and swallows clicks (including implicit
- * form submits), so double submits are impossible without removing it from the tab order.
+ * Pending state for action buttons. While `appButtonSpinner` is true the button shows a
+ * skeleton-style shimmer (global `.app-btn-pending` styles), is marked `aria-busy`/`aria-disabled`,
+ * and swallows clicks (including implicit form submits), so double submits are impossible without
+ * removing it from the tab order. Nothing is added to the button, so its size does not change.
  *
  *   <button mat-flat-button [appButtonSpinner]="saving()">Save</button>
  *
- * Spinner styling lives in global styles (`.app-btn-spinner`).
+ * (The selector keeps its old name so existing templates need no change.)
  */
 @Directive({
   selector: '[appButtonSpinner]',
@@ -28,23 +21,12 @@ import {
 })
 export class ButtonSpinnerDirective {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private readonly renderer = inject(Renderer2);
-  private spinner: HTMLElement | null = null;
 
   readonly pending = input(false, { alias: 'appButtonSpinner', transform: booleanAttribute });
 
   constructor() {
     // Capturing listener on the target runs before handlers bound by the template or other directives.
     this.host.addEventListener('click', this.blockWhilePending, true);
-
-    effect((onCleanup) => {
-      if (this.pending()) {
-        this.attachSpinner();
-      } else {
-        this.detachSpinner();
-      }
-      onCleanup(() => this.detachSpinner());
-    });
   }
 
   private readonly blockWhilePending = (event: Event): void => {
@@ -53,24 +35,4 @@ export class ButtonSpinnerDirective {
       event.stopImmediatePropagation();
     }
   };
-
-  private attachSpinner(): void {
-    if (this.spinner) {
-      return;
-    }
-    const spinner = this.renderer.createElement('span') as HTMLElement;
-    this.renderer.addClass(spinner, 'app-btn-spinner');
-    this.renderer.setAttribute(spinner, 'role', 'status');
-    this.renderer.setAttribute(spinner, 'aria-live', 'polite');
-    this.renderer.setAttribute(spinner, 'aria-label', 'Working');
-    this.renderer.insertBefore(this.host, spinner, this.host.firstChild);
-    this.spinner = spinner;
-  }
-
-  private detachSpinner(): void {
-    if (this.spinner) {
-      this.renderer.removeChild(this.host, this.spinner);
-      this.spinner = null;
-    }
-  }
 }

@@ -20,6 +20,7 @@ import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skelet
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { OvertimeFormDialogComponent } from '../../dialogs/overtime-form-dialog.component';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
+import { formatDate as formatDateValue } from '../../../../core/utils/date-format';
 
 const STATUS_OPTIONS: Array<{ value: OvertimeStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -159,11 +160,7 @@ export class AttendanceOvertimePageComponent implements OnInit {
   }
 
   formatDate(value: string): string {
-    return new Date(value).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    return formatDateValue(value);
   }
 
   formatHours(minutes: number): string {

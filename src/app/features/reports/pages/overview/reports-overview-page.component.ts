@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -19,12 +18,13 @@ import { ReportsBarChartComponent } from '../../components/reports-bar-chart.com
 import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
 import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
 import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
+import { AppDatePipe } from '../../../../shared/pipes/app-date.pipe';
 
 @Component({
   selector: 'app-reports-overview-page',
   standalone: true,
   imports: [
-    DatePipe,
+    AppDatePipe,
     RouterLink,
     MatButtonModule,
     MatCardModule,

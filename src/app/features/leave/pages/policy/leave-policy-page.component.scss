@@ -2,6 +2,38 @@
   display: block;
 }
 
+.lp-rule {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--zh-border);
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+
+    strong {
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+
+    span {
+      font-size: 0.8125rem;
+      line-height: 1.45;
+      color: var(--zh-muted-foreground);
+    }
+  }
+}
+
+mat-form-field {
+  width: 100%;
+  margin-top: 1.1rem;
+}
+
 .save-spinner {
   display: inline-block;
   margin-right: 0.35rem;

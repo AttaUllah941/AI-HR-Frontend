@@ -34,15 +34,9 @@
         <input matInput formControlName="currency" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Effective from</mat-label>
-        <input matInput type="date" formControlName="effectiveFrom" />
-      </mat-form-field>
+      <app-date-field label="Effective from" formControlName="effectiveFrom" />
 
-      <mat-form-field appearance="outline">
-        <mat-label>Effective to</mat-label>
-        <input matInput type="date" formControlName="effectiveTo" />
-      </mat-form-field>
+      <app-date-field label="Effective to" formControlName="effectiveTo" />
 
       <mat-form-field appearance="outline">
         <mat-label>Bank name</mat-label>

@@ -156,6 +156,11 @@ export class RecruitmentCandidatesPageComponent implements OnInit {
       });
   }
 
+  /** Colour band for a 0-100 screening score. */
+  scoreTone(score: number): 'high' | 'mid' | 'low' {
+    return score >= 80 ? 'high' : score >= 60 ? 'mid' : 'low';
+  }
+
   setMenuItem(item: Candidate): void {
     this.menuItem.set(item);
   }

@@ -47,7 +47,7 @@
             <th scope="col">Name</th>
             <th scope="col">Kind</th>
             <th scope="col">Calculation</th>
-            <th scope="col">Default</th>
+            <th scope="col" class="payroll-table__num">Default</th>
             <th scope="col">Status</th>
             <th scope="col" class="payroll-table__actions-col"><span class="sr-only">Actions</span></th>
           </tr>
@@ -61,14 +61,14 @@
                   <span>{{ item.code }}</span>
                 </div>
               </td>
-              <td data-label="Kind">{{ kindLabel(item.kind) }}</td>
+              <td data-label="Kind"><span [class]="'pc-chip pc-chip--' + item.kind.toLowerCase()">{{ kindLabel(item.kind) }}</span></td>
               <td data-label="Calculation">{{ calcLabel(item.calcType) }}</td>
-              <td data-label="Default">
-                {{
-                  item.calcType === 'PERCENT_OF_BASIC'
-                    ? item.defaultValue + '%'
-                    : item.defaultValue
-                }}
+              <td data-label="Default" class="payroll-table__num">
+                @if (item.defaultValue) {
+                  {{ item.calcType === 'PERCENT_OF_BASIC' ? item.defaultValue + '%' : item.defaultValue }}
+                } @else {
+                  <span class="pc-muted" title="Set per employee on the salary structure">Per employee</span>
+                }
               </td>
               <td data-label="Status">
                 <span
