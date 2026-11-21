@@ -83,8 +83,9 @@ const FUNNEL_WIDTHS = [100, 78, 58, 40, 24];
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 2rem;
+      gap: 1rem 2rem;
       flex-wrap: wrap;
+      overflow: hidden;
     }
     .chart__plot--funnel {
       display: flex;
@@ -108,7 +109,7 @@ const FUNNEL_WIDTHS = [100, 78, 58, 40, 24];
     .donut__legend {
       display: flex;
       flex-direction: column;
-      gap: 0.7rem;
+      gap: 0.5rem;
       width: 8rem;
     }
     .donut__row {
