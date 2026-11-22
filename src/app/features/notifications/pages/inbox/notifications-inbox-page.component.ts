@@ -1,13 +1,12 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { filter, Subscription, forkJoin } from 'rxjs';
+import { catchError, filter, Subscription, forkJoin, of } from 'rxjs';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   NOTIFICATION_CATEGORIES,
@@ -18,10 +17,13 @@ import {
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { NotificationStreamService } from '../../../../core/services/notification-stream.service';
+import { LeaveRequest, LeaveService } from '../../../../core/services/leave.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { formatDate, formatDateTime } from '../../../../core/utils/date-format';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { SendNotificationDialogComponent } from '../../dialogs/send-notification-dialog.component';
+import { CATEGORY_ICONS, CATEGORY_TONES } from '../../notification-categories';
 import { optimistic } from '../../../../core/utils/optimistic';
 
 @Component({
@@ -31,8 +33,6 @@ import { optimistic } from '../../../../core/utils/optimistic';
     ReactiveFormsModule,
     MatButtonModule,
     MatCheckboxModule,
-    MatFormFieldModule,
-    MatSelectModule,
     MatIconModule,
     MatTooltipModule,
     EmptyStateComponent,
@@ -49,6 +49,8 @@ export class NotificationsInboxPageComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly confirm = inject(ConfirmDialogService);
   private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
+  private readonly leave = inject(LeaveService);
   private readonly stream = inject(NotificationStreamService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -69,17 +71,33 @@ export class NotificationsInboxPageComponent implements OnInit {
 
   readonly unreadCount = computed(() => this.summary()?.unreadCount ?? 0);
 
+  /** One chip per category; the unread count shows on the ones that have any. */
   readonly categoryChips = computed(() => {
     const unread = this.summary()?.unreadByCategory ?? {};
-    return this.categories
-      .map((category) => ({
-        category,
-        label: this.notifications.categoryLabel(category),
-        unread: unread[category] ?? 0,
-      }))
-      .filter((row) => row.unread > 0)
-      .slice(0, 4);
+    return this.categories.map((category) => ({
+      category,
+      label: this.notifications.categoryLabel(category),
+      unread: unread[category] ?? 0,
+    }));
   });
+
+  /** Items bucketed by day (Today, Yesterday, then the date), in the order the API returned them. */
+  readonly groups = computed(() => {
+    const out: Array<{ label: string; items: NotificationItem[] }> = [];
+    for (const item of this.items()) {
+      const label = this.dayLabel(item.createdAt);
+      const last = out[out.length - 1];
+      if (last && last.label === label) {
+        last.items.push(item);
+      } else {
+        out.push({ label, items: [item] });
+      }
+    }
+    return out;
+  });
+
+  readonly rangeStart = computed(() => (this.total() === 0 ? 0 : (this.page() - 1) * this.pageSize + 1));
+  readonly rangeEnd = computed(() => Math.min(this.total(), this.page() * this.pageSize));
 
   ngOnInit(): void {
     this.reload();
@@ -110,6 +128,7 @@ export class NotificationsInboxPageComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.items.set(res.items);
+          this.loadLeaveStates(res.items);
           this.total.set(res.pagination.total);
           this.totalPages.set(res.pagination.totalPages);
           this.loading.set(false);
@@ -302,5 +321,166 @@ export class NotificationsInboxPageComponent implements OnInit {
 
   relativeTime(iso: string): string {
     return this.notifications.relativeTime(iso);
+  }
+
+  // —— Approve / reject leave straight from its notification ——
+
+  /** Live state of the leave request behind each "awaiting review" notification (null = could not be loaded). */
+  readonly leaveStates = signal<Record<string, LeaveRequest | null>>({});
+
+  private readonly canReviewLeave = this.auth.hasPermission('leave:approve');
+
+  leaveRequestIdOf(item: NotificationItem): string | null {
+    if (item.category !== 'LEAVE' || item.title !== 'Leave request awaiting review') {
+      return null;
+    }
+    const data = item.data;
+    if (data && typeof data === 'object' && 'leaveRequestId' in data) {
+      const id = (data as { leaveRequestId?: unknown }).leaveRequestId;
+      return typeof id === 'string' ? id : null;
+    }
+    return null;
+  }
+
+  /** The leave request a notification is about, once its current state is known. */
+  leaveOf(item: NotificationItem): LeaveRequest | null {
+    const id = this.leaveRequestIdOf(item);
+    return id ? (this.leaveStates()[id] ?? null) : null;
+  }
+
+  /** Approve/Reject buttons: only while the request is pending and the server says this user may review it. */
+  canActOn(item: NotificationItem): boolean {
+    const request = this.leaveOf(item);
+    return !!request && request.status === 'PENDING' && request.canReview === true;
+  }
+
+  /** Someone already decided (or it was withdrawn): show the outcome instead of buttons. */
+  decisionOf(item: NotificationItem): string | null {
+    const request = this.leaveOf(item);
+    if (!request || request.status === 'PENDING') {
+      return null;
+    }
+    return request.status.charAt(0) + request.status.slice(1).toLowerCase();
+  }
+
+  private loadLeaveStates(items: NotificationItem[]): void {
+    if (!this.canReviewLeave) {
+      return;
+    }
+    const ids = [...new Set(items.map((n) => this.leaveRequestIdOf(n)).filter((id): id is string => !!id))];
+    if (ids.length === 0) {
+      return;
+    }
+    forkJoin(
+      ids.map((id) => this.leave.getRequest(id).pipe(catchError(() => of<LeaveRequest | null>(null)))),
+    ).subscribe((requests) => {
+      this.leaveStates.update((current) => {
+        const next = { ...current };
+        ids.forEach((id, i) => {
+          next[id] = requests[i] ?? null;
+        });
+        return next;
+      });
+    });
+  }
+
+  approveLeave(item: NotificationItem): void {
+    this.review(item, 'approve');
+  }
+
+  rejectLeave(item: NotificationItem): void {
+    this.review(item, 'reject');
+  }
+
+  private review(item: NotificationItem, action: 'approve' | 'reject'): void {
+    const request = this.leaveOf(item);
+    const id = this.leaveRequestIdOf(item);
+    if (!request || !id) {
+      return;
+    }
+    const approving = action === 'approve';
+    const who = `${request.employee?.firstName ?? 'the employee'} ${request.employee?.lastName ?? ''}`.trim();
+    this.confirm
+      .open({
+        title: approving ? 'Approve leave' : 'Reject leave',
+        message: approving
+          ? `Approve leave for ${who} (${request.days} day(s))?`
+          : `Reject leave for ${who} (${request.days} day(s))?`,
+        confirmLabel: approving ? 'Approve' : 'Reject',
+        destructive: !approving,
+        icon: approving ? 'check_circle' : 'cancel',
+      })
+      .pipe(filter((confirmed) => confirmed === true))
+      .subscribe(() => {
+        const request$ = approving ? this.leave.approveRequest(id) : this.leave.rejectRequest(id);
+        request$.subscribe({
+          next: (updated) => {
+            this.leaveStates.update((current) => ({ ...current, [id]: { ...request, ...updated, canReview: false } }));
+            this.toast.success(approving ? 'Leave approved' : 'Leave rejected');
+            if (!this.isRead(item)) {
+              this.markRead(item);
+            }
+          },
+          error: (err: { error?: { message?: string } }) => {
+            this.toast.error(err?.error?.message || (approving ? 'Unable to approve leave' : 'Unable to reject leave'));
+            this.loadLeaveStates(this.items()); // someone may have decided it already: refresh the state
+          },
+        });
+      });
+  }
+
+  setUnreadOnly(value: boolean): void {
+    if (this.unreadOnly.value === value) {
+      return;
+    }
+    this.unreadOnly.setValue(value);
+    this.applyFilters();
+  }
+
+  iconFor(category: string): string {
+    return CATEGORY_ICONS[category] ?? 'notifications';
+  }
+
+  toneFor(category: string): string {
+    return CATEGORY_TONES[category] ?? 'neutral';
+  }
+
+  /** In-app route the notification points to (set by the server in `data.link`), if it is a safe local path. */
+  linkOf(item: NotificationItem): string | null {
+    const data = item.data;
+    if (data && typeof data === 'object' && 'link' in data) {
+      const link = (data as { link?: unknown }).link;
+      if (typeof link === 'string' && link.startsWith('/') && !link.startsWith('//')) {
+        return link;
+      }
+    }
+    return null;
+  }
+
+  /** Clicking a notification marks it read and, when it has a destination, goes there. */
+  open(item: NotificationItem): void {
+    if (!this.isRead(item)) {
+      this.markRead(item);
+    }
+    const link = this.linkOf(item);
+    if (link) {
+      void this.router.navigateByUrl(link);
+    }
+  }
+
+  fullTime(iso: string): string {
+    return formatDateTime(iso);
+  }
+
+  private dayLabel(iso: string): string {
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) {
+      return 'Earlier';
+    }
+    const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const days = Math.round((startOfDay(new Date()) - startOfDay(date)) / 86_400_000);
+    if (days <= 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    return formatDate(date);
   }
 }

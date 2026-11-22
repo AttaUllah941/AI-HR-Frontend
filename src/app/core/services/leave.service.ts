@@ -80,6 +80,8 @@ export interface LeaveRequest {
   reviewedBy: string | null;
   reviewedAt: string | null;
   reviewNotes: string | null;
+  /** Server verdict: the signed-in user may approve or reject this request right now. */
+  canReview?: boolean;
   createdAt?: string;
   updatedAt?: string;
   employee?: LeaveEmployeeRef;

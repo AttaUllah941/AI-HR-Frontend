@@ -135,7 +135,7 @@
             <span>Cancel</span>
           </button>
         }
-        @if (item.status === 'PENDING' && canApprove) {
+        @if (item.canReview) {
           <button mat-menu-item type="button" (click)="approve(item)">
             <mat-icon>check_circle</mat-icon>
             <span>Approve</span>

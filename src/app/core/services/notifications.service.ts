@@ -335,7 +335,11 @@ export class NotificationsService {
     if (!category) {
       return '—';
     }
-    return category.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    if (category === 'AI') {
+      return 'AI';
+    }
+    const text = category.replace(/_/g, ' ').toLowerCase();
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   channelLabel(channel: string | null | undefined): string {

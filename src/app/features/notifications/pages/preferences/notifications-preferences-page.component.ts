@@ -1,8 +1,13 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import {
+  CATEGORY_DESCRIPTIONS,
+  CATEGORY_ICONS,
+  CATEGORY_TONES,
+} from '../../notification-categories';
 import {
   NotificationPreference,
   NotificationsService,
@@ -19,8 +24,8 @@ import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard
   imports: [
     ReactiveFormsModule,
     MatButtonModule,
-    MatCheckboxModule,
     MatIconModule,
+    MatSlideToggleModule,
     EmptyStateComponent,
     OrganizationStatusComponent,
     ButtonSpinnerDirective,
@@ -95,6 +100,18 @@ export class NotificationsPreferencesPageComponent implements OnInit, HasUnsaved
 
   categoryLabel(category: string): string {
     return this.notifications.categoryLabel(category);
+  }
+
+  iconFor(category: string): string {
+    return CATEGORY_ICONS[category] ?? 'notifications';
+  }
+
+  toneFor(category: string): string {
+    return CATEGORY_TONES[category] ?? 'neutral';
+  }
+
+  describe(category: string): string {
+    return CATEGORY_DESCRIPTIONS[category] ?? '';
   }
 
   private createPrefGroup(pref: NotificationPreference): FormGroup {
