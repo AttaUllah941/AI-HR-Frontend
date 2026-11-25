@@ -4,9 +4,9 @@
 
 .leave-overview-heading {
   margin: 0 0 0.25rem;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .leave-overview-sub {
@@ -18,7 +18,7 @@
 .lo-grid {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: 1rem;
+  gap: 1.25rem;
   margin-top: 1.25rem;
   align-items: start;
 }
@@ -32,13 +32,13 @@
 .lo-balance-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .lo-balance {
-  padding: 1rem 1.15rem 1.1rem;
+  padding: 1.15rem 1.35rem 1.25rem;
   border: 1px solid var(--zh-border);
-  border-radius: var(--zh-radius);
+  border-radius: 1.25rem;
   background: var(--zh-card);
   box-shadow: var(--zh-shadow-sm);
   border-top: 3px solid var(--ev);
@@ -64,8 +64,8 @@
 
   &__code {
     margin-left: auto;
-    padding: 0.1rem 0.45rem;
-    border-radius: 6px;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.45rem;
     background: var(--zh-muted);
     color: var(--zh-muted-foreground);
     font-size: 0.6875rem;
@@ -81,8 +81,9 @@
 
     strong {
       font-family: var(--zh-font-display);
-      font-size: 2rem;
+      font-size: 2.1rem;
       font-weight: 700;
+      letter-spacing: -0.02em;
       line-height: 1;
       font-variant-numeric: tabular-nums;
     }
@@ -126,7 +127,7 @@
 // Used = solid colour, pending = the same colour as diagonal stripes, the rest is the empty track.
 .lo-meter {
   display: flex;
-  height: 0.5rem;
+  height: 0.6rem;
   border-radius: 999px;
   background: var(--zh-muted);
   overflow: hidden;
@@ -146,9 +147,9 @@
 
 // —— Recent requests ——
 .lo-recent {
-  padding: 1.1rem 1.15rem;
+  padding: 1.25rem 1.35rem;
   border: 1px solid var(--zh-border);
-  border-radius: var(--zh-radius);
+  border-radius: 1.25rem;
   background: var(--zh-card);
   box-shadow: var(--zh-shadow-sm);
 
@@ -159,7 +160,7 @@
   }
 
   &__all {
-    color: var(--zh-primary);
+    color: var(--zh-primary-text);
     font-size: 0.8125rem;
     font-weight: 600;
 

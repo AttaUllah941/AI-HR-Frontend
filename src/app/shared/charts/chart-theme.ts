@@ -22,8 +22,9 @@ export interface ChartTheme {
   palette: string[];
 }
 
-const LIGHT_PALETTE = ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#64748b'];
-const DARK_PALETTE = ['#818cf8', '#22d3ee', '#34d399', '#fbbf24', '#f472b6', '#a78bfa', '#f87171', '#94a3b8'];
+// Brand orange first, then colours that stay distinguishable from it (and from each other).
+const LIGHT_PALETTE = ['#f26a1b', '#0ea5e9', '#16a34a', '#eab308', '#8b5cf6', '#ec4899', '#14b8a6', '#64748b'];
+const DARK_PALETTE = ['#fb8a4c', '#38bdf8', '#4ade80', '#facc15', '#a78bfa', '#f472b6', '#2dd4bf', '#94a3b8'];
 
 let probe: CanvasRenderingContext2D | null = null;
 
@@ -112,7 +113,7 @@ export function tooltipStyle(t: ChartTheme) {
     borderWidth: 1,
     padding: [10, 12],
     textStyle: { color: t.text, fontSize: 12, fontFamily: t.fontFamily },
-    extraCssText: 'box-shadow: 0 8px 24px rgb(15 23 42 / 0.12); border-radius: 10px;',
+    extraCssText: 'box-shadow: 0 8px 24px rgb(40 30 20 / 0.12); border-radius: 12px;',
   };
 }
 

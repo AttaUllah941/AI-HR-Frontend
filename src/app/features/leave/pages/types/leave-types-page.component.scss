@@ -5,17 +5,17 @@
 .lt-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .lt-card {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  padding: 1rem 1.15rem 1.1rem;
+  padding: 1.15rem 1.35rem 1.25rem;
   border: 1px solid var(--zh-border);
   border-top: 3px solid var(--ev);
-  border-radius: var(--zh-radius);
+  border-radius: 1.25rem;
   background: var(--zh-card);
   box-shadow: var(--zh-shadow-sm);
 
@@ -46,14 +46,15 @@
     flex: 1;
 
     strong {
-      font-size: 1rem;
-      font-weight: 700;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
     }
   }
 
   &__code {
-    padding: 0.1rem 0.45rem;
-    border-radius: 6px;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.45rem;
     background: var(--zh-muted);
     color: var(--zh-muted-foreground);
     font-size: 0.6875rem;
@@ -67,6 +68,11 @@
 
     button {
       color: var(--zh-muted-foreground);
+
+      &:hover {
+        background: var(--zh-muted);
+        color: var(--zh-foreground);
+      }
     }
   }
 
@@ -109,7 +115,7 @@
 }
 
 .lt-chip {
-  padding: 0.15rem 0.6rem;
+  padding: 0.2rem 0.7rem;
   border-radius: 999px;
   background: var(--zh-muted);
   color: var(--zh-muted-foreground);

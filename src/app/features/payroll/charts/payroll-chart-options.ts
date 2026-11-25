@@ -91,8 +91,8 @@ export function costOption(months: MonthPoint[], currency: string, t: ChartTheme
       minInterval: Math.max(1, Math.floor(ceiling / 10)),
     },
     series: [
-      { name: 'Gross pay', type: 'bar', barMaxWidth: 26, itemStyle: { color: t.palette[0], borderRadius: [4, 4, 0, 0] }, emphasis: { focus: 'series' }, data: months.map((m) => m.grossPay) },
-      { name: 'Net pay', type: 'bar', barMaxWidth: 26, itemStyle: { color: t.success, borderRadius: [4, 4, 0, 0] }, emphasis: { focus: 'series' }, data: months.map((m) => m.netPay) },
+      { name: 'Gross pay', type: 'bar', barMaxWidth: 26, itemStyle: { color: t.palette[0], borderRadius: [6, 6, 0, 0] }, emphasis: { focus: 'series' }, data: months.map((m) => m.grossPay) },
+      { name: 'Net pay', type: 'bar', barMaxWidth: 26, itemStyle: { color: t.success, borderRadius: [6, 6, 0, 0] }, emphasis: { focus: 'series' }, data: months.map((m) => m.netPay) },
     ],
   };
 }

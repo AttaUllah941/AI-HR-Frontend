@@ -4,9 +4,9 @@
 
 .recruitment-overview-heading {
   margin: 0 0 0.25rem;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .recruitment-overview-sub {
@@ -18,15 +18,15 @@
 .ro-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
 }
 
 .ro-card {
   grid-column: span 5;
-  padding: 1.1rem 1.25rem 1rem;
+  padding: 1.35rem 1.5rem 1.25rem;
   border: 1px solid var(--zh-border);
-  border-radius: var(--zh-radius);
+  border-radius: 1.25rem;
   background: var(--zh-card);
   box-shadow: var(--zh-shadow-sm);
 
@@ -39,9 +39,9 @@
 
     h3 {
       margin: 0;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 0;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
     }
 
     p {
@@ -62,7 +62,7 @@
 
 .ro-link {
   flex-shrink: 0;
-  color: var(--zh-primary);
+  color: var(--zh-primary-text);
   font-size: 0.8125rem;
   font-weight: 600;
 
@@ -95,7 +95,7 @@
 
 .ro-funnel__track {
   display: block;
-  height: 0.7rem;
+  height: 0.8rem;
   border-radius: 999px;
   background: var(--zh-muted);
   overflow: hidden;
@@ -182,9 +182,9 @@
   align-items: center;
   min-width: 3.6rem;
   padding: 0.3rem 0.4rem;
-  border-radius: 0.6rem;
+  border-radius: 0.8rem;
   background: var(--zh-primary-soft);
-  color: var(--zh-primary);
+  color: var(--zh-primary-text);
   line-height: 1.25;
 
   strong {

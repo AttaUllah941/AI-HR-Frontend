@@ -135,9 +135,9 @@ export function reviewsOption(counts: Record<string, number> | undefined, t: Cha
     series: [
       {
         type: 'bar',
-        barMaxWidth: 16,
+        barMaxWidth: 18,
         label: { show: true, position: 'right', color: t.text, fontSize: 12, fontFamily: t.fontFamily },
-        data: data.map((d) => ({ value: d.value, itemStyle: { color: d.color, borderRadius: [0, 4, 4, 0] } })),
+        data: data.map((d) => ({ value: d.value, itemStyle: { color: d.color, borderRadius: [0, 9, 9, 0] } })),
       },
     ],
   };

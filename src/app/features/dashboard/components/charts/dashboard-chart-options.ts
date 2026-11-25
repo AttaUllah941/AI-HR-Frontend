@@ -69,7 +69,11 @@ export function attendanceOption(points: DashboardAttendancePoint[], t: ChartThe
   const bars = toAttendanceBars(points);
   const tallest = Math.max(1, ...bars.map((b) => b.onTime + b.late + b.absent));
   const ceiling = axisMax(tallest);
-  const barWidth = 26;
+  const barWidth = 18;
+  // Soft green / sage / pale yellow stack, as in the reference chart.
+  const colors = t.dark
+    ? { onTime: '#3fae74', late: '#e8de8a', absent: '#7fa89d' }
+    : { onTime: '#2e8b57', late: '#e8e49b', absent: '#8fb5ab' };
 
   const stackSeries = (name: string, key: 'onTime' | 'late' | 'absent', color: string) => ({
     name,
@@ -77,7 +81,7 @@ export function attendanceOption(points: DashboardAttendancePoint[], t: ChartThe
     stack: 'attendance',
     barWidth,
     barGap: '-100%',
-    itemStyle: { color, borderColor: t.surface, borderWidth: 1, borderRadius: 3 },
+    itemStyle: { color, borderRadius: 2 },
     emphasis: { focus: 'series' },
     data: bars.map((b) => (b.weekend ? null : b[key])),
   });
@@ -106,9 +110,9 @@ export function attendanceOption(points: DashboardAttendancePoint[], t: ChartThe
         const heading = `<strong>${esc(bar.caption.replace('\n', ', '))}</strong>`;
         if (bar.weekend) return `${heading}<br/><span style="color:${t.muted}">Weekend, no attendance expected</span>`;
         const rows = [
-          ['On time', bar.onTime, t.success],
-          ['Late', bar.late, t.warning],
-          ['Absent', bar.absent, t.danger],
+          ['On time', bar.onTime, colors.onTime],
+          ['Late', bar.late, colors.late],
+          ['Absent', bar.absent, colors.absent],
         ]
           .map(
             ([name, n, c]) =>
@@ -122,6 +126,7 @@ export function attendanceOption(points: DashboardAttendancePoint[], t: ChartThe
       type: 'category',
       data: bars.map((b) => b.caption),
       ...axisBase(t),
+      axisLine: { show: true, lineStyle: { color: t.grid } },
       axisLabel: {
         ...axisBase(t).axisLabel,
         lineHeight: 15,
@@ -135,7 +140,7 @@ export function attendanceOption(points: DashboardAttendancePoint[], t: ChartThe
       max: ceiling,
       minInterval: 1,
       ...axisBase(t),
-      splitLine: { lineStyle: { color: t.grid, type: 'dashed' } },
+      splitLine: { lineStyle: { color: t.grid, type: 'dashed', opacity: 0.8 } },
     },
     series: [
       {
@@ -144,13 +149,26 @@ export function attendanceOption(points: DashboardAttendancePoint[], t: ChartThe
         barWidth,
         barGap: '-100%',
         silent: true,
-        itemStyle: { color: t.grid, opacity: 0.45, borderRadius: 3 },
+        // Hatched track, like the reference's empty columns.
+        itemStyle: {
+          color: t.grid,
+          opacity: 0.55,
+          borderRadius: 6,
+          decal: {
+            symbol: 'rect',
+            symbolSize: 1,
+            rotation: Math.PI / 4,
+            dashArrayX: [1, 0],
+            dashArrayY: [2, 4],
+            color: t.muted,
+          },
+        },
         data: bars.map((b) => (b.weekend ? ceiling : null)),
         z: 1,
       },
-      stackSeries('On time', 'onTime', t.success),
-      stackSeries('Late', 'late', t.warning),
-      stackSeries('Absent', 'absent', t.danger),
+      stackSeries('On time', 'onTime', colors.onTime),
+      stackSeries('Absent', 'absent', colors.absent),
+      stackSeries('Late', 'late', colors.late),
     ],
   };
 }
@@ -269,14 +287,14 @@ export function hiringOption(stages: DashboardFunnelStage[], t: ChartTheme): Opt
     series: [
       {
         type: 'bar',
-        barWidth: 16,
+        barWidth: 18,
         showBackground: true,
-        backgroundStyle: { color: t.grid, opacity: 0.35, borderRadius: 8 },
+        backgroundStyle: { color: t.grid, opacity: 0.35, borderRadius: 9 },
         label: { show: true, position: 'right', color: t.text, fontWeight: 600, fontSize: 12, fontFamily: t.fontFamily },
         data: stages.map((s, i) => ({
           name: s.label,
           value: s.value,
-          itemStyle: { color: t.palette[order[i % order.length]!], borderRadius: 8 },
+          itemStyle: { color: t.palette[order[i % order.length]!], borderRadius: 9 },
         })),
       },
     ],
@@ -337,8 +355,8 @@ export function growthOption(points: DashboardGrowthPoint[], t: ChartTheme): Opt
         symbol: 'circle',
         symbolSize: 8,
         // Points stay invisible until hovered, except the latest one which is always marked.
-        itemStyle: { color: t.success, borderColor: t.surface, borderWidth: 2, opacity: 0 },
-        lineStyle: { color: t.success, width: 2.5 },
+        itemStyle: { color: t.primary, borderColor: t.surface, borderWidth: 2, opacity: 0 },
+        lineStyle: { color: t.primary, width: 2.5 },
         areaStyle: {
           color: {
             type: 'linear',
@@ -347,8 +365,8 @@ export function growthOption(points: DashboardGrowthPoint[], t: ChartTheme): Opt
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: withAlpha(t.success, 0.28) },
-              { offset: 1, color: withAlpha(t.success, 0.02) },
+              { offset: 0, color: withAlpha(t.primary, 0.28) },
+              { offset: 1, color: withAlpha(t.primary, 0.02) },
             ],
           },
         },

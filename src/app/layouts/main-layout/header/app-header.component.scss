@@ -10,7 +10,6 @@
   padding: 0.65rem 1.35rem;
   background: color-mix(in oklab, var(--zh-background) 92%, transparent);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--zh-border);
 }
 
 .topbar__left,
@@ -26,9 +25,10 @@
 
 .topbar__greeting {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
+  line-height: 1.25;
   white-space: nowrap;
 }
 
@@ -37,11 +37,15 @@
   align-items: center;
   gap: 0.55rem;
   width: 100%;
-  padding: 0.55rem 0.85rem;
+  padding: 0.6rem 1rem;
   border: 1px solid var(--zh-border);
   border-radius: 999px;
   background: var(--zh-card);
   box-shadow: var(--zh-shadow-sm);
+  &:focus-within {
+    border-color: var(--zh-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--zh-primary) 18%, transparent);
+  }
   mat-icon {
     color: var(--zh-muted-foreground);
     font-size: 1.05rem;
@@ -54,7 +58,7 @@
     width: 100%;
     background: transparent;
     color: var(--zh-foreground);
-    font-size: 0.86rem;
+    font-size: 0.875rem;
   }
 }
 
@@ -128,7 +132,7 @@
   }
 
   .topbar__greeting {
-    font-size: 0.92rem;
+    font-size: 1.15rem;
   }
 }
 

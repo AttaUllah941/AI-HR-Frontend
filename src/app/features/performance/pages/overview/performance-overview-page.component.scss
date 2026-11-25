@@ -4,9 +4,9 @@
 
 .performance-overview-heading {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .performance-overview-sub {
@@ -18,13 +18,13 @@
 .pf-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .pf-card {
-  padding: 1.1rem 1.25rem 1rem;
+  padding: 1.35rem 1.5rem 1.25rem;
   border: 1px solid var(--zh-border);
-  border-radius: var(--zh-radius);
+  border-radius: 1.25rem;
   background: var(--zh-card);
   box-shadow: var(--zh-shadow-sm);
 
@@ -33,9 +33,9 @@
 
     h3 {
       margin: 0;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 0;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
     }
 
     p {
@@ -103,7 +103,7 @@
 
   &__track {
     flex: 1;
-    height: 0.4rem;
+    height: 0.5rem;
     border-radius: 999px;
     background: var(--zh-muted);
     overflow: hidden;
@@ -113,7 +113,7 @@
     display: block;
     height: 100%;
     border-radius: inherit;
-    background: var(--zh-primary);
+    background: var(--zh-primary-gradient);
   }
 
   &__value {

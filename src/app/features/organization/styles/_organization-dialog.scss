@@ -4,12 +4,18 @@
   gap: 0.65rem;
   margin: 0;
   padding: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 
   mat-icon {
-    color: var(--zh-primary);
+    display: grid;
+    place-items: center;
+    box-sizing: content-box;
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    background: var(--zh-primary-soft);
+    color: var(--zh-primary-text);
     font-size: 1.25rem;
     width: 1.25rem;
     height: 1.25rem;
@@ -38,12 +44,22 @@
 }
 
 .org-form-section__title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--zh-muted-foreground);
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--zh-border);
+  }
 }
 
 .org-form-section__grid {
@@ -68,6 +84,8 @@
 
 .org-dialog-actions {
   gap: 0.5rem;
+  padding: 0.85rem 1.5rem 1.25rem !important;
+  border-top: 1px solid var(--zh-border);
 }
 
 .org-dialog-actions__save {

@@ -3,7 +3,7 @@
 .recruitment-page {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .recruitment-action-bar,
@@ -29,12 +29,21 @@
   gap: 0.65rem;
   flex: 1 1 18rem;
   max-width: 22rem;
-  min-height: 2.5rem;
-  padding: 0 0.9rem;
+  min-height: 2.75rem;
+  padding: 0 1.1rem;
   border: 1px solid var(--zh-border);
-  border-radius: 0.65rem;
+  border-radius: 999px;
   background: var(--zh-card);
+  box-shadow: var(--zh-shadow-sm);
   color: var(--zh-muted-foreground);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:focus-within {
+    border-color: var(--zh-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--zh-primary) 18%, transparent);
+  }
 
   mat-icon {
     font-size: 1.1rem;
@@ -64,8 +73,10 @@
 }
 
 .recruitment-action-btn {
-  height: 2.5rem;
-  border-radius: 0.65rem !important;
+  height: 2.75rem;
+  border-radius: 999px !important;
+  border-color: var(--zh-border) !important;
+  background: var(--zh-card);
   font-weight: 500;
 
   mat-icon {
@@ -76,17 +87,18 @@
   }
 
   &--active {
-    border-color: var(--zh-primary) !important;
-    color: var(--zh-primary);
+    border-color: color-mix(in oklab, var(--zh-primary) 45%, var(--zh-border)) !important;
+    color: var(--zh-primary-text);
     background: var(--zh-primary-soft);
   }
 }
 
 .recruitment-add-btn {
-  height: 2.5rem;
-  border-radius: 0.65rem !important;
+  height: 2.75rem;
+  border-radius: 999px !important;
   font-weight: 600;
-  padding-inline: 1rem !important;
+  padding-inline: 1.25rem !important;
+  box-shadow: 0 8px 18px -8px color-mix(in oklab, var(--zh-primary) 65%, transparent) !important;
 
   mat-icon {
     margin-right: 0.15rem;
@@ -100,10 +112,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  padding: 0.9rem 1rem;
+  padding: 1rem 1.25rem;
   border: 1px solid var(--zh-border);
-  border-radius: calc(var(--zh-radius) - 2px);
+  border-radius: 1.25rem;
   background: var(--zh-card);
+  box-shadow: var(--zh-shadow-sm);
 
   .mat-mdc-form-field {
     min-width: 12rem;
@@ -112,9 +125,15 @@
 
 .recruitment-table-card {
   border: 1px solid var(--zh-border);
-  border-radius: calc(var(--zh-radius) - 2px);
+  border-radius: 1.25rem;
   background: var(--zh-card);
+  box-shadow: var(--zh-shadow-sm);
   overflow: hidden;
+  transition: opacity 0.15s ease;
+
+  &.is-refetching {
+    opacity: 0.65;
+  }
 }
 
 .recruitment-table-state {
@@ -131,7 +150,7 @@
       font-size: 2rem;
       width: 2rem;
       height: 2rem;
-      color: var(--zh-danger);
+      color: var(--zh-destructive-text);
     }
 
     p {
@@ -150,22 +169,22 @@
   font-size: 0.875rem;
 
   thead th {
-    padding: 0.85rem 1.25rem;
+    padding: 0.8rem 1.25rem;
     text-align: left;
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--zh-muted-foreground);
     border-bottom: 1px solid var(--zh-border);
     white-space: nowrap;
-    background: color-mix(in srgb, var(--zh-muted) 35%, var(--zh-card));
+    background: color-mix(in oklab, var(--zh-muted) 55%, var(--zh-card));
   }
 
   tbody td,
   tfoot td {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--zh-border);
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--zh-border) 70%, transparent);
     color: var(--zh-foreground);
     vertical-align: middle;
   }
@@ -178,7 +197,7 @@
     transition: background-color 0.15s ease;
 
     &:hover {
-      background: color-mix(in srgb, var(--zh-primary) 4%, var(--zh-card));
+      background: color-mix(in oklab, var(--zh-primary) 4%, var(--zh-card));
     }
   }
 
@@ -218,6 +237,11 @@
 
   &__menu-btn {
     color: var(--zh-muted-foreground);
+
+    &:hover {
+      background: var(--zh-muted);
+      color: var(--zh-foreground);
+    }
   }
 }
 
@@ -225,7 +249,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.2rem 0.65rem;
+  padding: 0.25rem 0.7rem;
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -266,7 +290,7 @@
   &--offer,
   &--on_hold {
     background: color-mix(in oklab, var(--zh-primary) 14%, transparent);
-    color: var(--zh-primary);
+    color: var(--zh-primary-text);
   }
 
   // Negative outcome
@@ -300,24 +324,38 @@
   &__nav {
     display: flex;
     gap: 0.5rem;
+
+    button {
+      height: 2.1rem;
+      padding-inline: 0.8rem;
+      font-size: 0.8125rem;
+    }
   }
 }
 
 .recruitment-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .recruitment-kpi-card {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  padding: 1rem 1.15rem !important;
+  padding: 1.1rem 1.35rem !important;
   border: 1px solid var(--zh-border) !important;
-  border-radius: var(--zh-radius) !important;
+  border-radius: 1.25rem !important;
   background: var(--zh-card) !important;
   box-shadow: var(--zh-shadow-sm) !important;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: color-mix(in oklab, var(--zh-primary) 30%, var(--zh-border)) !important;
+    box-shadow: var(--zh-shadow-md) !important;
+  }
 
   &__header {
     display: flex;
@@ -339,22 +377,22 @@
 
     &--success {
       background: color-mix(in oklab, var(--zh-success) 15%, transparent);
-      color: var(--zh-success);
+      color: var(--zh-success-text);
     }
 
     &--warning {
-      background: color-mix(in oklab, var(--zh-warning) 18%, transparent);
-      color: var(--zh-warning);
+      background: color-mix(in oklab, var(--zh-warning) 20%, transparent);
+      color: var(--zh-warning-text);
     }
 
     &--info {
       background: color-mix(in oklab, var(--zh-primary) 14%, transparent);
-      color: var(--zh-primary);
+      color: var(--zh-primary-text);
     }
 
     &--purple {
-      background: color-mix(in oklab, oklch(62% 0.2 300) 15%, transparent);
-      color: oklch(62% 0.2 300);
+      background: color-mix(in oklab, oklch(62% 0.2 300) 14%, transparent);
+      color: oklch(52% 0.2 300);
     }
 
     &--neutral {
@@ -374,8 +412,9 @@
     display: block;
     margin-top: 0.1rem;
     font-family: var(--zh-font-display);
-    font-size: 1.65rem;
+    font-size: 1.85rem;
     font-weight: 700;
+    letter-spacing: -0.02em;
     line-height: 1.15;
     font-variant-numeric: tabular-nums;
   }
@@ -392,11 +431,21 @@
   align-items: center;
   gap: 0.65rem;
   margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 
   mat-icon {
-    color: var(--zh-primary);
+    display: grid;
+    place-items: center;
+    box-sizing: content-box;
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    background: var(--zh-primary-soft);
+    color: var(--zh-primary-text);
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
   }
 }
 
@@ -427,13 +476,15 @@
 
 .recruitment-dialog-actions {
   gap: 0.5rem;
+  padding: 0.85rem 1.5rem 1.25rem !important;
+  border-top: 1px solid var(--zh-border);
 }
 
 /* ---- Pipeline board: horizontally scrolling stage columns with compact cards ---- */
 .rp-board {
   display: flex;
   align-items: flex-start;
-  gap: 0.85rem;
+  gap: 1rem;
   padding-bottom: 0.75rem;
   overflow-x: auto;
   scroll-snap-type: x proximity;
@@ -448,7 +499,7 @@
   flex-direction: column;
   border: 1px solid var(--zh-border);
   border-top: 3px solid var(--stage);
-  border-radius: var(--zh-radius);
+  border-radius: 1.25rem;
   background: color-mix(in oklab, var(--zh-muted) 55%, var(--zh-card));
   scroll-snap-align: start;
 
@@ -462,11 +513,11 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-    padding: 0.7rem 0.9rem;
+    padding: 0.85rem 1rem;
 
     strong {
-      font-size: 0.8125rem;
-      font-weight: 700;
+      font-size: 0.875rem;
+      font-weight: 600;
     }
   }
 
@@ -487,7 +538,7 @@
     flex-direction: column;
     gap: 0.5rem;
     max-height: 68vh;
-    padding: 0 0.6rem 0.7rem;
+    padding: 0 0.7rem 0.8rem;
     overflow-y: auto;
   }
 
@@ -498,7 +549,7 @@
     font-size: 0.75rem;
     color: var(--zh-muted-foreground);
     border: 1px dashed var(--zh-border);
-    border-radius: 0.6rem;
+    border-radius: 0.85rem;
   }
 }
 
@@ -507,9 +558,9 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: start;
   gap: 0.2rem 0.65rem;
-  padding: 0.65rem 0.7rem;
+  padding: 0.8rem 0.85rem;
   border: 1px solid var(--zh-border);
-  border-radius: 0.65rem;
+  border-radius: 1rem;
   background: var(--zh-card);
   box-shadow: var(--zh-shadow-sm);
   transition:
@@ -577,7 +628,7 @@
       }
 
       &:hover {
-        color: var(--zh-primary);
+        color: var(--zh-primary-text);
       }
 
       &.is-danger:hover {
@@ -614,7 +665,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.15rem 0.6rem;
+  padding: 0.2rem 0.7rem;
   border-radius: 999px;
   background: var(--zh-muted);
   color: var(--zh-muted-foreground);
@@ -649,7 +700,7 @@
   &__bar {
     display: block;
     width: 100%;
-    height: 0.3rem;
+    height: 0.4rem;
     border-radius: 999px;
     background: var(--zh-muted);
     overflow: hidden;
@@ -692,11 +743,11 @@
 }
 
 .recruitment-table thead th {
-  padding: 0.6rem 1rem;
+  padding: 0.75rem 1.25rem;
 }
 
 .recruitment-table tbody td {
-  padding: 0.7rem 1rem;
+  padding: 0.8rem 1.25rem;
 }
 
 .recruitment-table th.recruitment-table__num,

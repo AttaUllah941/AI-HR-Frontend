@@ -36,16 +36,8 @@ const STATUS_OPTIONS: Array<{ value: AttendanceStatus | ''; label: string }> = [
   { value: 'EARLY_LEAVE', label: 'Early leave' },
 ];
 
-const AVATAR_COLORS = [
-  { bg: '#dbeafe', color: '#2563eb' },
-  { bg: '#ccfbf1', color: '#0d9488' },
-  { bg: '#ffedd5', color: '#ea580c' },
-  { bg: '#fee2e2', color: '#dc2626' },
-  { bg: '#dcfce7', color: '#16a34a' },
-  { bg: '#ede9fe', color: '#7c3aed' },
-  { bg: '#fef3c7', color: '#d97706' },
-  { bg: '#e0e7ff', color: '#4f46e5' },
-];
+/** Per-person hues. Lightness follows the theme, so initials stay readable in light and dark mode. */
+const AVATAR_HUES = [250, 180, 55, 25, 150, 300, 85, 265];
 
 @Component({
   selector: 'app-attendance-daily-page',
@@ -222,9 +214,12 @@ export class AttendanceDailyPageComponent implements OnInit {
 
   avatarStyle(item: AttendanceRecord): { background: string; color: string } {
     const seed = item.employeeId || item.id;
-    const index = [...seed].reduce((sum, char) => sum + char.charCodeAt(0), 0) % AVATAR_COLORS.length;
-    const palette = AVATAR_COLORS[index];
-    return { background: palette.bg, color: palette.color };
+    const index = [...seed].reduce((sum, char) => sum + char.charCodeAt(0), 0) % AVATAR_HUES.length;
+    const hue = AVATAR_HUES[index];
+    return {
+      background: `color-mix(in oklab, oklch(66% 0.17 ${hue}) 20%, var(--zh-card))`,
+      color: `color-mix(in oklab, oklch(50% 0.19 ${hue}) 72%, var(--zh-foreground))`,
+    };
   }
 
   readonly formatTime = formatTime;

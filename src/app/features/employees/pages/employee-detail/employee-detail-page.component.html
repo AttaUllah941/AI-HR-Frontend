@@ -17,11 +17,11 @@
         <div class="emp-detail-hero__avatar" aria-hidden="true">{{ initials(emp) }}</div>
         <div>
           <h1>{{ emp.firstName }} {{ emp.lastName }}</h1>
-          <p>
+          <p class="emp-detail-hero__meta">
             <code>{{ emp.employeeCode }}</code>
-            · {{ emp.email }}
+            <span>{{ emp.email }}</span>
             @if (emp.designation) {
-              · {{ emp.designation.name }}
+              <span>{{ emp.designation.name }}</span>
             }
           </p>
         </div>
@@ -37,7 +37,7 @@
       </div>
     </div>
 
-    <mat-tab-group animationDuration="200ms">
+    <mat-tab-group class="emp-tabs" animationDuration="200ms">
       <mat-tab label="Profile">
         <div class="emp-tab-panel">
           <dl class="emp-profile-grid">

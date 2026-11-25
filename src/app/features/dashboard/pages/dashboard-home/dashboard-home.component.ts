@@ -14,6 +14,7 @@ import { AttendanceTrendChartComponent } from '../../components/charts/attendanc
 import { DepartmentDonutChartComponent } from '../../components/charts/department-donut-chart.component';
 import { HiringFunnelChartComponent } from '../../components/charts/hiring-funnel-chart.component';
 import { EmployeeGrowthChartComponent } from '../../components/charts/employee-growth-chart.component';
+import { KpiSparklineComponent } from '../../components/kpi-sparkline/kpi-sparkline.component';
 import { DashboardClockCardComponent } from '../../components/dashboard-clock-card/dashboard-clock-card.component';
 import {
   DashboardKpiTrend,
@@ -38,6 +39,7 @@ import { SkeletonComponent } from '../../../../shared/skeleton/skeleton.componen
     HiringFunnelChartComponent,
     EmployeeGrowthChartComponent,
     DashboardClockCardComponent,
+    KpiSparklineComponent,
     ChartSkeletonComponent,
     ErrorStateComponent,
     SkeletonComponent,
@@ -58,11 +60,12 @@ export class DashboardHomeComponent implements OnInit {
   readonly iconStyles: Record<string, { bg: string; color: string }> = Object.fromEntries(
     Object.entries({
       primary: 'var(--zh-primary)',
-      secondary: 'oklch(62% 0.2 300)',
+      // Brand-led chips like the reference; success / warning / danger keep their meaning.
+      secondary: 'var(--zh-primary)',
       success: 'var(--zh-success)',
       warning: 'var(--zh-warning)',
       danger: 'var(--zh-destructive)',
-      info: 'oklch(70% 0.12 210)',
+      info: 'var(--zh-primary)',
     }).map(([tone, color]) => [tone, { bg: `color-mix(in oklab, ${color} 15%, transparent)`, color }]),
   );
 
@@ -82,6 +85,11 @@ export class DashboardHomeComponent implements OnInit {
       return Number.isInteger(value) ? value.toLocaleString('en-US') : value.toString();
     }
     return value;
+  }
+
+  /** Word values such as "DRAFT" are shown smaller than numbers so they fit the compact card. */
+  isTextValue(value: number | string | null): boolean {
+    return typeof value === 'string' && /[A-Za-z]/.test(value);
   }
 
   hasAttendanceData(data: DashboardSummary): boolean {

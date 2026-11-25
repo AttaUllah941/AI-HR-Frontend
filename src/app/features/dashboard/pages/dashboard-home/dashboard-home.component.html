@@ -24,14 +24,44 @@
         @for (n of kpiPlaceholders; track n) {
           <div class="kpi-card sk-kpi">
             <div class="kpi-card__header">
-              <app-skeleton width="2.5rem" height="2.5rem" style="border-radius: 0.75rem" />
-              <app-skeleton width="3rem" height="1.25rem" style="border-radius: 999px" />
+              <app-skeleton width="1.9rem" height="1.9rem" style="border-radius: 0.6rem" />
+              <app-skeleton width="2.6rem" height="1.1rem" style="border-radius: 999px" />
             </div>
-            <div class="sk-line" style="height: 1.2rem"><app-skeleton width="55%" height="0.8rem" /></div>
-            <div class="sk-line" style="height: 2.1rem"><app-skeleton width="40%" height="1.5rem" /></div>
-            <div class="sk-line" style="height: 1.1rem"><app-skeleton width="35%" height="0.7rem" /></div>
+            <app-skeleton width="60%" height="0.75rem" />
+            <app-skeleton width="35%" height="1.4rem" />
           </div>
         }
+      </section>
+
+      <section class="dashboard-grid">
+        <div class="panel panel--attendance">
+          <div class="sk-panel__head">
+            <app-skeleton width="9rem" height="1rem" />
+            <app-skeleton width="5rem" height="0.75rem" />
+          </div>
+          <app-chart-skeleton [bare]="true" [detailed]="true" variant="bars" height="17rem" />
+        </div>
+        <div class="panel panel--departments">
+          <div class="sk-panel__head">
+            <app-skeleton width="11rem" height="1rem" />
+            <app-skeleton width="6rem" height="0.75rem" />
+          </div>
+          <app-chart-skeleton [bare]="true" [detailed]="true" variant="donut" height="19rem" />
+        </div>
+        <div class="panel panel--funnel">
+          <div class="sk-panel__head">
+            <app-skeleton width="8rem" height="1rem" />
+            <app-skeleton width="5rem" height="0.75rem" />
+          </div>
+          <app-chart-skeleton [bare]="true" [detailed]="true" variant="funnel" height="17rem" />
+        </div>
+        <div class="panel panel--growth">
+          <div class="sk-panel__head">
+            <app-skeleton width="10rem" height="1rem" />
+            <app-skeleton width="4rem" height="0.75rem" />
+          </div>
+          <app-chart-skeleton [bare]="true" [detailed]="true" variant="ascending" height="17rem" />
+        </div>
       </section>
 
       <div class="ai-banner sk-ai">
@@ -46,37 +76,6 @@
         </div>
         <app-skeleton width="8rem" height="0.85rem" />
       </div>
-
-      <section class="dashboard-grid">
-        <div class="panel panel--attendance">
-          <div class="sk-panel__head">
-            <app-skeleton width="9rem" height="1rem" />
-            <app-skeleton width="5rem" height="0.75rem" />
-          </div>
-          <app-chart-skeleton [bare]="true" variant="bars" height="17rem" />
-        </div>
-        <div class="panel panel--departments">
-          <div class="sk-panel__head">
-            <app-skeleton width="11rem" height="1rem" />
-            <app-skeleton width="6rem" height="0.75rem" />
-          </div>
-          <app-chart-skeleton [bare]="true" variant="donut" height="19rem" />
-        </div>
-        <div class="panel panel--funnel">
-          <div class="sk-panel__head">
-            <app-skeleton width="8rem" height="1rem" />
-            <app-skeleton width="5rem" height="0.75rem" />
-          </div>
-          <app-chart-skeleton [bare]="true" variant="funnel" height="17rem" />
-        </div>
-        <div class="panel panel--growth">
-          <div class="sk-panel__head">
-            <app-skeleton width="10rem" height="1rem" />
-            <app-skeleton width="4rem" height="0.75rem" />
-          </div>
-          <app-chart-skeleton [bare]="true" variant="ascending" height="17rem" />
-        </div>
-      </section>
     </div>
   </div>
 } @else if (error()) {
@@ -104,22 +103,110 @@
               {{ card.icon }}
             </mat-icon>
           </div>
-          @if (card.trend) {
-            <div class="kpi-card__trend" [class]="trendClass(card.trend)">
-              @if (trendIcon(card.trend); as icon) {
-                <mat-icon>{{ icon }}</mat-icon>
+          @if (card.trend || card.subValue) {
+            <div class="kpi-card__meta">
+              @if (card.trend) {
+                <div class="kpi-card__trend" [class]="trendClass(card.trend)">
+                  @if (trendIcon(card.trend); as icon) {
+                    <mat-icon>{{ icon }}</mat-icon>
+                  }
+                  <span>{{ card.trend.value }}</span>
+                </div>
               }
-              <span>{{ card.trend.value }}</span>
+              @if (card.subValue) {
+                <span class="kpi-card__sub">{{ card.subValue }}</span>
+              }
             </div>
           }
         </div>
         <p class="kpi-card__label">{{ card.label }}</p>
-        <strong class="kpi-card__value">{{ formatKpiValue(card.value) }}</strong>
-        @if (card.subValue) {
-          <span class="kpi-card__sub">{{ card.subValue }}</span>
-        }
+        <div class="kpi-card__body">
+          <strong class="kpi-card__value" [class.kpi-card__value--text]="isTextValue(card.value)">{{ formatKpiValue(card.value) }}</strong>
+          @if (card.sparkline && card.sparkline.length > 1) {
+            <div class="kpi-card__spark" aria-hidden="true">
+              <app-kpi-sparkline [data]="card.sparkline" [label]="card.label" color="#f26a1b" />
+            </div>
+          }
+        </div>
       </mat-card>
     }
+  </section>
+
+  <section class="dashboard-grid">
+    <mat-card class="panel panel--attendance">
+      <header class="panel__header">
+        <div>
+          <h3>Attendance Trend</h3>
+          <p>{{ data.attendanceTrend.period }}</p>
+        </div>
+      </header>
+      @if (hasAttendanceData(data)) {
+        @defer (on viewport) {
+          <app-attendance-trend-chart [series]="data.attendanceTrend.series" />
+        } @placeholder {
+          <app-chart-skeleton [bare]="true" [detailed]="true" variant="bars" height="17rem" />
+        }
+      } @else {
+        <p class="state-msg state-msg--panel">No attendance recorded for this period yet.</p>
+      }
+    </mat-card>
+
+    <mat-card class="panel panel--departments">
+      <header class="panel__header">
+        <div>
+          <h3>Department Distribution</h3>
+          <p>{{ data.departmentDistribution.total | number }} employees</p>
+        </div>
+      </header>
+      @if (data.departmentDistribution.total > 0) {
+        @defer (on viewport) {
+          <app-department-donut-chart
+            [slices]="data.departmentDistribution.slices"
+            [total]="data.departmentDistribution.total"
+          />
+        } @placeholder {
+          <app-chart-skeleton [bare]="true" [detailed]="true" variant="donut" height="19rem" />
+        }
+      } @else {
+        <p class="state-msg state-msg--panel">No employees assigned to departments yet.</p>
+      }
+    </mat-card>
+
+    <mat-card class="panel panel--funnel">
+      <header class="panel__header">
+        <div>
+          <h3>Hiring Funnel</h3>
+          <p>{{ data.hiringFunnel.period }}</p>
+        </div>
+      </header>
+      @if (hasFunnelData(data)) {
+        @defer (on viewport) {
+          <app-hiring-funnel-chart [stages]="data.hiringFunnel.stages" />
+        } @placeholder {
+          <app-chart-skeleton [bare]="true" [detailed]="true" variant="funnel" height="17rem" />
+        }
+      } @else {
+        <p class="state-msg state-msg--panel">No candidates in the hiring pipeline yet.</p>
+      }
+    </mat-card>
+
+    <mat-card class="panel panel--growth">
+      <header class="panel__header">
+        <div>
+          <h3>Employee Growth</h3>
+          <p>{{ data.employeeGrowth.period }}</p>
+        </div>
+      </header>
+      @if (hasGrowthData(data)) {
+        @defer (on viewport) {
+          <app-employee-growth-chart [points]="data.employeeGrowth.points" />
+        } @placeholder {
+          <app-chart-skeleton [bare]="true" [detailed]="true" variant="ascending" height="17rem" />
+        }
+      } @else {
+        <p class="state-msg state-msg--panel">No employee growth data yet.</p>
+      }
+    </mat-card>
   </section>
 
   @if (data.aiInsights.items.length > 0) {
@@ -148,81 +235,4 @@
       </a>
     </mat-card>
   }
-
-  <section class="dashboard-grid">
-    <mat-card class="panel panel--attendance">
-      <header class="panel__header">
-        <div>
-          <h3>Attendance Trend</h3>
-          <p>{{ data.attendanceTrend.period }}</p>
-        </div>
-      </header>
-      @if (hasAttendanceData(data)) {
-        @defer (on viewport) {
-          <app-attendance-trend-chart [series]="data.attendanceTrend.series" />
-        } @placeholder {
-          <app-chart-skeleton [bare]="true" variant="bars" height="17rem" />
-        }
-      } @else {
-        <p class="state-msg state-msg--panel">No attendance recorded for this period yet.</p>
-      }
-    </mat-card>
-
-    <mat-card class="panel panel--departments">
-      <header class="panel__header">
-        <div>
-          <h3>Department Distribution</h3>
-          <p>{{ data.departmentDistribution.total | number }} employees</p>
-        </div>
-      </header>
-      @if (data.departmentDistribution.total > 0) {
-        @defer (on viewport) {
-          <app-department-donut-chart
-            [slices]="data.departmentDistribution.slices"
-            [total]="data.departmentDistribution.total"
-          />
-        } @placeholder {
-          <app-chart-skeleton [bare]="true" variant="donut" height="19rem" />
-        }
-      } @else {
-        <p class="state-msg state-msg--panel">No employees assigned to departments yet.</p>
-      }
-    </mat-card>
-
-    <mat-card class="panel panel--funnel">
-      <header class="panel__header">
-        <div>
-          <h3>Hiring Funnel</h3>
-          <p>{{ data.hiringFunnel.period }}</p>
-        </div>
-      </header>
-      @if (hasFunnelData(data)) {
-        @defer (on viewport) {
-          <app-hiring-funnel-chart [stages]="data.hiringFunnel.stages" />
-        } @placeholder {
-          <app-chart-skeleton [bare]="true" variant="funnel" height="17rem" />
-        }
-      } @else {
-        <p class="state-msg state-msg--panel">No candidates in the hiring pipeline yet.</p>
-      }
-    </mat-card>
-
-    <mat-card class="panel panel--growth">
-      <header class="panel__header">
-        <div>
-          <h3>Employee Growth</h3>
-          <p>{{ data.employeeGrowth.period }}</p>
-        </div>
-      </header>
-      @if (hasGrowthData(data)) {
-        @defer (on viewport) {
-          <app-employee-growth-chart [points]="data.employeeGrowth.points" />
-        } @placeholder {
-          <app-chart-skeleton [bare]="true" variant="ascending" height="17rem" />
-        }
-      } @else {
-        <p class="state-msg state-msg--panel">No employee growth data yet.</p>
-      }
-    </mat-card>
-  </section>
 }

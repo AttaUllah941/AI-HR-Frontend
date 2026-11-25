@@ -28,7 +28,7 @@
   margin-bottom: 0.75rem;
   border-radius: 999px;
   background: color-mix(in oklab, var(--zh-primary) 14%, transparent);
-  color: var(--zh-primary);
+  color: var(--zh-primary-text);
 
   mat-icon {
     font-size: 1.4rem;
@@ -68,7 +68,7 @@
   margin-bottom: 1rem;
   padding: 1rem 1rem 0.85rem;
   border: 1px solid var(--zh-border);
-  border-radius: var(--zh-radius);
+  border-radius: 1.25rem;
   background: var(--zh-muted);
   text-align: center;
 }

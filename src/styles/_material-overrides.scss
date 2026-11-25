@@ -2,12 +2,17 @@
 
 .mat-mdc-raised-button.mat-primary,
 .mat-mdc-unelevated-button.mat-primary {
-  --mdc-filled-button-container-shape: calc(var(--zh-radius) - 2px);
-  --mdc-protected-button-container-shape: calc(var(--zh-radius) - 2px);
+  --mdc-filled-button-container-shape: 999px;
+  --mdc-protected-button-container-shape: 999px;
+  --mat-button-filled-container-shape: 999px;
+  --mat-button-protected-container-shape: 999px;
+  font-weight: 600;
 }
 
 .mat-mdc-outlined-button {
-  --mdc-outlined-button-container-shape: calc(var(--zh-radius) - 2px);
+  --mdc-outlined-button-container-shape: 999px;
+  --mat-button-outlined-container-shape: 999px;
+  font-weight: 500;
 }
 
 .mat-mdc-form-field {
@@ -50,6 +55,16 @@
   --mat-slide-toggle-track-outline-color: transparent;
   --mat-slide-toggle-selected-icon-color: var(--zh-primary);
   --mat-slide-toggle-unselected-icon-color: var(--zh-muted-foreground);
+}
+
+// Dialogs and menus: larger radius to match the cards.
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: 1.5rem;
+  --mat-dialog-container-shape: 1.5rem;
+}
+
+.mat-mdc-menu-panel {
+  --mat-menu-container-shape: 1rem;
 }
 
 .mat-mdc-snack-bar-container {
