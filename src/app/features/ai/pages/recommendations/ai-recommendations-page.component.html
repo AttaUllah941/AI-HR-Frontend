@@ -31,6 +31,14 @@
       </div>
     </div>
 
+    <p class="ai-notice" role="note">
+      <mat-icon aria-hidden="true">info</mat-icon>
+      <span>
+        Suggestions come from summary company data and can be wrong. Review them before you act on
+        them.
+      </span>
+    </p>
+
     @if (recommendations().length === 0) {
       <app-empty-state
         title="No recommendations yet"

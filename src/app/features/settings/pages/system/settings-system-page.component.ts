@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,8 +8,15 @@ import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SettingsService } from '../../../../core/services/settings.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { TIME_ZONES, localeValidator, timeZoneValidator } from '../../../../shared/forms/validators';
+
+/** Optional http(s) address. Empty is fine. */
+const HTTP_URL = /^$|^https?:\/\/[^\s/$.?#][^\s]*$/i;
+
+type ApiError = { error?: { message?: string }; message?: string };
 
 @Component({
   selector: 'app-settings-system-page',
@@ -28,7 +35,7 @@ import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button
   styleUrl: './settings-system-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SettingsSystemPageComponent implements OnInit {
+export class SettingsSystemPageComponent implements OnInit, HasUnsavedChanges {
   private readonly fb = inject(FormBuilder);
   private readonly settings = inject(SettingsService);
   private readonly auth = inject(AuthService);
@@ -39,16 +46,17 @@ export class SettingsSystemPageComponent implements OnInit {
   readonly savingIntegrations = signal(false);
   readonly error = signal<string | null>(null);
   readonly canUpdate = this.auth.hasPermission('settings:update');
+  readonly timeZones = TIME_ZONES;
 
   readonly systemForm = this.fb.nonNullable.group({
     maintenanceMode: [false],
     allowSelfRegistration: [false],
-    defaultTimezone: ['UTC'],
-    defaultLocale: ['en-US'],
+    defaultTimezone: ['UTC', [Validators.required, timeZoneValidator]],
+    defaultLocale: ['en-US', [Validators.required, localeValidator]],
   });
 
   readonly integrationsForm = this.fb.nonNullable.group({
-    slackWebhookUrl: [''],
+    slackWebhookUrl: ['', Validators.pattern(HTTP_URL)],
     googleWorkspaceDomain: [''],
     microsoftTenantId: [''],
     webhookSigningSecretSet: [false],
@@ -81,9 +89,11 @@ export class SettingsSystemPageComponent implements OnInit {
           this.systemForm.disable();
           this.integrationsForm.disable();
         }
+        // Sign-up is decided by the server, never by this page, so it is always shown read-only.
+        this.systemForm.controls.allowSelfRegistration.disable();
         this.loading.set(false);
       },
-      error: (err: { error?: { message?: string }; message?: string }) => {
+      error: (err: ApiError) => {
         this.error.set(err?.error?.message || err?.message || 'Unable to load system settings.');
         this.loading.set(false);
       },
@@ -92,6 +102,10 @@ export class SettingsSystemPageComponent implements OnInit {
 
   saveSystem(): void {
     if (!this.canUpdate || this.savingSystem()) return;
+    if (this.systemForm.invalid) {
+      this.systemForm.markAllAsTouched();
+      return;
+    }
     this.savingSystem.set(true);
     const raw = this.systemForm.getRawValue();
     this.settings
@@ -103,10 +117,11 @@ export class SettingsSystemPageComponent implements OnInit {
       })
       .subscribe({
         next: () => {
+          this.systemForm.markAsPristine();
           this.toast.success('System settings saved.');
           this.savingSystem.set(false);
         },
-        error: (err: { error?: { message?: string }; message?: string }) => {
+        error: (err: ApiError) => {
           this.toast.error(err?.error?.message || err?.message || 'Unable to save system settings.');
           this.savingSystem.set(false);
         },
@@ -115,6 +130,10 @@ export class SettingsSystemPageComponent implements OnInit {
 
   saveIntegrations(): void {
     if (!this.canUpdate || this.savingIntegrations()) return;
+    if (this.integrationsForm.invalid) {
+      this.integrationsForm.markAllAsTouched();
+      return;
+    }
     this.savingIntegrations.set(true);
     const raw = this.integrationsForm.getRawValue();
     this.settings
@@ -126,13 +145,21 @@ export class SettingsSystemPageComponent implements OnInit {
       })
       .subscribe({
         next: () => {
+          this.integrationsForm.markAsPristine();
           this.toast.success('Integrations saved.');
           this.savingIntegrations.set(false);
         },
-        error: (err: { error?: { message?: string }; message?: string }) => {
+        error: (err: ApiError) => {
           this.toast.error(err?.error?.message || err?.message || 'Unable to save integrations.');
           this.savingIntegrations.set(false);
         },
       });
+  }
+
+  hasUnsavedChanges(): boolean {
+    return (
+      (this.systemForm.dirty && !this.savingSystem()) ||
+      (this.integrationsForm.dirty && !this.savingIntegrations())
+    );
   }
 }

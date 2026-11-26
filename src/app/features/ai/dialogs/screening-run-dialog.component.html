@@ -12,11 +12,26 @@
     <div class="ai-form__grid">
       <mat-form-field appearance="outline" class="ai-form__full">
         <mat-label>Candidate</mat-label>
-        <mat-select formControlName="candidateId">
-          @for (c of candidates(); track c.id) {
-            <mat-option [value]="c.id">{{ candidateLabel(c) }}</mat-option>
+        <input
+          matInput
+          type="text"
+          [formControl]="candidate"
+          [matAutocomplete]="candidateAuto"
+          placeholder="Search by name or email"
+          autocomplete="off"
+        />
+        <mat-autocomplete #candidateAuto="matAutocomplete" [displayWith]="displayPerson">
+          @for (option of candidateOptions(); track option.id) {
+            <mat-option [value]="option">
+              {{ option.name }} <span class="ai-option-detail">{{ option.detail }}</span>
+            </mat-option>
           }
-        </mat-select>
+        </mat-autocomplete>
+        @if (candidate.hasError('required')) {
+          <mat-error>Choose the candidate to screen</mat-error>
+        } @else if (candidate.hasError('notSelected')) {
+          <mat-error>Pick a candidate from the list</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="ai-form__full">
@@ -47,7 +62,7 @@
     color="primary"
     type="submit"
     form="screening-form"
-    [disabled]="form.invalid || saving()"
+    [disabled]="saving()"
     [appButtonSpinner]="saving()">
     
     {{ saving() ? 'Screening…' : 'Run screening' }}

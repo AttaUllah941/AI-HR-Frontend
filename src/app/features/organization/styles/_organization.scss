@@ -202,7 +202,7 @@
       background: var(--zh-primary-soft);
     }
 
-    &[aria-label='Delete']:hover:not([disabled]) {
+    &[aria-label^='Delete']:hover:not([disabled]) {
       color: var(--zh-destructive-text);
       background: color-mix(in oklab, var(--zh-destructive) 10%, var(--zh-card));
     }
@@ -358,5 +358,495 @@
 
   .org-section-header__main {
     width: 100%;
+  }
+}
+
+/* ---- List tables (branches, departments, teams, designations) ---- */
+.org-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.org-toolbar__search {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex: 1 1 16rem;
+  max-width: 24rem;
+  min-height: 2.75rem;
+  padding: 0 1.1rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 999px;
+  background: var(--zh-card);
+  box-shadow: var(--zh-shadow-sm);
+  color: var(--zh-muted-foreground);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:focus-within {
+    border-color: var(--zh-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--zh-primary) 18%, transparent);
+  }
+
+  mat-icon {
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: var(--zh-foreground);
+    outline: none;
+    font-size: 0.875rem;
+
+    &::placeholder {
+      color: var(--zh-muted-foreground);
+    }
+  }
+}
+
+/* Segmented status filter and the density toggle share this look. */
+.org-toolbar__group,
+.org-view-menu__row {
+  display: inline-flex;
+  padding: 0.2rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 999px;
+  background: var(--zh-card);
+
+  button {
+    padding: 0.35rem 0.85rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--zh-muted-foreground);
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--zh-foreground);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--zh-ring);
+      outline-offset: 1px;
+    }
+
+    &.is-on {
+      background: var(--zh-primary-soft);
+      color: var(--zh-primary-text);
+      font-weight: 600;
+    }
+  }
+}
+
+.org-toolbar__clear {
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  background: transparent;
+  color: var(--zh-primary-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.org-toolbar__view {
+  height: 2.75rem;
+  margin-left: auto;
+  border-radius: 999px !important;
+  border-color: var(--zh-border) !important;
+  background: var(--zh-card);
+  font-weight: 500;
+
+  mat-icon {
+    margin-right: 0.25rem;
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+.org-view-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 15rem;
+  padding: 0.75rem 1rem;
+}
+
+.org-view-menu__title {
+  margin: 0.25rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--zh-muted-foreground);
+}
+
+.org-view-menu__row {
+  align-self: flex-start;
+}
+
+.org-view-menu__check {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.2rem 0;
+  font-size: 0.875rem;
+  color: var(--zh-foreground);
+  cursor: pointer;
+}
+
+.org-view-menu__reset {
+  align-self: flex-start;
+  margin-top: 0.4rem;
+  padding: 0.2rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--zh-primary-text);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.org-table-card {
+  border: 1px solid var(--zh-border);
+  border-radius: 1.25rem;
+  background: var(--zh-card);
+  box-shadow: var(--zh-shadow-sm);
+  overflow: hidden;
+}
+
+/* The global `[class$='-table-wrap']` rule makes this scroll with a sticky header. */
+.org-table-wrap {
+  overflow-x: auto;
+}
+
+.org-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  thead th {
+    padding: 0.8rem 1.25rem;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--zh-muted-foreground);
+    border-bottom: 1px solid var(--zh-border);
+    white-space: nowrap;
+    background: color-mix(in oklab, var(--zh-muted) 55%, var(--zh-card));
+  }
+
+  tbody td {
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--zh-border) 70%, transparent);
+    color: var(--zh-foreground);
+    vertical-align: middle;
+  }
+
+  tbody td[data-col='code'],
+  tbody td[data-col='level'],
+  tbody td[data-col='teams'],
+  tbody td[data-col='status'] {
+    white-space: nowrap;
+  }
+
+  tbody td[data-col='teams'] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  tbody tr {
+    transition: background-color 0.12s ease;
+
+    &:hover {
+      background: color-mix(in oklab, var(--zh-primary) 4%, var(--zh-card));
+    }
+
+    &:last-child td {
+      border-bottom: 0;
+    }
+  }
+}
+
+.org-table__name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 11rem;
+
+  strong {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--zh-foreground);
+  }
+
+  span {
+    max-width: 28rem;
+    font-size: 0.8125rem;
+    color: var(--zh-muted-foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.org-table__code {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 0.45rem;
+  background: var(--zh-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--zh-muted-foreground);
+}
+
+.org-table__badge {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--zh-primary-soft);
+  color: var(--zh-primary-text);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.org-table__actions-col {
+  width: 6.5rem;
+  text-align: right;
+  white-space: nowrap;
+
+  button {
+    color: var(--zh-muted-foreground);
+
+    &:hover:not([disabled]) {
+      color: var(--zh-primary-text);
+      background: var(--zh-primary-soft);
+    }
+
+    &.org-table__delete:hover:not([disabled]) {
+      color: var(--zh-destructive-text);
+      background: color-mix(in oklab, var(--zh-destructive) 10%, var(--zh-card));
+    }
+  }
+}
+
+.org-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.15rem 0.25rem;
+  margin: -0.15rem -0.25rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 0.95rem;
+    width: 0.95rem;
+    height: 0.95rem;
+    opacity: 0.45;
+  }
+
+  &:hover {
+    color: var(--zh-foreground);
+
+    mat-icon {
+      opacity: 0.9;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--zh-ring);
+  }
+}
+
+th[aria-sort='ascending'] .org-sort,
+th[aria-sort='descending'] .org-sort {
+  color: var(--zh-primary-text);
+
+  mat-icon {
+    opacity: 1;
+  }
+}
+
+/* Text and a dot, never colour alone. */
+.org-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: var(--zh-muted);
+  color: var(--zh-muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &--active {
+    background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+    color: var(--zh-success-text);
+  }
+}
+
+.org-status-pill__dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.org-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid var(--zh-border);
+  font-size: 0.8125rem;
+  color: var(--zh-muted-foreground);
+
+  strong {
+    color: var(--zh-foreground);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.org-table-footer__range {
+  margin-right: auto;
+}
+
+.org-table-footer__size {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  select {
+    height: 2.1rem;
+    padding: 0 0.75rem;
+    border: 1px solid var(--zh-border);
+    border-radius: 999px;
+    background: var(--zh-card);
+    color: var(--zh-foreground);
+    font: inherit;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--zh-ring);
+    }
+  }
+}
+
+.org-table-footer__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  button {
+    height: 2.1rem;
+    padding-inline: 0.8rem;
+    font-size: 0.8125rem;
+  }
+
+  mat-icon {
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+.org-table-footer__page {
+  margin-right: 0.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tablet: drop the least important columns first (by data-col, not position). */
+@media (min-width: 601px) and (max-width: 1040px) {
+  .org-table [data-col='parent'] {
+    display: none;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 860px) {
+  .org-table [data-col='teams'],
+  .org-table [data-col='branch'] {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .org-toolbar__search {
+    /* In the stacked layout the desktop flex-basis would become the box's height. */
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  .org-toolbar__view {
+    margin-left: 0;
+  }
+
+  .org-table-footer__range {
+    flex-basis: 100%;
+  }
+}
+
+/* Phones use the stacked-card table from the global styles; the name leads the card. */
+@media (max-width: 600px) {
+  .org-table tbody tr {
+    position: relative;
+  }
+
+  .org-table td[data-label='Name'] {
+    justify-content: flex-start;
+    text-align: left;
+    padding-right: 5rem;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .org-table__name {
+    min-width: 0;
+  }
+
+  .org-table td.org-table__actions-col {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    width: auto;
+    padding: 0;
   }
 }

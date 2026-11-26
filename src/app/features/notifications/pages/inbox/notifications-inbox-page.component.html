@@ -2,7 +2,7 @@
   [loading]="loading()"
   [error]="error()"
   skeleton="list"
-  [hasData]="items().length > 0"
+  [hasData]="loaded()"
   loadingMessage="Loading notifications…"
   errorTitle="Inbox unavailable"
   (retry)="reload()"
@@ -85,9 +85,23 @@
             : 'You\'re all caught up. New alerts will appear here as they happen.'
         "
         icon="notifications_none"
+        [actionLabel]="hasFilters() ? 'Clear filters' : ''"
+        actionIcon="filter_alt_off"
+        (action)="clearFilters()"
       />
     } @else {
       <div class="feed">
+        @if (unreadItems().length > 1) {
+          <div class="select-all">
+            <mat-checkbox
+              [checked]="allSelected()"
+              [indeterminate]="selectedUnread().length > 0 && !allSelected()"
+              (change)="toggleAll()"
+            >
+              Select all unread on this page
+            </mat-checkbox>
+          </div>
+        }
         @if (selectedUnread().length > 0) {
           <div class="bulk" role="region" aria-label="Bulk actions">
             <span><strong>{{ selectedUnread().length }}</strong> selected</span>
@@ -128,7 +142,8 @@
                   <span class="note__top">
                     <span class="note__title">{{ item.title }}</span>
                     @if (!isRead(item)) {
-                      <span class="note__dot" aria-label="Unread"></span>
+                      <span class="note__dot" aria-hidden="true"></span>
+                      <span class="sr-only">Unread</span>
                     }
                   </span>
                   <span class="note__body">{{ item.body }}</span>
@@ -173,7 +188,7 @@
                       mat-icon-button
                       type="button"
                       matTooltip="Mark as read"
-                      aria-label="Mark as read"
+                      [attr.aria-label]="'Mark as read: ' + item.title"
                       (click)="markRead(item)"
                     >
                       <mat-icon>mark_email_read</mat-icon>
@@ -183,7 +198,7 @@
                     mat-icon-button
                     type="button"
                     matTooltip="Delete"
-                    aria-label="Delete notification"
+                    [attr.aria-label]="'Delete notification: ' + item.title"
                     (click)="deleteItem(item)"
                   >
                     <mat-icon>delete_outline</mat-icon>

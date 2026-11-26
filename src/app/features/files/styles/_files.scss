@@ -1,4 +1,5 @@
-// Files feature styles — import via styles.scss
+// Files / Documents feature styles — import via styles.scss.
+// Tables, the toolbar search and the pager reuse the shared `org-*` list styles.
 
 .files-page {
   display: flex;
@@ -34,10 +35,10 @@
 }
 
 .files-add-btn {
-  height: 2.5rem;
-  border-radius: 0.65rem !important;
+  height: 2.75rem;
+  border-radius: 999px !important;
   font-weight: 600;
-  padding-inline: 1rem !important;
+  padding-inline: 1.25rem !important;
 
   mat-icon {
     margin-right: 0.15rem;
@@ -47,18 +48,7 @@
   }
 }
 
-.files-panel-card,
-.files-table-card {
-  border: 1px solid var(--zh-border);
-  border-radius: calc(var(--zh-radius) - 2px);
-  background: var(--zh-card);
-  overflow: hidden;
-}
-
-.files-panel-card {
-  padding: 1.1rem 1.15rem;
-}
-
+/* ---- Overview ---- */
 .files-meta-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -92,114 +82,6 @@
   }
 }
 
-.files-table-wrap {
-  overflow-x: auto;
-}
-
-.files-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-
-  th,
-  td {
-    text-align: left;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--zh-border);
-    vertical-align: top;
-  }
-
-  th {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--zh-muted-foreground);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    background: color-mix(in srgb, var(--zh-muted) 35%, transparent);
-  }
-}
-
-.files-table__title {
-  display: block;
-  font-weight: 600;
-}
-
-.files-table__body {
-  display: block;
-  margin-top: 0.15rem;
-  font-size: 0.8rem;
-  color: var(--zh-muted-foreground);
-}
-
-.files-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  border: 1px solid var(--zh-border);
-  background: color-mix(in srgb, var(--zh-muted) 40%, transparent);
-}
-
-.files-doc-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.files-doc-card {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 1rem;
-  align-items: center;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--zh-border);
-  border-radius: calc(var(--zh-radius) - 2px);
-  background: var(--zh-card);
-
-  &__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: calc(var(--zh-radius) - 4px);
-    background: color-mix(in srgb, var(--zh-muted) 40%, transparent);
-    color: var(--zh-muted-foreground);
-  }
-
-  &__title {
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 600;
-  }
-
-  &__meta {
-    margin: 0.2rem 0 0;
-    font-size: 0.8rem;
-    color: var(--zh-muted-foreground);
-  }
-
-  &__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    justify-content: flex-end;
-  }
-}
-
-@media (max-width: 720px) {
-  .files-doc-card {
-    grid-template-columns: auto 1fr;
-
-    &__actions {
-      grid-column: 1 / -1;
-      justify-content: flex-start;
-    }
-  }
-}
-
 .files-quick-links {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
@@ -225,8 +107,89 @@
   &:hover {
     border-color: var(--zh-primary);
   }
+
+  &:focus-visible {
+    outline: 2px solid var(--zh-ring);
+    outline-offset: 2px;
+  }
 }
 
+/* ---- Browser: toolbar and table ---- */
+.files-select select {
+  height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 999px;
+  background: var(--zh-card);
+  box-shadow: var(--zh-shadow-sm);
+  color: var(--zh-foreground);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--zh-ring);
+  }
+}
+
+.files-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: var(--zh-muted);
+  color: var(--zh-muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.files-list-table {
+  /* Three icon buttons (preview, download, delete). */
+  .org-table__actions-col {
+    width: 9rem;
+  }
+
+  tbody td[data-col='size'],
+  tbody td[data-col='category'] {
+    white-space: nowrap;
+  }
+}
+
+.files-table__file {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 14rem;
+}
+
+.files-table__icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 0.65rem;
+  background: var(--zh-primary-soft);
+  color: var(--zh-primary-text);
+
+  mat-icon {
+    font-size: 1.15rem;
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+}
+
+.files-table__muted {
+  color: var(--zh-muted-foreground);
+}
+
+.files-table__by {
+  display: block;
+  font-size: 0.8125rem;
+}
+
+/* ---- Upload dialog ---- */
 .files-form__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -248,8 +211,62 @@
   border: 1px dashed var(--zh-border);
   border-radius: calc(var(--zh-radius) - 2px);
   background: color-mix(in srgb, var(--zh-muted) 25%, transparent);
-  cursor: pointer;
   text-align: center;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+
+  > mat-icon {
+    color: var(--zh-muted-foreground);
+  }
+
+  &.is-over {
+    border-color: var(--zh-primary);
+    background: var(--zh-primary-soft);
+  }
+
+  &.has-file {
+    border-style: solid;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--zh-muted-foreground);
+  }
+}
+
+.files-dropzone__hint {
+  font-size: 0.75rem;
+  color: var(--zh-muted-foreground);
+}
+
+.files-dropzone__file {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  max-width: 100%;
+
+  strong {
+    overflow-wrap: anywhere;
+    font-size: 0.9rem;
+  }
+
+  span {
+    font-size: 0.8125rem;
+    color: var(--zh-muted-foreground);
+  }
+}
+
+.files-dropzone__actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.files-dropzone__error {
+  margin: 0.4rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--zh-destructive-text);
 }
 
 @media (max-width: 900px) {
@@ -259,5 +276,30 @@
 
   .files-form__grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet: drop the least important columns first. */
+@media (min-width: 601px) and (max-width: 1040px) {
+  .files-list-table [data-col='size'],
+  .files-list-table [data-col='linked'] {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .files-select {
+    flex: 1 1 100%;
+
+    select {
+      width: 100%;
+    }
+  }
+}
+
+/* Phones: the stacked-card table; leave room for three icon buttons in the card corner. */
+@media (max-width: 600px) {
+  .files-list-table td[data-label='Name'] {
+    padding-right: 9rem;
   }
 }

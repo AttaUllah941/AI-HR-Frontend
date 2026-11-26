@@ -1,0 +1,28 @@
+<div class="org-table-footer">
+  <span class="org-table-footer__range" aria-live="polite">
+    Showing <strong>{{ list().rangeStart() }}–{{ list().rangeEnd() }}</strong> of
+    <strong>{{ list().total() }}</strong> {{ noun() }}
+  </span>
+  <label class="org-table-footer__size">
+    Rows per page
+    <select [value]="list().pageSize()" (change)="list().setPageSize($any($event.target).value)">
+      @for (n of pageSizes; track n) {
+        <option [value]="n" [selected]="n === list().pageSize()">{{ n }}</option>
+      }
+    </select>
+  </label>
+  <div class="org-table-footer__nav">
+    <span class="org-table-footer__page">Page {{ list().currentPage() }} of {{ list().totalPages() }}</span>
+    <button mat-stroked-button type="button" [disabled]="list().currentPage() <= 1" (click)="list().prevPage()">
+      <mat-icon aria-hidden="true">chevron_left</mat-icon> Previous
+    </button>
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="list().currentPage() >= list().totalPages()"
+      (click)="list().nextPage()"
+    >
+      Next <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    </button>
+  </div>
+</div>

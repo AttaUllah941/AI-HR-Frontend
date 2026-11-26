@@ -5,6 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 
@@ -38,6 +39,7 @@ import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
     MatInputModule,
 
     MatButtonModule,
+    MatCheckboxModule,
 
     MatIconModule,
 
@@ -83,6 +85,7 @@ export class DesignationFormDialogComponent {
     level: [this.data.designation?.level ?? 1, [Validators.required, Validators.min(1), Validators.max(100)]],
 
     description: [this.data.designation?.description ?? ''],
+    isActive: [this.data.designation?.isActive ?? true],
 
   });
 
@@ -111,6 +114,7 @@ export class DesignationFormDialogComponent {
       level: Number(raw.level),
 
       description: raw.description || null,
+      isActive: raw.isActive,
 
     };
 
@@ -132,11 +136,11 @@ export class DesignationFormDialogComponent {
 
       },
 
-      error: () => {
+      error: (err: { error?: { message?: string } }) => {
 
         this.saving.set(false);
 
-        this.toast.error('Unable to save designation');
+        this.toast.error(err?.error?.message || 'Unable to save designation');
 
       },
 

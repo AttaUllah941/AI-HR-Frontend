@@ -254,7 +254,12 @@ select {
 [data-hide~='position'] [data-col='position'],
 [data-hide~='manager'] [data-col='manager'],
 [data-hide~='status'] [data-col='status'],
-[data-hide~='joined'] [data-col='joined'] {
+[data-hide~='joined'] [data-col='joined'],
+[data-hide~='branch'] [data-col='branch'],
+[data-hide~='parent'] [data-col='parent'],
+[data-hide~='teams'] [data-col='teams'],
+[data-hide~='location'] [data-col='location'],
+[data-hide~='level'] [data-col='level'] {
   display: none;
 }
 

@@ -5,6 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 
@@ -50,6 +51,7 @@ import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
     MatSelectModule,
 
     MatButtonModule,
+    MatCheckboxModule,
 
     MatIconModule,
 
@@ -97,6 +99,7 @@ export class TeamFormDialogComponent implements OnInit {
     description: [this.data.team?.description ?? ''],
 
     departmentId: [this.data.team?.departmentId ?? '', Validators.required],
+    isActive: [this.data.team?.isActive ?? true],
 
   });
 
@@ -133,6 +136,7 @@ export class TeamFormDialogComponent implements OnInit {
       description: raw.description || null,
 
       departmentId: raw.departmentId,
+      isActive: raw.isActive,
 
     };
 
@@ -154,11 +158,11 @@ export class TeamFormDialogComponent implements OnInit {
 
       },
 
-      error: () => {
+      error: (err: { error?: { message?: string } }) => {
 
         this.saving.set(false);
 
-        this.toast.error('Unable to save team');
+        this.toast.error(err?.error?.message || 'Unable to save team');
 
       },
 

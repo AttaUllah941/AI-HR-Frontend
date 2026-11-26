@@ -1,4 +1,5 @@
-<app-organization-status skeleton="form"
+<app-organization-status
+  skeleton="form"
   [loading]="loading()"
   [error]="error()"
   loadingMessage="Loading company…"
@@ -12,28 +13,39 @@
         <p class="settings-page-sub">Legal identity, contact details, and locale defaults.</p>
       </div>
       @if (canUpdate) {
-        <div class="settings-action-bar__actions">
+        <div class="settings-save">
+          @if (form.dirty && !saving()) {
+            <span class="settings-dirty" role="status">Unsaved changes</span>
+          }
           <button
             mat-flat-button
             color="primary"
-            type="button"
+            type="submit"
+            form="company-form"
             class="settings-add-btn"
-            [disabled]="form.invalid || saving()"
-            (click)="save()"
-            [appButtonSpinner]="saving()">
-            @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
+            [disabled]="saving() || !form.dirty"
+            [appButtonSpinner]="saving()"
+          >
+            @if (!saving()) {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
             {{ saving() ? 'Saving…' : 'Save company' }}
           </button>
         </div>
+      } @else {
+        <p class="settings-dirty" role="note">View only</p>
       }
     </div>
 
     <div class="settings-panel-card">
-      <form [formGroup]="form" class="settings-form" (ngSubmit)="save()">
+      <form [formGroup]="form" class="settings-form" id="company-form" (ngSubmit)="save()">
         <div class="settings-form__grid">
           <mat-form-field appearance="outline">
             <mat-label>Name</mat-label>
-            <input matInput formControlName="name" />
+            <input matInput formControlName="name" autocomplete="organization" />
+            @if (form.controls.name.hasError('required')) {
+              <mat-error>Enter the company name</mat-error>
+            }
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Legal name</mat-label>
@@ -41,30 +53,66 @@
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Email</mat-label>
-            <input matInput formControlName="email" type="email" />
+            <input matInput formControlName="email" type="email" autocomplete="off" />
+            @if (form.controls.email.hasError('email')) {
+              <mat-error>Enter a valid email address</mat-error>
+            }
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Phone</mat-label>
-            <input matInput formControlName="phone" />
+            <input matInput formControlName="phone" type="tel" autocomplete="off" />
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Website</mat-label>
-            <input matInput formControlName="website" />
+            <input matInput formControlName="website" type="url" placeholder="https://example.com" />
+            @if (form.controls.website.hasError('pattern')) {
+              <mat-error>Start with http:// or https://</mat-error>
+            }
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Logo URL</mat-label>
-            <input matInput formControlName="logoUrl" />
+            <input matInput formControlName="logoUrl" type="url" placeholder="https://example.com/logo.png" />
+            @if (form.controls.logoUrl.hasError('pattern')) {
+              <mat-error>Start with http:// or https://</mat-error>
+            }
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Timezone</mat-label>
-            <input matInput formControlName="timezone" />
+            <input matInput formControlName="timezone" list="company-timezones" autocomplete="off" />
+            <mat-hint>For example Asia/Karachi or UTC</mat-hint>
+            @if (form.controls.timezone.hasError('required')) {
+              <mat-error>Enter a timezone</mat-error>
+            } @else if (form.controls.timezone.hasError('timezone')) {
+              <mat-error>Not a known timezone. Pick one from the suggestions.</mat-error>
+            }
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Locale</mat-label>
-            <input matInput formControlName="locale" />
+            <input matInput formControlName="locale" autocomplete="off" />
+            <mat-hint>For example en-US or en-GB</mat-hint>
+            @if (form.controls.locale.hasError('required')) {
+              <mat-error>Enter a locale</mat-error>
+            } @else if (form.controls.locale.hasError('locale')) {
+              <mat-error>Use a language and region such as en-US</mat-error>
+            }
           </mat-form-field>
+          <datalist id="company-timezones">
+            @for (tz of timeZones; track tz) {
+              <option [value]="tz"></option>
+            }
+          </datalist>
+
           <div class="settings-form__full">
             <mat-checkbox formControlName="isActive">Company is active</mat-checkbox>
+            @if (!form.controls.isActive.value) {
+              <p class="settings-notice settings-notice--danger" role="alert">
+                <mat-icon aria-hidden="true">warning</mat-icon>
+                <span>
+                  An inactive company cannot sign in. Saving this will sign everyone out, including you,
+                  until the platform administrator turns it back on.
+                </span>
+              </p>
+            }
           </div>
         </div>
       </form>

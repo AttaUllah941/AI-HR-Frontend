@@ -1,12 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
+import { debounceTime, filter, Subscription, tap } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import {
@@ -16,11 +13,16 @@ import {
 } from '../../../../core/services/settings.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { OrganizationListFooterComponent } from '../../../organization/components/organization-list-footer/organization-list-footer.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { ORG_PAGE_SIZES, type OrgPagerControls } from '../../../organization/utils/org-list';
 import {
   UserFormDialogComponent,
   UserFormDialogResult,
 } from '../../dialogs/user-form-dialog.component';
+import { USER_STATUS_FILTERS, userStatusLabel, userStatusTone } from '../../utils/labels';
+
+type ApiError = { error?: { message?: string }; message?: string };
 
 @Component({
   selector: 'app-settings-users-page',
@@ -29,11 +31,9 @@ import {
     ReactiveFormsModule,
     MatButtonModule,
     MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
     MatIconModule,
     EmptyStateComponent,
+    OrganizationListFooterComponent,
     OrganizationStatusComponent,
   ],
   templateUrl: './settings-users-page.component.html',
@@ -51,8 +51,13 @@ export class SettingsUsersPageComponent implements OnInit {
   readonly items = signal<SettingsUser[]>([]);
   readonly roles = signal<SettingsRole[]>([]);
   readonly loading = signal(true);
+  /** True once the first load finished, so filtering and paging never swap the page for a skeleton. */
+  readonly loaded = signal(false);
   readonly error = signal<string | null>(null);
   readonly total = signal(0);
+  readonly page = signal(1);
+  readonly pageSize = signal<number>(25);
+  readonly totalPages = signal(1);
   readonly generatedPassword = signal<string | null>(null);
   readonly passwordEmailed = signal(false);
 
@@ -63,12 +68,46 @@ export class SettingsUsersPageComponent implements OnInit {
 
   readonly search = new FormControl('', { nonNullable: true });
   readonly status = new FormControl('', { nonNullable: true });
+  readonly statusFilters = USER_STATUS_FILTERS;
+
+  private readonly searchText = signal('');
+  private readonly statusValue = signal('');
+  readonly hasFilters = computed(() => this.searchText().trim() !== '' || this.statusValue() !== '');
+  readonly myId = computed(() => this.auth.user()?.id ?? null);
+
+  /** Server-side paging in the shape the shared footer expects. */
+  readonly pager: OrgPagerControls = {
+    total: this.total,
+    currentPage: this.page,
+    totalPages: this.totalPages,
+    pageSize: this.pageSize,
+    rangeStart: computed(() => (this.total() === 0 ? 0 : (this.page() - 1) * this.pageSize() + 1)),
+    rangeEnd: computed(() => Math.min(this.page() * this.pageSize(), this.total())),
+    setPageSize: (value) => {
+      const size = Number(value);
+      if (!(ORG_PAGE_SIZES as readonly number[]).includes(size)) return;
+      this.pageSize.set(size);
+      this.page.set(1);
+      this.reload();
+    },
+    prevPage: () => this.goToPage(this.page() - 1),
+    nextPage: () => this.goToPage(this.page() + 1),
+  };
+
+  protected readonly statusLabel = userStatusLabel;
+  protected readonly statusTone = userStatusTone;
 
   ngOnInit(): void {
-    this.search.valueChanges.pipe(debounceTime(300), distinctUntilChanged()).subscribe(() => {
-      this.reload();
+    this.search.valueChanges
+      .pipe(
+        tap((value) => this.searchText.set(value)),
+        debounceTime(300),
+      )
+      .subscribe(() => this.resetAndReload());
+    this.status.valueChanges.subscribe((value) => {
+      this.statusValue.set(value);
+      this.resetAndReload();
     });
-    this.status.valueChanges.subscribe(() => this.reload());
     this.loadRoles();
     this.reload();
   }
@@ -89,27 +128,51 @@ export class SettingsUsersPageComponent implements OnInit {
       .listUsers({
         search: this.search.value.trim() || undefined,
         status: this.status.value || undefined,
-        page: 1,
-        pageSize: 50,
+        page: this.page(),
+        pageSize: this.pageSize(),
       })
       .subscribe({
         next: (res) => {
+          const { total, totalPages } = res.pagination;
+          // The last user on the last page was deleted: step back instead of showing an empty page.
+          if (res.items.length === 0 && total > 0 && this.page() > 1) {
+            this.page.set(Math.max(1, totalPages));
+            this.reload();
+            return;
+          }
           this.items.set(res.items);
-          this.total.set(res.pagination.total);
+          this.total.set(total);
+          this.totalPages.set(Math.max(1, totalPages));
           this.loading.set(false);
+          this.loaded.set(true);
         },
-        error: (err: { error?: { message?: string }; message?: string }) => {
+        error: (err: ApiError) => {
           this.error.set(err?.error?.message || err?.message || 'Unable to load users.');
           this.loading.set(false);
         },
       });
   }
 
+  clearFilters(): void {
+    this.search.setValue('', { emitEvent: false });
+    this.status.setValue('', { emitEvent: false });
+    this.searchText.set('');
+    this.statusValue.set('');
+    this.resetAndReload();
+  }
+
+  isSelf(user: SettingsUser): boolean {
+    return user.id === this.myId();
+  }
+
   openCreate(): void {
     if (!this.canCreate) return;
     this.dialog
       .open(UserFormDialogComponent, {
-        width: '32rem',
+        width: '34rem',
+        maxHeight: '90vh',
+        autoFocus: 'first-tabbable',
+        restoreFocus: true,
         data: { mode: 'create', roles: this.roles(), user: null },
       })
       .afterClosed()
@@ -129,7 +192,10 @@ export class SettingsUsersPageComponent implements OnInit {
     if (!this.canUpdate) return;
     this.dialog
       .open(UserFormDialogComponent, {
-        width: '32rem',
+        width: '34rem',
+        maxHeight: '90vh',
+        autoFocus: 'first-tabbable',
+        restoreFocus: true,
         data: { mode: 'edit', roles: this.roles(), user },
       })
       .afterClosed()
@@ -139,13 +205,14 @@ export class SettingsUsersPageComponent implements OnInit {
   }
 
   remove(user: SettingsUser): void {
-    if (!this.canDelete) return;
+    if (!this.canDelete || this.isSelf(user)) return;
     this.confirm
       .open({
         title: 'Delete user?',
-        message: `Remove ${user.email} from this company? This soft-deletes the account.`,
-        confirmLabel: 'Delete',
+        message: `Delete ${user.firstName} ${user.lastName} (${user.email})? They will no longer be able to sign in.`,
+        confirmLabel: 'Delete user',
         destructive: true,
+        icon: 'delete_forever',
       })
       .pipe(filter(Boolean))
       .subscribe(() => {
@@ -154,11 +221,26 @@ export class SettingsUsersPageComponent implements OnInit {
             this.toast.success('User deleted.');
             this.reload();
           },
-          error: (err: { error?: { message?: string }; message?: string }) => {
+          error: (err: ApiError) => {
             this.toast.error(err?.error?.message || err?.message || 'Unable to delete user.');
           },
         });
       });
+  }
+
+  async copyPassword(): Promise<void> {
+    const password = this.generatedPassword();
+    if (!password) return;
+    try {
+      await navigator.clipboard.writeText(password);
+      this.toast.success('Password copied.');
+    } catch {
+      this.toast.error('Could not copy. Select the password and copy it manually.');
+    }
+  }
+
+  fullName(user: SettingsUser): string {
+    return `${user.firstName} ${user.lastName}`.trim() || user.email;
   }
 
   formatDate(iso: string | null | undefined): string {
@@ -168,5 +250,17 @@ export class SettingsUsersPageComponent implements OnInit {
   dismissPassword(): void {
     this.generatedPassword.set(null);
     this.passwordEmailed.set(false);
+  }
+
+  private resetAndReload(): void {
+    this.page.set(1);
+    this.reload();
+  }
+
+  private goToPage(target: number): void {
+    const next = Math.min(Math.max(1, target), this.totalPages());
+    if (next === this.page()) return;
+    this.page.set(next);
+    this.reload();
   }
 }

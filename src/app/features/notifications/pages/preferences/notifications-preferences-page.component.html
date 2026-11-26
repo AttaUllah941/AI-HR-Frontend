@@ -11,17 +11,26 @@
         <h2 class="prefs__title">Delivery preferences</h2>
         <p class="prefs__sub">Choose how you want to hear about each kind of event.</p>
       </div>
+      <div class="prefs__save">
+        @if (hasEdits()) {
+          <span class="prefs__dirty" role="status">Unsaved changes</span>
+        }
       <button
         mat-flat-button
         color="primary"
         type="button"
-        [disabled]="saving() || preferences.length === 0"
+        [disabled]="saving() || preferences.length === 0 || !hasEdits()"
         (click)="save()"
         [appButtonSpinner]="saving()">
         @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
         {{ saving() ? 'Saving…' : 'Save preferences' }}
       </button>
+      </div>
     </header>
+    <p class="prefs__note">
+      Push notifications are only delivered to devices you have registered.
+      <a routerLink="../devices">Manage devices</a>
+    </p>
 
     @if (preferences.length === 0) {
       <app-empty-state
@@ -62,6 +71,12 @@
                 <span class="pref__channel">Push</span>
                 <mat-slide-toggle formControlName="pushEnabled" [attr.aria-label]="categoryLabel(cat) + ' push notifications'" />
               </div>
+              @if (cat === 'SECURITY' && isMuted(group)) {
+                <p class="pref__warn" role="note">
+                  <mat-icon aria-hidden="true">warning</mat-icon>
+                  You won't be told about sign-ins, password changes or suspicious activity.
+                </p>
+              }
             </div>
           }
         </div>

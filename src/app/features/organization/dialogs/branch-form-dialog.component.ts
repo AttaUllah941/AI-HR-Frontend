@@ -47,6 +47,7 @@ export class BranchFormDialogComponent {
     city: [this.data.branch?.city ?? ''],
     country: [this.data.branch?.country ?? ''],
     isHeadOffice: [this.data.branch?.isHeadOffice ?? false],
+    isActive: [this.data.branch?.isActive ?? true],
     allowedIpsText: [
       this.data.branch?.allowedIps?.map((ip) => ip.cidr).join('\n') ?? '',
     ],
@@ -65,6 +66,7 @@ export class BranchFormDialogComponent {
       city: raw.city,
       country: raw.country,
       isHeadOffice: raw.isHeadOffice,
+      isActive: raw.isActive,
       allowedIps: raw.allowedIpsText
         .split(/[\n,]+/)
         .map((ip) => ip.trim())
@@ -79,9 +81,9 @@ export class BranchFormDialogComponent {
         this.toast.success(this.data.branch ? 'Branch updated' : 'Branch created');
         this.dialogRef.close(true);
       },
-      error: () => {
+      error: (err: { error?: { message?: string } }) => {
         this.saving.set(false);
-        this.toast.error('Unable to save branch');
+        this.toast.error(err?.error?.message || 'Unable to save branch');
       },
     });
   }

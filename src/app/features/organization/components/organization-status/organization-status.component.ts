@@ -10,7 +10,7 @@ import { ProfileSkeletonComponent } from '../../../../shared/skeleton/profile-sk
 import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 
 /** Placeholder shown on first load. `none` shows a generic stack of cards (never a spinner). */
-export type StatusSkeleton = 'none' | 'profile' | 'table' | 'list' | 'kpi' | 'form';
+export type StatusSkeleton = 'none' | 'profile' | 'table' | 'list' | 'kpi' | 'stats' | 'form';
 
 /**
  * Loading / error wrapper for a page section.

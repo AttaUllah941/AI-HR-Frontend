@@ -29,6 +29,19 @@
           <app-chart-skeleton height="13rem" />
         </div>
       }
+      @case ('stats') {
+        <div class="org-status-head">
+          <div class="org-status-head__text">
+            <app-skeleton width="14rem" height="1.1rem" />
+          </div>
+          <app-skeleton width="7.5rem" height="2.5rem" style="border-radius: 0.65rem" />
+        </div>
+        <div class="org-status-kpis">
+          @for (n of kpiPlaceholders; track n) {
+            <app-kpi-card-skeleton />
+          }
+        </div>
+      }
       @case ('form') {
         <app-form-skeleton [fields]="8" />
       }

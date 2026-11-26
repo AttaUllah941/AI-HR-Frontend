@@ -5,9 +5,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import {
   LoginAttemptItem,
   SecurityReview,
@@ -20,6 +20,9 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 import { AppDatePipe } from '../../../../shared/pipes/app-date.pipe';
+import { ipListValidator, parseIpList } from '../../../../shared/forms/validators';
+
+type ApiError = { error?: { message?: string }; message?: string };
 
 @Component({
   selector: 'app-settings-security-page',
@@ -31,7 +34,6 @@ import { AppDatePipe } from '../../../../shared/pipes/app-date.pipe';
     MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatIconModule,
     OrganizationStatusComponent,
     ButtonSpinnerDirective,
@@ -45,8 +47,11 @@ export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges 
   private readonly security = inject(SecurityService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly confirm = inject(ConfirmDialogService);
 
   readonly loading = signal(true);
+  /** True once the first load finished, so a reload after saving keeps the page on screen. */
+  readonly loaded = signal(false);
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
   readonly status = signal<SecurityStatus | null>(null);
@@ -54,11 +59,11 @@ export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges 
   readonly checks = signal<SecurityReviewCheck[]>([]);
   readonly attempts = signal<LoginAttemptItem[]>([]);
   readonly canUpdate = this.auth.hasPermission('settings:update');
+  /** The allowlist as loaded, to tell whether saving would change who can sign in. */
+  private savedAllowlist: string[] = [];
 
   readonly attemptEmail = new FormControl('', { nonNullable: true });
-  readonly attemptSuccess = new FormControl<'all' | 'true' | 'false'>('all', {
-    nonNullable: true,
-  });
+  readonly attemptSuccess = new FormControl<'all' | 'true' | 'false'>('all', { nonNullable: true });
 
   readonly form = this.fb.nonNullable.group({
     maxFailedLogins: [5, [Validators.required, Validators.min(1), Validators.max(50)]],
@@ -70,7 +75,7 @@ export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges 
     requireMfaForPrivileged: [false],
     allowSelfRegistration: [true],
     refreshRateLimitPerWindow: [60, [Validators.required, Validators.min(5)]],
-    ipAllowlistText: [''],
+    ipAllowlistText: ['', ipListValidator],
   });
 
   ngOnInit(): void {
@@ -88,6 +93,7 @@ export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges 
       next: (status) => {
         this.status.set(status);
         const p = status.policy;
+        this.savedAllowlist = p.ipAllowlist ?? [];
         this.form.reset({
           maxFailedLogins: p.maxFailedLogins,
           lockoutMinutes: p.lockoutMinutes,
@@ -98,9 +104,11 @@ export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges 
           requireMfaForPrivileged: p.requireMfaForPrivileged,
           allowSelfRegistration: p.allowSelfRegistration,
           refreshRateLimitPerWindow: p.refreshRateLimitPerWindow,
-          ipAllowlistText: (p.ipAllowlist ?? []).join('\n'),
+          ipAllowlistText: this.savedAllowlist.join('\n'),
         });
         if (!this.canUpdate) this.form.disable();
+        // Sign-up is decided by the server, so this flag is shown but cannot be changed.
+        this.form.controls.allowSelfRegistration.disable();
         this.security.getReview().subscribe({
           next: (review) => {
             this.review.set(review);
@@ -113,8 +121,9 @@ export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges 
         });
         this.reloadAttempts();
         this.loading.set(false);
+        this.loaded.set(true);
       },
-      error: (err: { error?: { message?: string }; message?: string }) => {
+      error: (err: ApiError) => {
         this.error.set(err?.error?.message || err?.message || 'Unable to load security settings.');
         this.loading.set(false);
       },
@@ -123,9 +132,7 @@ export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges 
 
   reloadAttempts(): void {
     const success =
-      this.attemptSuccess.value === 'all'
-        ? undefined
-        : this.attemptSuccess.value === 'true';
+      this.attemptSuccess.value === 'all' ? undefined : this.attemptSuccess.value === 'true';
     this.security
       .listLoginAttempts({
         page: 1,
@@ -140,17 +147,37 @@ export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges 
   }
 
   save(): void {
-    if (!this.canUpdate || this.form.invalid || this.saving()) {
+    if (!this.canUpdate || this.saving()) {
+      return;
+    }
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
+    const ipAllowlist = parseIpList(this.form.getRawValue().ipAllowlistText);
+    // A new or changed allowlist can lock people out of signing in, so make that explicit first.
+    if (ipAllowlist.length > 0 && !this.sameList(ipAllowlist, this.savedAllowlist)) {
+      this.confirm
+        .open({
+          title: 'Restrict where people can sign in?',
+          message:
+            `Only these ${ipAllowlist.length === 1 ? 'network' : `${ipAllowlist.length} networks`} will be able to sign in: ` +
+            `${ipAllowlist.join(', ')}. Anyone signing in from elsewhere will be refused, including you. ` +
+            'Check that your own network is on the list.',
+          confirmLabel: 'Save allowlist',
+          destructive: true,
+          icon: 'warning',
+        })
+        .pipe(filter(Boolean))
+        .subscribe(() => this.persist(ipAllowlist));
+      return;
+    }
+    this.persist(ipAllowlist);
+  }
+
+  private persist(ipAllowlist: string[]): void {
     this.saving.set(true);
     const raw = this.form.getRawValue();
-    const ipAllowlist = raw.ipAllowlistText
-      .split(/[\n,]+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
-
     this.security
       .updatePolicy({
         maxFailedLogins: raw.maxFailedLogins,
@@ -171,7 +198,7 @@ export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges 
           this.saving.set(false);
           this.reload();
         },
-        error: (err: { error?: { message?: string }; message?: string }) => {
+        error: (err: ApiError) => {
           this.toast.error(err?.error?.message || err?.message || 'Unable to save policy.');
           this.saving.set(false);
         },
@@ -188,4 +215,7 @@ export class SettingsSecurityPageComponent implements OnInit, HasUnsavedChanges 
     return this.form.dirty && !this.saving();
   }
 
+  private sameList(a: readonly string[], b: readonly string[]): boolean {
+    return a.length === b.length && [...a].sort().every((v, i) => v === [...b].sort()[i]);
+  }
 }

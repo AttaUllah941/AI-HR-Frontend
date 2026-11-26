@@ -60,6 +60,8 @@ export class NotificationsInboxPageComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly page = signal(1);
   readonly pageSize = 20;
+  /** True once the first response arrived, so later reloads keep the page (and its filters) on screen. */
+  readonly loaded = signal(false);
   readonly total = signal(0);
   readonly totalPages = signal(1);
 
@@ -128,6 +130,7 @@ export class NotificationsInboxPageComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.items.set(res.items);
+          this.loaded.set(true);
           this.loadLeaveStates(res.items);
           this.total.set(res.pagination.total);
           this.totalPages.set(res.pagination.totalPages);
@@ -148,6 +151,16 @@ export class NotificationsInboxPageComponent implements OnInit {
   applyFilters(): void {
     this.page.set(1);
     this.reload();
+  }
+
+  hasFilters(): boolean {
+    return this.unreadOnly.value || this.category.value !== '';
+  }
+
+  clearFilters(): void {
+    this.category.setValue('');
+    this.unreadOnly.setValue(false);
+    this.applyFilters();
   }
 
   filterByCategory(category: string): void {
@@ -221,8 +234,10 @@ export class NotificationsInboxPageComponent implements OnInit {
       rollback: () => this.items.set(before),
       request$: forkJoin(targets.map((n) => this.notifications.markRead(n.id))),
       onSuccess: () => {
-        this.toast.success(`${targets.length} notification(s) marked as read.`);
-        this.reload();
+        this.toast.success(
+          targets.length === 1 ? '1 notification marked as read.' : `${targets.length} notifications marked as read.`,
+        );
+        this.reload(true);
       },
       onError: () => this.toast.error('Unable to mark the selected notifications as read.'),
     });
@@ -239,7 +254,7 @@ export class NotificationsInboxPageComponent implements OnInit {
       rollback: () => patch({ status: item.status, readAt: item.readAt }),
       request$: this.notifications.markRead(item.id),
       // Refetch quietly so unread counters stay accurate.
-      onSuccess: () => this.reload(),
+      onSuccess: () => this.reload(true),
       onError: () => this.toast.error('Unable to mark as read.'),
     });
   }
@@ -256,9 +271,13 @@ export class NotificationsInboxPageComponent implements OnInit {
         this.notifications.markAllRead().subscribe({
           next: (res) => {
             this.toast.success(
-              res.updated ? `${res.updated} notification(s) marked read.` : 'Nothing to update.',
+              res.updated
+                ? res.updated === 1
+                  ? '1 notification marked read.'
+                  : `${res.updated} notifications marked read.`
+                : 'Nothing to update.',
             );
-            this.reload();
+            this.reload(true);
           },
           error: () => this.toast.error('Unable to mark all as read.'),
         });
@@ -278,7 +297,7 @@ export class NotificationsInboxPageComponent implements OnInit {
         this.notifications.deleteOne(item.id).subscribe({
           next: () => {
             this.toast.success('Notification deleted.');
-            this.reload();
+            this.reload(true);
           },
           error: () => this.toast.error('Unable to delete notification.'),
         });

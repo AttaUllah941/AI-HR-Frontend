@@ -1,0 +1,81 @@
+<div class="org-toolbar">
+  <label class="org-toolbar__search">
+    <mat-icon aria-hidden="true">search</mat-icon>
+    <input
+      type="search"
+      [value]="list().search()"
+      (input)="list().setSearch($any($event.target).value)"
+      [attr.placeholder]="'Search ' + noun() + '…'"
+      [attr.aria-label]="'Search ' + noun()"
+    />
+  </label>
+
+  <div class="org-toolbar__group" role="radiogroup" [attr.aria-label]="'Filter ' + noun() + ' by status'">
+    @for (opt of statusOptions; track opt.value) {
+      <button
+        type="button"
+        role="radio"
+        [attr.aria-checked]="list().status() === opt.value"
+        [class.is-on]="list().status() === opt.value"
+        (click)="list().setStatus(opt.value)"
+      >
+        {{ opt.label }}
+      </button>
+    }
+  </div>
+
+  @if (list().hasFilters()) {
+    <button type="button" class="org-toolbar__clear" (click)="list().clearFilters()">Clear filters</button>
+  }
+
+  <button
+    mat-stroked-button
+    type="button"
+    class="org-toolbar__view"
+    [matMenuTriggerFor]="viewMenu"
+    aria-label="Table view options"
+  >
+    <mat-icon aria-hidden="true">view_column</mat-icon>
+    View
+  </button>
+
+  <mat-menu #viewMenu="matMenu" xPosition="before">
+    <div class="org-view-menu" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+      <p class="org-view-menu__title">Row density</p>
+      <div class="org-view-menu__row" role="radiogroup" aria-label="Row density">
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="prefs().density() === 'comfortable'"
+          [class.is-on]="prefs().density() === 'comfortable'"
+          (click)="prefs().setDensity('comfortable')"
+        >
+          Comfortable
+        </button>
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="prefs().density() === 'compact'"
+          [class.is-on]="prefs().density() === 'compact'"
+          (click)="prefs().setDensity('compact')"
+        >
+          Compact
+        </button>
+      </div>
+      @if (columns().length > 0) {
+        <p class="org-view-menu__title">Columns</p>
+        @for (col of columns(); track col.id) {
+          <label class="org-view-menu__check">
+            <input
+              type="checkbox"
+              [checked]="prefs().isVisible(col.id)"
+              (change)="prefs().toggleColumn(col.id)"
+            />
+            {{ col.label }}
+          </label>
+        }
+      }
+      <button type="button" class="org-view-menu__reset" (click)="prefs().reset()">Reset view</button>
+    </div>
+  </mat-menu>
+</div>

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -20,17 +21,22 @@ import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-load
 import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
 import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
 import { DateFieldComponent } from '../../../../shared/components/date-field/date-field.component';
-import { Subscription } from 'rxjs';
+import { Subscription, startWith } from 'rxjs';
+import { toIsoDate } from '../../../../core/utils/date-format';
+import { formatMinutes } from '../../utils/format-minutes';
 
-function isoDate(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
+type PresetId = '7d' | '30d' | 'month';
 
-function defaultRange(): { from: string; to: string } {
+/** A range of whole local days ending today. Local dates, not UTC, so "today" is the user's today. */
+function rangeFor(preset: PresetId): { from: string; to: string } {
   const to = new Date();
   const from = new Date();
-  from.setUTCDate(from.getUTCDate() - 29);
-  return { from: isoDate(from), to: isoDate(to) };
+  if (preset === 'month') {
+    from.setDate(1);
+  } else {
+    from.setDate(from.getDate() - (preset === '7d' ? 6 : 29));
+  }
+  return { from: toIsoDate(from), to: toIsoDate(to) };
 }
 
 @Component({
@@ -62,7 +68,7 @@ export class ReportsAttendancePageComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
 
-  private readonly defaults = defaultRange();
+  private readonly defaults = rangeFor('30d');
 
   readonly report = signal<AttendanceReport | null>(null);
   readonly loading = signal(true);
@@ -74,11 +80,41 @@ export class ReportsAttendancePageComponent implements OnInit {
   readonly dateFrom = new FormControl(this.defaults.from, { nonNullable: true });
   readonly dateTo = new FormControl(this.defaults.to, { nonNullable: true });
 
+  readonly presets: ReadonlyArray<{ id: PresetId; label: string }> = [
+    { id: '7d', label: 'Last 7 days' },
+    { id: '30d', label: 'Last 30 days' },
+    { id: 'month', label: 'This month' },
+  ];
+
+  private readonly fromValue = toSignal(this.dateFrom.valueChanges.pipe(startWith(this.dateFrom.value)), {
+    initialValue: this.dateFrom.value,
+  });
+  private readonly toValue = toSignal(this.dateTo.valueChanges.pipe(startWith(this.dateTo.value)), {
+    initialValue: this.dateTo.value,
+  });
+  /** ISO dates compare correctly as strings. */
+  readonly rangeError = computed(() =>
+    this.fromValue() && this.toValue() && this.fromValue() > this.toValue()
+      ? 'The start date must be on or before the end date.'
+      : '',
+  );
+  /** The preset the current dates match, if any. */
+  readonly activePreset = computed(
+    () =>
+      this.presets.find((p) => {
+        const range = rangeFor(p.id);
+        return range.from === this.fromValue() && range.to === this.toValue();
+      })?.id ?? null,
+  );
+
   ngOnInit(): void {
     this.reload();
   }
 
   reload(): void {
+    if (this.rangeError()) {
+      return;
+    }
     this.loading.set(true);
     this.error.set(null);
     this.inflight?.unsubscribe();
@@ -102,7 +138,7 @@ export class ReportsAttendancePageComponent implements OnInit {
   }
 
   exportReport(format: ReportExportFormat): void {
-    if (!this.canExport) {
+    if (!this.canExport || this.rangeError()) {
       return;
     }
     this.exporting.set(true);
@@ -123,6 +159,17 @@ export class ReportsAttendancePageComponent implements OnInit {
           this.exporting.set(false);
         },
       });
+  }
+
+  applyPreset(id: PresetId): void {
+    const range = rangeFor(id);
+    this.dateFrom.setValue(range.from);
+    this.dateTo.setValue(range.to);
+    this.reload();
+  }
+
+  minutes(value: number): string {
+    return formatMinutes(value);
   }
 
   formatNumber(value: number): string {

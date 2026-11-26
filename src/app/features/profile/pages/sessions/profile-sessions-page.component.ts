@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { filter } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,6 +9,22 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+
+type ApiError = { error?: { message?: string }; message?: string };
+
+/** Plain words for a session's state. */
+export function sessionStatusLabel(status: string): string {
+  switch ((status || '').toUpperCase()) {
+    case 'ACTIVE':
+      return 'Active';
+    case 'EXPIRED':
+      return 'Expired';
+    case 'REVOKED':
+      return 'Signed out';
+    default:
+      return status || '—';
+  }
+}
 
 @Component({
   selector: 'app-profile-sessions-page',
@@ -32,8 +48,23 @@ export class ProfileSessionsPageComponent implements OnInit {
 
   readonly items = signal<ProfileSession[]>([]);
   readonly loading = signal(true);
+  /** True once the first load finished, so a revoke keeps the page on screen. */
+  readonly loaded = signal(false);
   readonly revokingOthers = signal(false);
+  readonly revokingId = signal<string | null>(null);
   readonly error = signal<string | null>(null);
+
+  /** This device first, then the other active ones, then ended sessions, newest first within each. */
+  readonly sessions = computed(() => {
+    const rank = (s: ProfileSession) => (s.current ? 0 : s.active ? 1 : 2);
+    return [...this.items()].sort(
+      (a, b) => rank(a) - rank(b) || b.createdAt.localeCompare(a.createdAt),
+    );
+  });
+  /** Other devices that are still signed in; the "sign out others" action only makes sense for them. */
+  readonly otherActive = computed(() => this.items().filter((s) => !s.current && s.active).length);
+
+  protected readonly statusLabel = sessionStatusLabel;
 
   ngOnInit(): void {
     this.reload();
@@ -46,8 +77,9 @@ export class ProfileSessionsPageComponent implements OnInit {
       next: (res) => {
         this.items.set(res.items);
         this.loading.set(false);
+        this.loaded.set(true);
       },
-      error: (err: { error?: { message?: string }; message?: string }) => {
+      error: (err: ApiError) => {
         this.error.set(err?.error?.message || err?.message || 'Unable to load sessions.');
         this.loading.set(false);
       },
@@ -56,37 +88,45 @@ export class ProfileSessionsPageComponent implements OnInit {
 
   revokeSession(session: ProfileSession): void {
     if (session.current) {
-      this.toast.error('Use logout to end the current session.');
+      this.toast.error('Use sign out to end the session on this device.');
       return;
     }
     this.confirm
       .open({
-        title: 'Revoke session?',
-        message: `This will sign out ${session.deviceLabel || 'that device'}.`,
-        confirmLabel: 'Revoke',
+        title: 'Sign out this device?',
+        message: `${session.deviceLabel || 'That device'} will be signed out and will need to sign in again.`,
+        confirmLabel: 'Sign out device',
         destructive: true,
+        icon: 'logout',
       })
       .pipe(filter(Boolean))
       .subscribe(() => {
+        this.revokingId.set(session.id);
         this.profile.revokeSession(session.id).subscribe({
           next: () => {
-            this.toast.success('Session revoked.');
+            this.revokingId.set(null);
+            this.toast.success('Device signed out.');
             this.reload();
           },
-          error: (err: { error?: { message?: string }; message?: string }) => {
-            this.toast.error(err?.error?.message || err?.message || 'Unable to revoke session.');
+          error: (err: ApiError) => {
+            this.revokingId.set(null);
+            this.toast.error(err?.error?.message || err?.message || 'Unable to sign out that device.');
           },
         });
       });
   }
 
   revokeOthers(): void {
+    if (this.otherActive() === 0) {
+      return;
+    }
     this.confirm
       .open({
-        title: 'Revoke other sessions?',
-        message: 'All sessions except this device will be signed out.',
-        confirmLabel: 'Revoke others',
+        title: 'Sign out your other devices?',
+        message: `${this.otherActive() === 1 ? '1 other device' : `${this.otherActive()} other devices`} will be signed out. This device stays signed in.`,
+        confirmLabel: 'Sign out others',
         destructive: true,
+        icon: 'logout',
       })
       .pipe(filter(Boolean))
       .subscribe(() => {
@@ -95,16 +135,14 @@ export class ProfileSessionsPageComponent implements OnInit {
           next: (res) => {
             this.toast.success(
               res.revoked > 0
-                ? `Revoked ${res.revoked} other session${res.revoked === 1 ? '' : 's'}.`
-                : 'No other sessions to revoke.',
+                ? `Signed out ${res.revoked} other device${res.revoked === 1 ? '' : 's'}.`
+                : 'No other devices were signed in.',
             );
             this.revokingOthers.set(false);
             this.reload();
           },
-          error: (err: { error?: { message?: string }; message?: string }) => {
-            this.toast.error(
-              err?.error?.message || err?.message || 'Unable to revoke other sessions.',
-            );
+          error: (err: ApiError) => {
+            this.toast.error(err?.error?.message || err?.message || 'Unable to sign out other devices.');
             this.revokingOthers.set(false);
           },
         });

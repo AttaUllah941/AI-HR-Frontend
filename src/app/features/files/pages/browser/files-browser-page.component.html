@@ -1,96 +1,176 @@
-<app-organization-status skeleton="table"
-  [loading]="loading()"
-  [error]="error()"
-  loadingMessage="Loading files…"
-  errorTitle="Files unavailable"
-  (retry)="reload()"
->
-  <section class="files-page" [attr.aria-label]="heading()">
-    <div class="files-action-bar">
-      <div>
-        <h2 class="files-page-heading">{{ heading() }}</h2>
-        <p class="files-page-sub">{{ subtitle() }} · {{ total() }} files</p>
-      </div>
-      <div class="files-action-bar__actions">
-        <button mat-stroked-button type="button" class="files-add-btn" (click)="reload()">
-          <mat-icon aria-hidden="true">refresh</mat-icon>
-          Refresh
-        </button>
-        @if (canCreate) {
-          <button
-            mat-flat-button
-            color="primary"
-            type="button"
-            class="files-add-btn"
-            (click)="openUpload()"
-          >
-            <mat-icon aria-hidden="true">upload_file</mat-icon>
-            Upload
-          </button>
-        }
-      </div>
+<section class="files-page" [attr.aria-label]="heading()">
+  <div class="files-action-bar">
+    <div>
+      <h2 class="files-page-heading">{{ heading() }}</h2>
+      <p class="files-page-sub">{{ subtitle() }}</p>
     </div>
-
-    <div class="files-action-bar">
-      <mat-form-field appearance="outline">
-        <mat-label>Search</mat-label>
-        <input matInput [formControl]="search" placeholder="Name or title" />
-      </mat-form-field>
-      @if (!lockedCategory()) {
-        <mat-form-field appearance="outline">
-          <mat-label>Category</mat-label>
-          <mat-select [formControl]="category">
-            <mat-option value="">All</mat-option>
-            @for (cat of categories; track cat) {
-              <mat-option [value]="cat">{{ categoryLabels[cat] }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+    <div class="files-action-bar__actions">
+      <button mat-stroked-button type="button" class="files-add-btn" [disabled]="loading()" (click)="reload()">
+        <mat-icon aria-hidden="true">refresh</mat-icon>
+        Refresh
+      </button>
+      @if (canCreate) {
+        <button mat-flat-button color="primary" type="button" class="files-add-btn" (click)="openUpload()">
+          <mat-icon aria-hidden="true">upload_file</mat-icon>
+          Upload
+        </button>
       }
     </div>
+  </div>
 
-    @if (items().length === 0) {
-      <app-empty-state
-        title="No files yet"
-        message="Upload documents and resumes to get started."
-        icon="folder_open"
+  <!-- Kept outside the loading wrapper so the search box is never replaced (and never loses focus) while results reload. -->
+  <div class="org-toolbar files-toolbar">
+    <label class="org-toolbar__search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        type="search"
+        [formControl]="search"
+        [attr.placeholder]="'Search ' + noun() + ' by name or title…'"
+        [attr.aria-label]="'Search ' + noun()"
       />
-    } @else {
-      <div class="files-doc-grid">
-        @for (file of items(); track file.id) {
-          <article class="files-doc-card">
-            <div class="files-doc-card__icon" aria-hidden="true">
-              <mat-icon>{{ file.previewable ? 'visibility' : 'insert_drive_file' }}</mat-icon>
-            </div>
-            <div class="files-doc-card__body">
-              <h3 class="files-doc-card__title">{{ file.title || file.originalName }}</h3>
-              <p class="files-doc-card__meta">
-                {{ categoryLabel(file.category) }} · {{ formatBytes(file.sizeBytes) }} ·
-                {{ formatDate(file.createdAt) }}
-              </p>
-              @if (file.employee) {
-                <p class="files-doc-card__meta">
-                  {{ file.employee.firstName }} {{ file.employee.lastName }}
-                  ({{ file.employee.employeeCode }})
-                </p>
-              } @else if (file.candidate) {
-                <p class="files-doc-card__meta">
-                  {{ file.candidate.firstName }} {{ file.candidate.lastName }}
-                </p>
-              }
-            </div>
-            <div class="files-doc-card__actions">
-              @if (file.previewable) {
-                <button mat-stroked-button type="button" (click)="preview(file)">Preview</button>
-              }
-              <button mat-stroked-button type="button" (click)="download(file)">Download</button>
-              @if (canDelete) {
-                <button mat-button color="warn" type="button" (click)="remove(file)">Delete</button>
-              }
-            </div>
-          </article>
-        }
-      </div>
+    </label>
+    @if (!lockedCategory()) {
+      <label class="files-select">
+        <span class="sr-only">Category</span>
+        <select [formControl]="category" aria-label="Filter by category">
+          <option value="">All categories</option>
+          @for (cat of categories; track cat) {
+            <option [value]="cat">{{ categoryLabels[cat] }}</option>
+          }
+        </select>
+      </label>
     }
-  </section>
-</app-organization-status>
+    @if (hasFilters()) {
+      <button type="button" class="org-toolbar__clear" (click)="clearFilters()">Clear filters</button>
+    }
+  </div>
+
+  <app-organization-status
+    skeleton="table"
+    [loading]="loading()"
+    [error]="error()"
+    [hasData]="items().length > 0"
+    loadingMessage="Loading files…"
+    errorTitle="Files unavailable"
+    (retry)="reload()"
+  >
+    <div class="org-table-card">
+      @if (items().length === 0) {
+        @if (hasFilters()) {
+          <app-empty-state
+            [title]="'No matching ' + noun()"
+            message="Try a different search or clear the filters."
+            icon="search_off"
+            actionLabel="Clear filters"
+            actionIcon="filter_alt_off"
+            (action)="clearFilters()"
+          />
+        } @else {
+          <app-empty-state
+            [title]="'No ' + noun() + ' yet'"
+            message="Uploaded files will appear here."
+            icon="folder_open"
+            [actionLabel]="canCreate ? 'Upload a file' : ''"
+            actionIcon="upload_file"
+            (action)="openUpload()"
+          />
+        }
+      } @else {
+        <div class="org-table-wrap">
+          <table class="org-table files-list-table" data-responsive>
+            <thead>
+              <tr>
+                <th scope="col">File</th>
+                <th scope="col" data-col="category">Category</th>
+                <th scope="col" data-col="linked">Linked to</th>
+                <th scope="col" data-col="size">Size</th>
+                <th scope="col" data-col="uploaded">Uploaded</th>
+                <th scope="col" class="org-table__actions-col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (file of items(); track file.id) {
+                <tr>
+                  <td data-label="Name">
+                    <div class="files-table__file">
+                      <span class="files-table__icon" aria-hidden="true">
+                        <mat-icon>{{ icon(file) }}</mat-icon>
+                      </span>
+                      <div class="org-table__name">
+                        <strong>{{ file.title || file.originalName }}</strong>
+                        @if (file.title && file.title !== file.originalName) {
+                          <span [title]="file.originalName">{{ file.originalName }}</span>
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td data-col="category" data-label="Category">
+                    <span class="files-badge">{{ categoryLabel(file.category) }}</span>
+                  </td>
+                  <td data-col="linked" data-label="Linked to">
+                    @if (file.employee) {
+                      {{ file.employee.firstName }} {{ file.employee.lastName }}
+                      <span class="files-table__muted">({{ file.employee.employeeCode }})</span>
+                    } @else if (file.candidate) {
+                      {{ file.candidate.firstName }} {{ file.candidate.lastName }}
+                    } @else {
+                      —
+                    }
+                  </td>
+                  <td data-col="size" data-label="Size">{{ formatBytes(file.sizeBytes) }}</td>
+                  <td data-col="uploaded" data-label="Uploaded">
+                    {{ formatDate(file.createdAt) }}
+                    @if (file.uploadedBy) {
+                      <span class="files-table__muted files-table__by">
+                        by {{ file.uploadedBy.firstName }} {{ file.uploadedBy.lastName }}
+                      </span>
+                    }
+                  </td>
+                  <td class="org-table__actions-col" data-label="">
+                    @if (file.previewable) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        [attr.aria-label]="'Preview ' + (file.title || file.originalName)"
+                        title="Preview"
+                        [disabled]="busyId() !== null || deletingId() === file.id"
+                        (click)="preview(file)"
+                      >
+                        <mat-icon>visibility</mat-icon>
+                      </button>
+                    }
+                    <button
+                      mat-icon-button
+                      type="button"
+                      [attr.aria-label]="'Download ' + (file.title || file.originalName)"
+                      title="Download"
+                      [disabled]="busyId() !== null || deletingId() === file.id"
+                      (click)="download(file)"
+                    >
+                      <mat-icon>{{ busyId() === file.id ? 'hourglass_top' : 'download' }}</mat-icon>
+                    </button>
+                    @if (canDelete) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        class="org-table__delete"
+                        [attr.aria-label]="'Delete ' + (file.title || file.originalName)"
+                        title="Delete"
+                        [disabled]="deletingId() === file.id"
+                        (click)="remove(file)"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <app-organization-list-footer [list]="pager" [noun]="noun()" />
+      }
+    </div>
+  </app-organization-status>
+</section>

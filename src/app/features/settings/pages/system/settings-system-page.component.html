@@ -1,4 +1,5 @@
-<app-organization-status skeleton="form"
+<app-organization-status
+  skeleton="form"
   [loading]="loading()"
   [error]="error()"
   loadingMessage="Loading system settings…"
@@ -9,44 +10,74 @@
     <div class="settings-action-bar">
       <div>
         <h2 class="settings-page-heading">System configuration</h2>
-        <p class="settings-page-sub">Workspace defaults and feature toggles.</p>
+        <p class="settings-page-sub">Workspace defaults and notes about connected services.</p>
       </div>
       @if (canUpdate) {
-        <div class="settings-action-bar__actions">
+        <div class="settings-save">
+          @if (systemForm.dirty && !savingSystem()) {
+            <span class="settings-dirty" role="status">Unsaved changes</span>
+          }
           <button
             mat-flat-button
             color="primary"
-            type="button"
+            type="submit"
+            form="system-form"
             class="settings-add-btn"
-            [disabled]="savingSystem()"
-            (click)="saveSystem()"
-            [appButtonSpinner]="savingSystem()">
-            @if (!savingSystem()) { <mat-icon aria-hidden="true">save</mat-icon> }
-            Save system
+            [disabled]="savingSystem() || !systemForm.dirty"
+            [appButtonSpinner]="savingSystem()"
+          >
+            @if (!savingSystem()) {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
+            {{ savingSystem() ? 'Saving…' : 'Save system' }}
           </button>
         </div>
+      } @else {
+        <p class="settings-dirty" role="note">View only</p>
       }
     </div>
 
     <div class="settings-panel-card">
-      <form [formGroup]="systemForm" class="settings-form">
+      <form [formGroup]="systemForm" class="settings-form" id="system-form" (ngSubmit)="saveSystem()">
         <div class="settings-form__grid">
           <div class="settings-form__full">
             <mat-checkbox formControlName="maintenanceMode">Maintenance mode</mat-checkbox>
+            <p class="settings-page-sub">
+              Recorded only. It does not stop anyone from using the app yet.
+            </p>
           </div>
           <div class="settings-form__full">
-            <mat-checkbox formControlName="allowSelfRegistration"
-              >Allow self-registration</mat-checkbox
-            >
+            <mat-checkbox formControlName="allowSelfRegistration">Allow self-registration</mat-checkbox>
+            <p class="settings-page-sub">
+              Read only. Whether new companies can sign up is controlled by the server, not by this
+              setting.
+            </p>
           </div>
           <mat-form-field appearance="outline">
             <mat-label>Default timezone</mat-label>
-            <input matInput formControlName="defaultTimezone" />
+            <input matInput formControlName="defaultTimezone" list="system-timezones" autocomplete="off" />
+            <mat-hint>For example Asia/Karachi or UTC</mat-hint>
+            @if (systemForm.controls.defaultTimezone.hasError('required')) {
+              <mat-error>Enter a timezone</mat-error>
+            } @else if (systemForm.controls.defaultTimezone.hasError('timezone')) {
+              <mat-error>Not a known timezone. Pick one from the suggestions.</mat-error>
+            }
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Default locale</mat-label>
-            <input matInput formControlName="defaultLocale" />
+            <input matInput formControlName="defaultLocale" autocomplete="off" />
+            <mat-hint>For example en-US or en-GB</mat-hint>
+            @if (systemForm.controls.defaultLocale.hasError('required')) {
+              <mat-error>Enter a locale</mat-error>
+            } @else if (systemForm.controls.defaultLocale.hasError('locale')) {
+              <mat-error>Use a language and region such as en-US</mat-error>
+            }
           </mat-form-field>
+          <datalist id="system-timezones">
+            @for (tz of timeZones; track tz) {
+              <option [value]="tz"></option>
+            }
+          </datalist>
         </div>
       </form>
     </div>
@@ -54,44 +85,66 @@
     <div class="settings-action-bar">
       <div>
         <h2 class="settings-page-heading">Integrations</h2>
-        <p class="settings-page-sub">External connectors (metadata only for now).</p>
+        <p class="settings-page-sub">Details for external services you plan to connect.</p>
       </div>
       @if (canUpdate) {
-        <div class="settings-action-bar__actions">
+        <div class="settings-save">
+          @if (integrationsForm.dirty && !savingIntegrations()) {
+            <span class="settings-dirty" role="status">Unsaved changes</span>
+          }
           <button
             mat-flat-button
             color="primary"
-            type="button"
+            type="submit"
+            form="integrations-form"
             class="settings-add-btn"
-            [disabled]="savingIntegrations()"
-            (click)="saveIntegrations()"
-            [appButtonSpinner]="savingIntegrations()">
-            @if (!savingIntegrations()) { <mat-icon aria-hidden="true">save</mat-icon> }
-            Save integrations
+            [disabled]="savingIntegrations() || !integrationsForm.dirty"
+            [appButtonSpinner]="savingIntegrations()"
+          >
+            @if (!savingIntegrations()) {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
+            {{ savingIntegrations() ? 'Saving…' : 'Save integrations' }}
           </button>
         </div>
       }
     </div>
 
+    <p class="settings-notice" role="note">
+      <mat-icon aria-hidden="true">info</mat-icon>
+      <span>
+        Nothing is connected yet. These details are only stored, and no feature uses them. Treat the
+        webhook address like a password: anyone who has it can post to your channel.
+      </span>
+    </p>
+
     <div class="settings-panel-card">
-      <form [formGroup]="integrationsForm" class="settings-form">
+      <form
+        [formGroup]="integrationsForm"
+        class="settings-form"
+        id="integrations-form"
+        (ngSubmit)="saveIntegrations()"
+      >
         <div class="settings-form__grid">
           <mat-form-field appearance="outline" class="settings-form__full">
             <mat-label>Slack webhook URL</mat-label>
-            <input matInput formControlName="slackWebhookUrl" />
+            <input matInput formControlName="slackWebhookUrl" type="password" autocomplete="off" />
+            @if (integrationsForm.controls.slackWebhookUrl.hasError('pattern')) {
+              <mat-error>Use an address starting with http:// or https://</mat-error>
+            }
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Google Workspace domain</mat-label>
-            <input matInput formControlName="googleWorkspaceDomain" />
+            <input matInput formControlName="googleWorkspaceDomain" autocomplete="off" placeholder="example.com" />
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Microsoft tenant ID</mat-label>
-            <input matInput formControlName="microsoftTenantId" />
+            <input matInput formControlName="microsoftTenantId" autocomplete="off" />
           </mat-form-field>
           <div class="settings-form__full">
-            <mat-checkbox formControlName="webhookSigningSecretSet"
-              >Webhook signing secret configured</mat-checkbox
-            >
+            <mat-checkbox formControlName="webhookSigningSecretSet">
+              Note that a webhook signing secret has been set up
+            </mat-checkbox>
           </div>
         </div>
       </form>

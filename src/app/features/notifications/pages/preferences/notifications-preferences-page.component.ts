@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -23,6 +25,7 @@ import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     MatButtonModule,
     MatIconModule,
     MatSlideToggleModule,
@@ -46,6 +49,22 @@ export class NotificationsPreferencesPageComponent implements OnInit, HasUnsaved
   readonly form = this.fb.group({
     preferences: this.fb.array<FormGroup>([]),
   });
+
+  /** Re-reads the template whenever any toggle changes (the view is OnPush). */
+  private readonly changes = toSignal(this.form.valueChanges);
+
+  /** True while there are edits that have not been saved. */
+  hasEdits(): boolean {
+    this.changes();
+    return this.form.dirty && !this.saving();
+  }
+
+  /** The Security category is the one place where turning everything off has a real cost. */
+  isMuted(group: AbstractControl): boolean {
+    this.changes();
+    const v = group.value as { inAppEnabled: boolean; emailEnabled: boolean; pushEnabled: boolean };
+    return !v.inAppEnabled && !v.emailEnabled && !v.pushEnabled;
+  }
 
   get preferences(): FormArray<FormGroup> {
     return this.form.get('preferences') as FormArray<FormGroup>;

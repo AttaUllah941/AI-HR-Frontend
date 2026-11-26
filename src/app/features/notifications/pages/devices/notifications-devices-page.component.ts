@@ -48,6 +48,8 @@ export class NotificationsDevicesPageComponent implements OnInit {
   readonly items = signal<PushDevice[]>([]);
   readonly loading = signal(true);
   readonly registering = signal(false);
+  /** True once the first load finished, so a reload after registering keeps the form on screen. */
+  readonly loaded = signal(false);
   readonly error = signal<string | null>(null);
 
   readonly platforms = PUSH_PLATFORMS;
@@ -68,6 +70,7 @@ export class NotificationsDevicesPageComponent implements OnInit {
     this.notifications.listDevices().subscribe({
       next: (res) => {
         this.items.set(res.items);
+        this.loaded.set(true);
         this.loading.set(false);
       },
       error: (err: { error?: { message?: string }; message?: string }) => {
@@ -122,6 +125,11 @@ export class NotificationsDevicesPageComponent implements OnInit {
           error: () => this.toast.error('Unable to remove device.'),
         });
       });
+  }
+
+  platformLabel(platform: string): string {
+    const labels: Record<string, string> = { WEB: 'Web', IOS: 'iOS', ANDROID: 'Android' };
+    return labels[platform] ?? platform;
   }
 
   createdLabel(iso: string): string {

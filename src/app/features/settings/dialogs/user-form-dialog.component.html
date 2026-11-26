@@ -1,71 +1,112 @@
-<h2 mat-dialog-title>{{ isEdit ? 'Edit user' : 'Invite user' }}</h2>
-
+<h2 mat-dialog-title class="org-dialog-title">
+  <mat-icon aria-hidden="true">{{ isEdit ? 'manage_accounts' : 'person_add' }}</mat-icon>
+  {{ isEdit ? 'Edit user' : 'Invite user' }}
+</h2>
 <mat-dialog-content>
-  <form [formGroup]="form" class="settings-form" (ngSubmit)="submit()">
+  <p class="org-dialog-subtitle">
+    @if (isEdit) {
+      Update this person's details, role and access.
+    } @else {
+      They get an account and a temporary password to sign in with.
+    }
+  </p>
+  <form [formGroup]="form" class="settings-form" id="user-form" (ngSubmit)="submit()">
     <div class="settings-form__grid">
       <mat-form-field appearance="outline">
         <mat-label>First name</mat-label>
-        <input matInput formControlName="firstName" />
+        <input matInput formControlName="firstName" autocomplete="off" />
+        @if (form.controls.firstName.hasError('required')) {
+          <mat-error>Enter a first name</mat-error>
+        }
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>Last name</mat-label>
-        <input matInput formControlName="lastName" />
+        <input matInput formControlName="lastName" autocomplete="off" />
+        @if (form.controls.lastName.hasError('required')) {
+          <mat-error>Enter a last name</mat-error>
+        }
       </mat-form-field>
       @if (!isEdit) {
         <mat-form-field appearance="outline" class="settings-form__full">
           <mat-label>Email</mat-label>
-          <input matInput formControlName="email" type="email" />
+          <input matInput formControlName="email" type="email" autocomplete="off" />
+          @if (form.controls.email.hasError('required')) {
+            <mat-error>Enter an email address</mat-error>
+          } @else if (form.controls.email.hasError('email')) {
+            <mat-error>Enter a valid email address</mat-error>
+          }
         </mat-form-field>
       }
       <mat-form-field appearance="outline">
-        <mat-label>Phone</mat-label>
-        <input matInput formControlName="phone" />
+        <mat-label>Phone (optional)</mat-label>
+        <input matInput formControlName="phone" type="tel" autocomplete="off" />
       </mat-form-field>
       @if (isEdit) {
         <mat-form-field appearance="outline">
           <mat-label>Status</mat-label>
           <mat-select formControlName="status">
-            <mat-option value="ACTIVE">ACTIVE</mat-option>
-            <mat-option value="INACTIVE">INACTIVE</mat-option>
-            <mat-option value="SUSPENDED">SUSPENDED</mat-option>
+            @for (s of statusOptions; track s.value) {
+              <mat-option [value]="s.value">{{ s.label }}</mat-option>
+            }
           </mat-select>
+          <mat-hint>Suspended or inactive people cannot sign in.</mat-hint>
         </mat-form-field>
       }
       <mat-form-field appearance="outline" class="settings-form__full">
         <mat-label>Roles</mat-label>
         <mat-select formControlName="roleCodes" multiple>
           @for (role of data.roles; track role.id) {
-            <mat-option [value]="role.code">{{ role.name }} ({{ role.code }})</mat-option>
+            <mat-option [value]="role.code">{{ role.name }}</mat-option>
           }
         </mat-select>
+        @if (form.controls.roleCodes.hasError('required') || form.controls.roleCodes.hasError('minlength')) {
+          <mat-error>Choose at least one role</mat-error>
+        } @else if (data.roles.length === 0) {
+          <mat-hint>Roles could not be loaded. You may not have access to view them.</mat-hint>
+        } @else {
+          <mat-hint>A person gets every permission of every role you choose.</mat-hint>
+        }
       </mat-form-field>
       @if (!isEdit) {
         <mat-form-field appearance="outline" class="settings-form__full">
           <mat-label>Temporary password (optional)</mat-label>
-          <input matInput formControlName="temporaryPassword" type="password" autocomplete="new-password" />
-          <mat-hint>
-            Leave blank to auto-generate and email it. Otherwise use 8+ characters with upper, lower
-            and a number.
-          </mat-hint>
+          <input
+            matInput
+            formControlName="temporaryPassword"
+            [type]="showPassword() ? 'text' : 'password'"
+            autocomplete="new-password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            [attr.aria-pressed]="showPassword()"
+            (click)="showPassword.set(!showPassword())"
+          >
+            <mat-icon aria-hidden="true">{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
           @if (form.controls.temporaryPassword.invalid) {
             <mat-error>Needs 8+ characters with upper case, lower case and a number.</mat-error>
+          } @else {
+            <mat-hint>Leave blank to generate one. Otherwise use 8+ characters with upper case, lower case and a number.</mat-hint>
           }
         </mat-form-field>
       }
     </div>
   </form>
 </mat-dialog-content>
-
-<mat-dialog-actions align="end">
+<mat-dialog-actions align="end" class="org-dialog-actions">
   <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
   <button
     mat-flat-button
     color="primary"
-    type="button"
-    [disabled]="form.invalid || saving()"
-    (click)="submit()"
-    [appButtonSpinner]="saving()">
-    @if (!saving()) { <mat-icon aria-hidden="true">{{ isEdit ? 'save' : 'person_add' }}</mat-icon> }
-    {{ saving() ? 'Saving…' : isEdit ? 'Save' : 'Create' }}
+    type="submit"
+    form="user-form"
+    class="org-dialog-actions__save"
+    [disabled]="saving()"
+    [appButtonSpinner]="saving()"
+  >
+    {{ saving() ? 'Saving…' : isEdit ? 'Save changes' : 'Create user' }}
   </button>
 </mat-dialog-actions>

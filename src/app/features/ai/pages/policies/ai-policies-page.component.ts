@@ -1,27 +1,28 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { filter } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import {
-  AiGeneration,
-  AiPolicyTone,
-  AiService,
-  PolicyDraft,
-} from '../../../../core/services/ai.service';
+import { AiGeneration, AiPolicyTone, AiService } from '../../../../core/services/ai.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
-import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
-import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
-import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
-import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 import { formatDateTime } from '../../../../core/utils/date-format';
+import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { LOADER_MESSAGES } from '../../../../shared/smart-loader/loader-messages';
+import { SmartLoaderComponent } from '../../../../shared/smart-loader/smart-loader.component';
+import { downloadBlob } from '../../../../shared/utils/download-blob';
+import { renderMarkdown } from '../../../../shared/utils/markdown';
+import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+
+/** How many past drafts the history lists (the API's newest first). */
+const HISTORY_SIZE = 50;
+
+type ApiError = { error?: { message?: string }; message?: string };
 
 @Component({
   selector: 'app-ai-policies-page',
@@ -29,7 +30,6 @@ import { formatDateTime } from '../../../../core/utils/date-format';
   imports: [
     ReactiveFormsModule,
     MatButtonModule,
-    MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -52,21 +52,47 @@ export class AiPoliciesPageComponent implements OnInit {
   private readonly confirm = inject(ConfirmDialogService);
 
   readonly items = signal<AiGeneration[]>([]);
-  readonly draft = signal<PolicyDraft | null>(null);
+  readonly total = signal(0);
+  readonly selectedId = signal<string | null>(null);
   readonly loading = signal(true);
   readonly generating = signal(false);
+  readonly deletingId = signal<string | null>(null);
   readonly error = signal<string | null>(null);
-
   readonly canCreate = this.auth.hasPermission('ai:create');
   readonly canDelete = this.auth.hasPermission('ai:delete');
-  readonly tones: AiPolicyTone[] = ['formal', 'friendly', 'strict'];
+
+  readonly tones: ReadonlyArray<{ value: AiPolicyTone; label: string }> = [
+    { value: 'formal', label: 'Formal' },
+    { value: 'friendly', label: 'Friendly' },
+    { value: 'strict', label: 'Strict' },
+  ];
+
+  /** Limits mirror the API's validation so users see them before the request fails. */
+  readonly limits = { topic: 200, audience: 100, additionalContext: 3000 } as const;
 
   readonly form = this.fb.nonNullable.group({
-    topic: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
-    audience: [''],
+    topic: [
+      '',
+      [Validators.required, Validators.minLength(3), Validators.maxLength(this.limits.topic)],
+    ],
+    audience: ['', Validators.maxLength(this.limits.audience)],
     tone: ['formal' as AiPolicyTone],
-    additionalContext: [''],
+    additionalContext: ['', Validators.maxLength(this.limits.additionalContext)],
   });
+
+  readonly selected = computed(() => this.items().find((item) => item.id === this.selectedId()) ?? null);
+  private readonly draft = computed(() => {
+    const generation = this.selected();
+    return generation ? this.ai.normalizePolicyOutput(generation.output) : null;
+  });
+  readonly title = computed(() => {
+    const generation = this.selected();
+    return generation ? (this.draft()?.topic || this.topicPreview(generation)) : '';
+  });
+  readonly markdown = computed(() => this.draft()?.markdown ?? '');
+  /** Safe to bind with [innerHTML]: the renderer escapes the AI text and emits no links or raw HTML. */
+  readonly html = computed(() => renderMarkdown(this.markdown()));
+  readonly failed = computed(() => this.selected()?.status === 'FAILED');
 
   ngOnInit(): void {
     this.reload();
@@ -75,23 +101,27 @@ export class AiPoliciesPageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.ai.listGenerations({ feature: 'POLICY', page: 1, pageSize: 50 }).subscribe({
+    this.ai.listGenerations({ feature: 'POLICY', page: 1, pageSize: HISTORY_SIZE }).subscribe({
       next: (res) => {
         this.items.set(res.items);
-        if (!this.draft() && res.items[0]) {
-          this.selectGeneration(res.items[0]);
+        this.total.set(res.pagination?.total ?? res.items.length);
+        if (!this.selected() && res.items[0]) {
+          this.selectedId.set(res.items[0].id);
         }
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Unable to load policy generations.');
+        this.error.set('Unable to load policy drafts.');
         this.loading.set(false);
       },
     });
   }
 
   generate(): void {
-    if (!this.canCreate || this.form.invalid || this.generating()) {
+    if (!this.canCreate || this.generating()) {
+      return;
+    }
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
@@ -107,43 +137,72 @@ export class AiPoliciesPageComponent implements OnInit {
       .subscribe({
         next: (generation) => {
           this.toast.success('Policy draft generated.');
-          this.selectGeneration(generation);
+          // Add it to the history here instead of reloading, so the page does not flash.
+          this.items.update((list) => [generation, ...list.filter((i) => i.id !== generation.id)]);
+          this.total.update((n) => n + 1);
+          this.selectedId.set(generation.id);
           this.generating.set(false);
-          this.reload();
         },
-        error: (err: { error?: { message?: string }; message?: string }) => {
-          this.toast.error(
-            err?.error?.message || err?.message || 'Policy generation failed.',
-          );
+        error: (err: ApiError) => {
+          this.toast.error(err?.error?.message || err?.message || 'Policy generation failed.');
           this.generating.set(false);
         },
       });
   }
 
-  selectGeneration(generation: AiGeneration): void {
-    this.draft.set(this.ai.normalizePolicyOutput(generation.output));
+  select(generation: AiGeneration): void {
+    this.selectedId.set(generation.id);
   }
 
-  deleteGeneration(id: string): void {
-    if (!this.canDelete) {
+  async copy(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.markdown());
+      this.toast.success('Policy text copied.');
+    } catch {
+      this.toast.error('Could not copy. Select the text and copy it manually.');
+    }
+  }
+
+  download(): void {
+    const slug =
+      this.title()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60) || 'policy-draft';
+    downloadBlob(new Blob([this.markdown()], { type: 'text/markdown;charset=utf-8' }), `${slug}.md`);
+  }
+
+  deleteGeneration(item: AiGeneration): void {
+    if (!this.canDelete || this.deletingId()) {
       return;
     }
     this.confirm
       .open({
         title: 'Delete policy draft?',
-        message: 'This removes the generated policy from history.',
+        message: `Delete “${this.topicPreview(item)}” from the history? This can't be undone.`,
         confirmLabel: 'Delete',
         destructive: true,
+        icon: 'delete_forever',
       })
       .pipe(filter(Boolean))
       .subscribe(() => {
-        this.ai.deleteGeneration(id).subscribe({
+        this.deletingId.set(item.id);
+        this.ai.deleteGeneration(item.id).subscribe({
           next: () => {
+            const remaining = this.items().filter((i) => i.id !== item.id);
+            this.items.set(remaining);
+            this.total.update((n) => Math.max(0, n - 1));
+            if (this.selectedId() === item.id) {
+              this.selectedId.set(remaining[0]?.id ?? null);
+            }
+            this.deletingId.set(null);
             this.toast.success('Policy draft deleted.');
-            this.draft.set(null);
-            this.reload();
           },
-          error: () => this.toast.error('Unable to delete policy draft.'),
+          error: (err: ApiError) => {
+            this.deletingId.set(null);
+            this.toast.error(err?.error?.message || err?.message || 'Unable to delete policy draft.');
+          },
         });
       });
   }

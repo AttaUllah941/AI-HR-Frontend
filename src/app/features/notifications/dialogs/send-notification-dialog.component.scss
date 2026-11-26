@@ -2,7 +2,12 @@
   display: block;
 }
 
-mat-spinner {
-  display: inline-block;
-  margin-right: 0.35rem;
+mat-dialog-content {
+  min-width: min(30rem, 92vw);
+}
+
+.notifications-option-detail {
+  margin-left: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--zh-muted-foreground);
 }

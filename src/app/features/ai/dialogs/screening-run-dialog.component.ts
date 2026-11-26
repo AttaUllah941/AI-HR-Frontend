@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { map } from 'rxjs';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,7 +10,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { AiGeneration, AiService } from '../../../core/services/ai.service';
 import {
-  Candidate,
   JobOpening,
   RecruitmentService,
 } from '../../../core/services/recruitment.service';
@@ -17,6 +18,14 @@ import { SmartLoaderComponent } from '../../../shared/smart-loader/smart-loader.
 import { LOADER_MESSAGES } from '../../../shared/smart-loader/loader-messages';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
+import {
+  PersonOption,
+  PickerValue,
+  displayPerson,
+  mustPickOption,
+  pickedId,
+  personSuggestions,
+} from '../../../shared/forms/person-picker';
 
 export interface ScreeningRunDialogData {
   candidateId?: string;
@@ -28,6 +37,7 @@ export interface ScreeningRunDialogData {
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    MatAutocompleteModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
@@ -51,29 +61,32 @@ export class ScreeningRunDialogComponent {
   readonly data = inject<ScreeningRunDialogData>(MAT_DIALOG_DATA, { optional: true }) ?? {};
 
   readonly saving = signal(false);
-  readonly candidates = signal<Candidate[]>([]);
   readonly jobs = signal<JobOpening[]>([]);
 
+  /** Searchable on the server, so every candidate is reachable, not just the first page. */
+  readonly candidate = new FormControl<PickerValue>(this.initialCandidate(), {
+    validators: [Validators.required, mustPickOption],
+  });
+  readonly candidateOptions = personSuggestions(this.candidate, (search) =>
+    this.recruitment.listCandidates({ search, page: 1, pageSize: 10 }).pipe(
+      map((res) =>
+        res.items.map((c) => ({ id: c.id, name: `${c.firstName} ${c.lastName}`.trim(), detail: c.email })),
+      ),
+    ),
+  );
+  readonly displayPerson = displayPerson;
+
   readonly form = this.fb.nonNullable.group({
-    candidateId: [this.data.candidateId ?? '', Validators.required],
     jobOpeningId: [this.data.jobOpeningId ?? ''],
     notes: [''],
   });
 
   constructor() {
-    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
-    this.recruitment.listCandidates({ page: 1, pageSize: 100 }).subscribe({
-      next: (res) => this.candidates.set(res.items),
-      error: () => this.candidates.set([]),
-    });
+    guardDirtyDialog(this.dialogRef, () => (this.form.dirty || this.candidate.dirty) && !this.saving());
     this.recruitment.listJobs({ page: 1, pageSize: 100 }).subscribe({
       next: (res) => this.jobs.set(res.items),
       error: () => this.jobs.set([]),
     });
-  }
-
-  candidateLabel(c: Candidate): string {
-    return `${c.firstName} ${c.lastName}${c.email ? ` · ${c.email}` : ''}`;
   }
 
   jobLabel(j: JobOpening): string {
@@ -81,15 +94,17 @@ export class ScreeningRunDialogComponent {
   }
 
   submit(): void {
-    if (this.form.invalid || this.saving()) {
-      this.form.markAllAsTouched();
+    this.form.markAllAsTouched();
+    this.candidate.markAsTouched();
+    const candidateId = pickedId(this.candidate.value);
+    if (!candidateId || this.form.invalid || this.saving()) {
       return;
     }
     this.saving.set(true);
     const raw = this.form.getRawValue();
     this.ai
       .screenResume({
-        candidateId: raw.candidateId,
+        candidateId,
         jobOpeningId: raw.jobOpeningId.trim() || null,
         notes: raw.notes.trim() || null,
       })
@@ -106,4 +121,8 @@ export class ScreeningRunDialogComponent {
         },
       });
   }
+  private initialCandidate(): PersonOption | null {
+    return this.data.candidateId ? { id: this.data.candidateId, name: 'Selected candidate', detail: '' } : null;
+  }
+
 }

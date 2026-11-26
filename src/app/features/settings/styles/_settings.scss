@@ -153,21 +153,21 @@
 }
 
 .settings-badge--ok {
-  border-color: color-mix(in srgb, #16a34a 35%, var(--zh-border));
-  color: #15803d;
-  background: color-mix(in srgb, #16a34a 12%, transparent);
+  border-color: color-mix(in oklab, var(--zh-success) 35%, var(--zh-border));
+  color: var(--zh-success-text);
+  background: color-mix(in oklab, var(--zh-success) 14%, transparent);
 }
 
 .settings-badge--warn {
-  border-color: color-mix(in srgb, #ca8a04 35%, var(--zh-border));
-  color: #a16207;
-  background: color-mix(in srgb, #ca8a04 12%, transparent);
+  border-color: color-mix(in oklab, var(--zh-warning) 40%, var(--zh-border));
+  color: var(--zh-warning-text);
+  background: color-mix(in oklab, var(--zh-warning) 18%, transparent);
 }
 
 .settings-badge--fail {
-  border-color: color-mix(in srgb, #dc2626 35%, var(--zh-border));
-  color: #b91c1c;
-  background: color-mix(in srgb, #dc2626 12%, transparent);
+  border-color: color-mix(in oklab, var(--zh-destructive) 35%, var(--zh-border));
+  color: var(--zh-destructive-text);
+  background: color-mix(in oklab, var(--zh-destructive) 12%, transparent);
 }
 
 .settings-role-layout {
@@ -293,5 +293,205 @@
 
   .settings-form__grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Notices, dirty indicator, read-only values ---- */
+.settings-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid color-mix(in oklab, var(--zh-secondary) 35%, var(--zh-border));
+  border-radius: 0.85rem;
+  background: color-mix(in oklab, var(--zh-secondary) 10%, transparent);
+  color: var(--zh-foreground);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+
+  mat-icon {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: color-mix(in oklab, var(--zh-secondary) 60%, var(--zh-foreground));
+  }
+
+  &--warn {
+    border-color: color-mix(in oklab, var(--zh-warning) 40%, var(--zh-border));
+    background: color-mix(in oklab, var(--zh-warning) 12%, transparent);
+    color: var(--zh-warning-text);
+
+    mat-icon {
+      color: var(--zh-warning-text);
+    }
+  }
+
+  &--danger {
+    border-color: color-mix(in oklab, var(--zh-destructive) 35%, var(--zh-border));
+    background: color-mix(in oklab, var(--zh-destructive) 8%, transparent);
+    color: var(--zh-destructive-text);
+
+    mat-icon {
+      color: var(--zh-destructive-text);
+    }
+  }
+}
+
+.settings-save {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.settings-dirty {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--zh-warning-text);
+}
+
+.settings-section-title {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.settings-readonly {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px dashed var(--zh-border);
+  border-radius: 0.85rem;
+  font-size: 0.875rem;
+  color: var(--zh-muted-foreground);
+
+  strong {
+    color: var(--zh-foreground);
+  }
+}
+
+.settings-secret {
+  margin: 0.5rem 0 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.75rem;
+  background: var(--zh-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.settings-you {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--zh-primary-soft);
+  color: var(--zh-primary-text);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.settings-actions {
+  display: inline-flex;
+  gap: 0.15rem;
+  white-space: nowrap;
+
+  button {
+    color: var(--zh-muted-foreground);
+
+    &:hover:not([disabled]) {
+      color: var(--zh-primary-text);
+      background: var(--zh-primary-soft);
+    }
+
+    &.is-danger:hover:not([disabled]) {
+      color: var(--zh-destructive-text);
+      background: color-mix(in oklab, var(--zh-destructive) 10%, var(--zh-card));
+    }
+  }
+}
+
+.settings-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8125rem;
+}
+
+.settings-perm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: var(--zh-muted-foreground);
+
+  mat-icon {
+    font-size: 0.9rem;
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  &.is-granted {
+    border-color: color-mix(in oklab, var(--zh-success) 35%, var(--zh-border));
+    background: color-mix(in oklab, var(--zh-success) 12%, transparent);
+    color: var(--zh-success-text);
+  }
+}
+
+/* ---- Filters and list tweaks ---- */
+.settings-select select {
+  height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 999px;
+  background: var(--zh-card);
+  box-shadow: var(--zh-shadow-sm);
+  color: var(--zh-foreground);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--zh-ring);
+  }
+}
+
+/* The permission chips are a list now, not a grid of checkboxes. */
+ul.settings-perm-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.settings-perm-module__title .settings-table__body {
+  margin-left: 0.5rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.settings-notice a {
+  color: inherit;
+  font-weight: 600;
+}
+
+@media (min-width: 601px) and (max-width: 1040px) {
+  .settings-users-table [data-col='login'] {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .settings-select {
+    flex: 1 1 100%;
+
+    select {
+      width: 100%;
+    }
   }
 }

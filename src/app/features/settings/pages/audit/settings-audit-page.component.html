@@ -1,79 +1,106 @@
-<app-organization-status
-  [loading]="loading()"
-  [error]="error()"
-  skeleton="table"
-  [hasData]="items().length > 0"
-  loadingMessage="Loading audit logs…"
-  errorTitle="Audit logs unavailable"
-  (retry)="reload()"
->
-  <section class="settings-page" aria-label="Audit logs">
-    <div class="settings-action-bar">
-      <div>
-        <h2 class="settings-page-heading">Audit logs</h2>
-        <p class="settings-page-sub">{{ total() }} recorded events (company-scoped when possible).</p>
-      </div>
-      <div class="settings-action-bar__actions">
-        <button mat-stroked-button type="button" class="settings-add-btn" (click)="reload()">
-          <mat-icon aria-hidden="true">refresh</mat-icon>
-          Refresh
-        </button>
-      </div>
+<section class="settings-page" aria-label="Audit logs">
+  <div class="settings-action-bar">
+    <div>
+      <h2 class="settings-page-heading">Audit logs</h2>
+      <p class="settings-page-sub">
+        @if (loaded()) {
+          {{ total() }} recorded {{ total() === 1 ? 'event' : 'events' }} for people in this company, newest first.
+        } @else {
+          A record of important actions in this company.
+        }
+      </p>
     </div>
+    <div class="settings-action-bar__actions">
+      <button mat-stroked-button type="button" class="settings-add-btn" [disabled]="loading()" (click)="reload()">
+        <mat-icon aria-hidden="true">refresh</mat-icon>
+        Refresh
+      </button>
+    </div>
+  </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Search</mat-label>
-      <input matInput [formControl]="search" placeholder="Action or entity" />
-    </mat-form-field>
+  <div class="org-toolbar">
+    <label class="org-toolbar__search">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input type="search" [formControl]="search" placeholder="Search by action or entity…" aria-label="Search audit logs" />
+    </label>
+    @if (hasFilters()) {
+      <button type="button" class="org-toolbar__clear" (click)="clearSearch()">Clear search</button>
+    }
+  </div>
 
-    @if (items().length === 0) {
-      <app-empty-state
-        title="No audit events"
-        message="Configuration and user admin actions will appear here."
-        icon="history"
-      />
-    } @else {
-      <div class="settings-table-card">
-        <div class="settings-table-wrap">
-          <table class="settings-table" data-responsive>
+  <app-organization-status
+    skeleton="table"
+    [loading]="loading()"
+    [error]="error()"
+    [hasData]="loaded()"
+    loadingMessage="Loading audit logs…"
+    errorTitle="Audit logs unavailable"
+    (retry)="reload()"
+  >
+    <div class="org-table-card">
+      @if (items().length === 0) {
+        @if (hasFilters()) {
+          <app-empty-state
+            title="No matching events"
+            message="Try a different search."
+            icon="search_off"
+            actionLabel="Clear search"
+            actionIcon="filter_alt_off"
+            (action)="clearSearch()"
+          />
+        } @else {
+          <app-empty-state
+            title="No audit events"
+            message="Configuration and user admin actions will appear here."
+            icon="history"
+          />
+        }
+      } @else {
+        <div class="org-table-wrap">
+          <table class="org-table" data-responsive>
             <thead>
               <tr>
                 <th scope="col">Action</th>
-                <th scope="col">Actor</th>
-                <th scope="col">Entity</th>
+                <th scope="col">Who</th>
+                <th scope="col" data-col="entity">Record</th>
                 <th scope="col">When</th>
               </tr>
             </thead>
             <tbody>
               @for (item of items(); track item.id) {
                 <tr>
-                  <td data-label="Action">
-                    <span class="settings-table__title">{{ item.action }}</span>
-                    @if (item.ipAddress) {
-                      <span class="settings-table__body">{{ item.ipAddress }}</span>
-                    }
+                  <td data-label="Name">
+                    <div class="org-table__name">
+                      <strong class="settings-code">{{ item.action }}</strong>
+                      @if (item.ipAddress) {
+                        <span>From {{ item.ipAddress }}</span>
+                      }
+                    </div>
                   </td>
-                  <td data-label="Actor">{{ actorLabel(item) }}</td>
-                  <td data-label="Entity">
+                  <td data-label="Who">{{ actorLabel(item) }}</td>
+                  <td data-col="entity" data-label="Record">
                     @if (item.entityType) {
                       {{ item.entityType }}
                       @if (item.entityId) {
-                        <span class="settings-table__body">{{ item.entityId }}</span>
+                        <span class="settings-table__body settings-code" [title]="item.entityId">{{ item.entityId }}</span>
                       }
                     } @else {
                       —
                     }
                   </td>
                   <td data-label="When">
-                    <span class="settings-table__title">{{ relative(item.createdAt) }}</span>
-                    <span class="settings-table__body">{{ formatDate(item.createdAt) }}</span>
+                    <time [attr.datetime]="item.createdAt" [title]="formatDate(item.createdAt)">
+                      <span class="settings-table__title">{{ relative(item.createdAt) }}</span>
+                      <span class="settings-table__body">{{ formatDate(item.createdAt) }}</span>
+                    </time>
                   </td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
-      </div>
-    }
-  </section>
-</app-organization-status>
+        <app-organization-list-footer [list]="pager" noun="events" />
+      }
+    </div>
+  </app-organization-status>
+</section>

@@ -1,1 +1,8 @@
-<div #host class="chart-host" role="img" [attr.aria-label]="title() || 'Bar chart'"></div>
+@if (title()) {
+  <h3 class="reports-chart-title">{{ title() }}</h3>
+}
+@if (empty()) {
+  <p class="reports-chart-empty">No data for this period.</p>
+} @else {
+  <app-echart [build]="build()" [label]="summary()" height="15rem" />
+}

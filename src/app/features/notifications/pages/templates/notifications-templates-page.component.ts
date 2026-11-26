@@ -43,6 +43,8 @@ export class NotificationsTemplatesPageComponent implements OnInit {
   readonly error = signal<string | null>(null);
 
   readonly canManage = this.auth.hasPermission('notifications:manage');
+  /** True once the first load finished, so reloads after an edit keep the page on screen. */
+  readonly loaded = signal(false);
 
   ngOnInit(): void {
     this.reload();
@@ -53,6 +55,7 @@ export class NotificationsTemplatesPageComponent implements OnInit {
       this.items.set([]);
       this.error.set(null);
       this.loading.set(false);
+      this.loaded.set(true);
       return;
     }
     this.loading.set(true);
@@ -60,6 +63,7 @@ export class NotificationsTemplatesPageComponent implements OnInit {
     this.notifications.listTemplates().subscribe({
       next: (res) => {
         this.items.set(res.items);
+        this.loaded.set(true);
         this.loading.set(false);
       },
       error: (err: { error?: { message?: string }; message?: string }) => {
@@ -114,7 +118,7 @@ export class NotificationsTemplatesPageComponent implements OnInit {
     this.dialog.open(SendNotificationDialogComponent, {
       width: '32rem',
       maxWidth: '95vw',
-      data: { templateCode: template?.code },
+      data: { templateCode: template?.code, prefillTest: true },
     });
   }
 
