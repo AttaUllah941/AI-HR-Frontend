@@ -43,8 +43,8 @@
               <th scope="col">Employee</th>
             }
             <th scope="col">Period</th>
-            <th scope="col">Gross</th>
-            <th scope="col">Net</th>
+            <th scope="col" class="payroll-table__num">Gross</th>
+            <th scope="col" class="payroll-table__num">Net</th>
             <th scope="col">Status</th>
             <th scope="col" class="payroll-table__actions-col"><span class="sr-only">Actions</span></th>
           </tr>
@@ -63,8 +63,8 @@
                 </td>
               }
               <td data-label="Period">{{ monthLabel(item.month) }} {{ item.year }}</td>
-              <td data-label="Gross">{{ formatMoney(item.grossPay, item.currency) }}</td>
-              <td data-label="Net">{{ formatMoney(item.netPay, item.currency) }}</td>
+              <td data-label="Gross" class="payroll-table__num">{{ formatMoney(item.grossPay, item.currency) }}</td>
+              <td data-label="Net" class="payroll-table__num">{{ formatMoney(item.netPay, item.currency) }}</td>
               <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="payroll-status-pill__dot" aria-hidden="true"></span>

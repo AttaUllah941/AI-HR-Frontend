@@ -53,8 +53,8 @@ const ICONS: Record<ToastKind, string> = {
   styles: `
     .toasts {
       position: fixed;
-      top: 1rem;
-      right: 1rem;
+      bottom: 1.25rem;
+      right: 1.25rem;
       z-index: 2000;
       display: flex;
       flex-direction: column;
@@ -110,7 +110,14 @@ const ICONS: Record<ToastKind, string> = {
     @keyframes toast-in {
       from {
         opacity: 0;
-        transform: translateY(-0.5rem);
+        transform: translateY(0.5rem);
+      }
+    }
+    /* Phones show a bottom tab bar: keep toasts clear of it. */
+    @media (max-width: 900px) {
+      .toasts {
+        bottom: 4.75rem;
+        right: 1rem;
       }
     }
     @media (prefers-reduced-motion: reduce) {

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toIsoDate } from '../../../core/utils/date-format';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +12,7 @@ import { EmployeeListItem, EmployeeService } from '../../../core/services/employ
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { DateFieldComponent } from '../../../shared/components/date-field/date-field.component';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface LeaveRequestFormDialogData {
@@ -41,6 +43,7 @@ function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
   selector: 'app-leave-request-form-dialog',
   standalone: true,
   imports: [
+    DateFieldComponent,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -77,11 +80,11 @@ export class LeaveRequestFormDialogComponent {
       employeeId: [this.data.request?.employeeId ?? ''],
       leaveTypeId: [this.data.request?.leaveTypeId ?? '', Validators.required],
       startDate: [
-        this.toDateInput(this.data.request?.startDate) || new Date().toISOString().slice(0, 10),
+        this.toDateInput(this.data.request?.startDate) || toIsoDate(new Date()),
         Validators.required,
       ],
       endDate: [
-        this.toDateInput(this.data.request?.endDate) || new Date().toISOString().slice(0, 10),
+        this.toDateInput(this.data.request?.endDate) || toIsoDate(new Date()),
         Validators.required,
       ],
       dayType: [this.data.request?.dayType ?? ('FULL_DAY' as LeaveDayType), Validators.required],

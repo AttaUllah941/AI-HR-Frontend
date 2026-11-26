@@ -1,6 +1,8 @@
 <app-organization-status
+  skeleton="table"
   [loading]="loading()"
   [error]="error()"
+  [hasData]="roles().length > 0"
   loadingMessage="Loading roles…"
   errorTitle="Roles unavailable"
   (retry)="reload()"
@@ -9,42 +11,38 @@
     <div class="settings-action-bar">
       <div>
         <h2 class="settings-page-heading">Roles &amp; permissions</h2>
-        <p class="settings-page-sub">Review the RBAC matrix. Only Super Admin can edit grants.</p>
+        <p class="settings-page-sub">What each role is allowed to do.</p>
       </div>
-      @if (canManage && selectedRole() && selectedRole()!.code !== 'SUPER_ADMIN') {
-        <div class="settings-action-bar__actions">
-          <button
-            mat-flat-button
-            color="primary"
-            type="button"
-            class="settings-add-btn"
-            [disabled]="saving()"
-            (click)="save()"
-            [appButtonSpinner]="saving()">
-            @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
-            {{ saving() ? 'Saving…' : 'Save permissions' }}
-          </button>
-        </div>
-      }
     </div>
 
+    <p class="settings-notice" role="note">
+      <mat-icon aria-hidden="true">info</mat-icon>
+      <span>
+        This is a read-only view. Roles are shared by every company on the platform, so only the
+        platform administrator can change what a role may do. To change what a person can do,
+        assign them a different role on the Users page.
+      </span>
+    </p>
+
     @if (roles().length === 0) {
-      <app-empty-state title="No roles" message="Roles will appear after seeding." icon="admin_panel_settings" />
+      <app-empty-state title="No roles" message="No roles are defined yet." icon="admin_panel_settings" />
     } @else {
       <div class="settings-role-layout">
-        <div class="settings-role-list">
+        <div class="settings-role-list" role="list" aria-label="Roles">
           @for (role of roles(); track role.id) {
             <button
               type="button"
               class="settings-role-item"
+              role="listitem"
               [class.settings-role-item--active]="role.id === selectedRoleId()"
+              [attr.aria-current]="role.id === selectedRoleId() ? 'true' : null"
               (click)="selectRole(role)"
             >
               <strong>{{ role.name }}</strong>
-              <span class="settings-table__body"
-                >{{ role.code }} · {{ role.userCount }} users ·
-                {{ role.permissions.length }} permissions</span
-              >
+              <span class="settings-table__body">
+                {{ role.userCount }} {{ role.userCount === 1 ? 'user' : 'users' }} ·
+                {{ role.permissions.length }} {{ role.permissions.length === 1 ? 'permission' : 'permissions' }}
+              </span>
             </button>
           }
         </div>
@@ -53,24 +51,23 @@
           @if (selectedRole(); as role) {
             <h3 class="settings-page-heading">{{ role.name }}</h3>
             <p class="settings-page-sub">{{ role.description || 'System role' }}</p>
-            @if (role.code === 'SUPER_ADMIN') {
-              <p class="settings-page-sub">Super Admin permissions are locked.</p>
-            }
+
             <div class="settings-perm-modules">
-              @for (mod of permissionModules(); track mod.module) {
+              @for (mod of modules(); track mod.module) {
                 <div class="settings-perm-module">
-                  <h4 class="settings-perm-module__title">{{ mod.module }}</h4>
-                  <div class="settings-perm-grid">
-                    @for (perm of mod.items; track perm.id) {
-                      <mat-checkbox
-                        [checked]="isChecked(perm.code)"
-                        [disabled]="!canManage || role.code === 'SUPER_ADMIN'"
-                        (change)="toggle(perm.code, $event.checked)"
-                      >
-                        {{ perm.action | lowercase }}
-                      </mat-checkbox>
+                  <h4 class="settings-perm-module__title">
+                    {{ mod.label }}
+                    <span class="settings-table__body">{{ mod.grantedCount }} of {{ mod.actions.length }}</span>
+                  </h4>
+                  <ul class="settings-perm-grid" [attr.aria-label]="mod.label + ' permissions'">
+                    @for (action of mod.actions; track action.id) {
+                      <li class="settings-perm-chip" [class.is-granted]="action.granted">
+                        <mat-icon aria-hidden="true">{{ action.granted ? 'check' : 'remove' }}</mat-icon>
+                        {{ action.action }}
+                        <span class="sr-only">{{ action.granted ? '(allowed)' : '(not allowed)' }}</span>
+                      </li>
                     }
-                  </div>
+                  </ul>
                 </div>
               }
             </div>

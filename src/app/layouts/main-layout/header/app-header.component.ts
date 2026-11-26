@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   HostListener,
   inject,
@@ -14,6 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { ThemeService } from '../../../core/services/theme.service';
 import { TopProgressBarComponent } from '../../../shared/top-progress-bar/top-progress-bar.component';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
 import { UserMenuComponent } from '../user-menu/user-menu.component';
@@ -51,8 +53,26 @@ export class AppHeaderComponent {
 
   readonly searchQuery = signal('');
 
+  private readonly themeService = inject(ThemeService);
+  private readonly prefersDark =
+    typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
+  private readonly systemDark = signal(this.prefersDark?.matches ?? false);
+
+  /** True when the dark theme is showing (explicitly chosen, or "system" resolving to dark). */
+  readonly isDark = computed(() => {
+    const mode = this.themeService.mode();
+    return mode === 'dark' || (mode === 'system' && this.systemDark());
+  });
+
+  toggleTheme(): void {
+    this.themeService.setMode(this.isDark() ? 'light' : 'dark');
+  }
+
   constructor() {
+    const onSystemChange = (e: MediaQueryListEvent) => this.systemDark.set(e.matches);
+    this.prefersDark?.addEventListener('change', onSystemChange);
     inject(DestroyRef).onDestroy(() => {
+      this.prefersDark?.removeEventListener('change', onSystemChange);
       if (this.pendingNavTimer) {
         clearTimeout(this.pendingNavTimer);
         this.pendingNavTimer = null;

@@ -3,106 +3,202 @@
 }
 
 .dashboard-clock-card {
-  margin-bottom: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 1.15rem 1.5rem !important;
+  border: 1px solid var(--zh-border) !important;
+  border-radius: 1.25rem !important;
+  background: var(--zh-card) !important;
+  box-shadow: var(--zh-shadow-sm) !important;
 }
 
-.dashboard-clock-card__loading,
-.dashboard-clock-card__error {
+.clock {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.5rem 2.5rem;
+}
+
+.clock__intro {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  min-height: 4rem;
-  color: var(--zh-muted-foreground);
-  font-size: 0.875rem;
-}
-
-.dashboard-clock-card__error {
-  flex-direction: column;
-  align-items: flex-start;
-
-  p {
-    margin: 0;
-  }
-}
-
-.att-clock-card {
-  padding: 1.25rem !important;
-  border: 1px solid var(--zh-border) !important;
-  border-radius: calc(var(--zh-radius) - 2px) !important;
-  background: var(--zh-card) !important;
-}
-
-.att-clock-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.15rem;
+  gap: 0.85rem;
 
   h2 {
     margin: 0;
     font-size: 1.05rem;
     font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
   }
 
   p {
-    margin: 0.25rem 0 0;
+    margin: 0.1rem 0 0;
     font-size: 0.8125rem;
     color: var(--zh-muted-foreground);
   }
+}
 
-  > mat-icon {
-    color: var(--zh-primary);
+.clock__icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: var(--zh-primary-soft);
+  color: var(--zh-primary-text);
+
+  mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
   }
 }
 
-.att-clock-card__times {
+.clock__times {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
+  grid-template-columns: repeat(3, minmax(0, 12rem));
+  gap: 1rem 2rem;
+  margin: 0;
 
-  span {
-    display: block;
-    font-size: 0.7rem;
+  dt {
+    font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--zh-muted-foreground);
   }
 
-  strong {
-    display: block;
-    margin-top: 0.35rem;
-    font-size: 0.95rem;
+  dd {
+    margin: 0.3rem 0 0;
+    min-height: 1.5rem;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
   }
 }
 
-.att-clock-card__actions {
-  display: flex;
+.status-chip {
+  display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  background: var(--zh-muted);
+  color: var(--zh-muted-foreground);
 
-  button mat-spinner,
+  &--success {
+    background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+    color: var(--zh-success-text);
+  }
+
+  &--warning {
+    background: color-mix(in oklab, var(--zh-warning) 22%, transparent);
+    color: var(--zh-warning-text);
+  }
+
+  &--danger {
+    background: color-mix(in oklab, var(--zh-destructive) 14%, transparent);
+    color: var(--zh-destructive-text);
+  }
+}
+
+.clock__action {
+  display: flex;
+  justify-content: flex-end;
+
+  button {
+    min-width: 9rem;
+    height: 2.5rem;
+  }
+
   button mat-icon {
     margin-right: 0.35rem;
   }
 }
 
-.att-clock-card__done {
+.clock__done {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.55rem 0.85rem;
+  padding: 0.5rem 0.9rem;
   border-radius: 999px;
-  background: #ecfdf5;
-  color: #059669;
+  background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+  color: var(--zh-success-text);
   font-size: 0.875rem;
   font-weight: 600;
 }
 
-@media (max-width: 720px) {
-  .att-clock-card__times {
+.clock-state {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3rem;
+  color: var(--zh-muted-foreground);
+  font-size: 0.875rem;
+
+  &--error {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 1100px) {
+  .clock {
+    grid-template-columns: 1fr auto;
+  }
+
+  .clock__times {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .clock {
     grid-template-columns: 1fr;
+  }
+
+  .clock__times {
+    grid-row: auto;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .clock__action,
+  .clock__action button {
+    width: 100%;
+  }
+}
+
+/* Loading placeholder: the same row (identity, times, action) as the real card, at its height. */
+.clock-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 4.5rem;
+}
+
+.clock-skeleton__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.clock-skeleton__action {
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .clock-skeleton {
+    flex-wrap: wrap;
+    min-height: 11rem;
+  }
+
+  .clock-skeleton__action {
+    margin-left: 0;
+    width: 100% !important;
   }
 }

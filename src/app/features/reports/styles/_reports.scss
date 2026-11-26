@@ -90,18 +90,18 @@
     }
 
     &--success {
-      background: #ecfdf5;
-      color: #059669;
+      background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+      color: var(--zh-success-text);
     }
 
     &--warning {
-      background: #fff7ed;
-      color: #ea580c;
+      background: color-mix(in oklab, var(--zh-warning) 22%, transparent);
+      color: var(--zh-warning-text);
     }
 
     &--info {
-      background: #eff6ff;
-      color: #2563eb;
+      background: color-mix(in oklab, var(--zh-secondary) 16%, transparent);
+      color: color-mix(in oklab, var(--zh-secondary) 60%, var(--zh-foreground));
     }
 
     &--neutral {
@@ -309,38 +309,38 @@
   }
 
   &--success {
-    background: #ecfdf5;
-    color: #059669;
+    background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+    color: var(--zh-success-text);
 
     .reports-status-pill__dot {
-      background: #10b981;
+      background: var(--zh-success);
     }
   }
 
   &--pending {
-    background: #fff7ed;
-    color: #ea580c;
+    background: color-mix(in oklab, var(--zh-warning) 22%, transparent);
+    color: var(--zh-warning-text);
 
     .reports-status-pill__dot {
-      background: #f97316;
+      background: var(--zh-warning);
     }
   }
 
   &--info {
-    background: #eff6ff;
-    color: #2563eb;
+    background: color-mix(in oklab, var(--zh-secondary) 16%, transparent);
+    color: color-mix(in oklab, var(--zh-secondary) 60%, var(--zh-foreground));
 
     .reports-status-pill__dot {
-      background: #3b82f6;
+      background: var(--zh-secondary);
     }
   }
 
   &--error {
-    background: #fef2f2;
-    color: #dc2626;
+    background: color-mix(in oklab, var(--zh-destructive) 12%, transparent);
+    color: var(--zh-destructive-text);
 
     .reports-status-pill__dot {
-      background: #ef4444;
+      background: var(--zh-destructive);
     }
   }
 }
@@ -349,11 +349,76 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  align-items: flex-end;
+  align-items: flex-start;
 
-  .mat-mdc-form-field {
+  .mat-mdc-form-field,
+  app-date-field {
     min-width: 11rem;
   }
+
+  .reports-filters__apply {
+    height: 3.5rem;
+  }
+}
+
+/* Quick date ranges. */
+.reports-presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: -0.25rem;
+
+  &__label {
+    margin-right: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--zh-muted-foreground);
+  }
+
+  button {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--zh-border);
+    border-radius: 999px;
+    background: var(--zh-card);
+    color: var(--zh-foreground);
+    font: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+
+    &:hover {
+      border-color: color-mix(in oklab, var(--zh-primary) 40%, var(--zh-border));
+      background: var(--zh-primary-soft);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--zh-ring);
+      outline-offset: 1px;
+    }
+
+    &.is-on {
+      border-color: color-mix(in oklab, var(--zh-primary) 45%, var(--zh-border));
+      background: var(--zh-primary-soft);
+      color: var(--zh-primary-text);
+      font-weight: 600;
+    }
+  }
+}
+
+.reports-filters__error {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--zh-destructive-text);
+}
+
+/* Shown while an export is generated. Fixed to the corner so the page does not jump down and up. */
+.reports-export-loader {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1000;
+  width: min(22rem, calc(100vw - 2rem));
+  margin: 0 !important;
+  box-shadow: var(--zh-shadow-md);
 }
 
 @media (max-width: 1100px) {

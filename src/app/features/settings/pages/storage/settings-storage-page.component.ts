@@ -12,6 +12,9 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 
+/** Optional http(s) address. Empty is fine. */
+const HTTP_URL = /^$|^https?:\/\/[^\s/$.?#][^\s]*$/i;
+
 @Component({
   selector: 'app-settings-storage-page',
   standalone: true,
@@ -44,7 +47,7 @@ export class SettingsStoragePageComponent implements OnInit, HasUnsavedChanges {
     storageProvider: ['local' as 'local' | 's3' | 'azure' | 'gcs', Validators.required],
     storageBucket: [''],
     storageRegion: [''],
-    storagePublicBaseUrl: [''],
+    storagePublicBaseUrl: ['', Validators.pattern(HTTP_URL)],
   });
 
   ngOnInit(): void {
@@ -74,7 +77,10 @@ export class SettingsStoragePageComponent implements OnInit, HasUnsavedChanges {
   }
 
   save(): void {
-    if (!this.canUpdate || this.form.invalid || this.saving()) {
+    if (!this.canUpdate || this.saving()) {
+      return;
+    }
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
@@ -90,7 +96,7 @@ export class SettingsStoragePageComponent implements OnInit, HasUnsavedChanges {
       .subscribe({
         next: () => {
           this.form.markAsPristine();
-          this.toast.success('Storage settings updated.');
+          this.toast.success('Storage settings saved.');
           this.saving.set(false);
         },
         error: (err: { error?: { message?: string }; message?: string }) => {

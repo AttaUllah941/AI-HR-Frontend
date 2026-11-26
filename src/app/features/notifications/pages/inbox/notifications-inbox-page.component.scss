@@ -1,4 +1,528 @@
-/* Page-specific tweaks inherit from styles/_notifications.scss */
 :host {
   display: block;
+}
+
+.inbox {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// —— Header ——
+.inbox__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.inbox__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.inbox__sub {
+  margin: 0.2rem 0 0;
+  font-size: 0.875rem;
+  color: var(--zh-muted-foreground);
+
+  strong {
+    color: var(--zh-foreground);
+  }
+}
+
+.inbox__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+// —— Filters: a segmented All/Unread switch and a scrollable row of category chips ——
+.inbox__filters {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.seg {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 0.2rem;
+  border-radius: 999px;
+  background: var(--zh-muted);
+}
+
+.seg__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.95rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--zh-muted-foreground);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &.is-active {
+    background: var(--zh-card);
+    color: var(--zh-foreground);
+    box-shadow: var(--zh-shadow-sm);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--zh-primary);
+    outline-offset: 2px;
+  }
+}
+
+.seg__count,
+.chip__count {
+  min-width: 1.15rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--zh-primary);
+  color: var(--zh-primary-foreground);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.15rem;
+  text-align: center;
+}
+
+.chips {
+  display: flex;
+  gap: 0.45rem;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 0.15rem 0.1rem;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 999px;
+  background: var(--zh-card);
+  color: var(--zh-foreground);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition:
+    background 120ms,
+    border-color 120ms;
+
+  mat-icon {
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+    color: var(--zh-muted-foreground);
+  }
+
+  &:hover {
+    border-color: var(--zh-primary);
+  }
+
+  &.is-active {
+    border-color: var(--zh-primary);
+    background: color-mix(in oklab, var(--zh-primary) 12%, transparent);
+    color: var(--zh-primary);
+    font-weight: 600;
+
+    mat-icon {
+      color: var(--zh-primary);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--zh-primary);
+    outline-offset: 2px;
+  }
+}
+
+// —— Feed ——
+.feed {
+  display: flex;
+  flex-direction: column;
+}
+
+.feed__day {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--zh-muted-foreground);
+
+  &:first-of-type {
+    margin-top: 0.25rem;
+  }
+}
+
+.feed__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--zh-border);
+  border-radius: var(--zh-radius);
+  background: var(--zh-card);
+  box-shadow: var(--zh-shadow-sm);
+  overflow: hidden;
+}
+
+.note {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.95rem 1.1rem;
+  border-bottom: 1px solid var(--zh-border);
+  transition: background 120ms;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &:hover,
+  &:focus-within {
+    background: color-mix(in oklab, var(--zh-muted) 55%, transparent);
+  }
+
+  // Unread rows get a tinted background and an accent bar.
+  &--unread {
+    background: color-mix(in oklab, var(--zh-primary) 5%, transparent);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: var(--zh-primary);
+    }
+  }
+
+  &--selected {
+    background: color-mix(in oklab, var(--zh-primary) 11%, transparent);
+  }
+}
+
+.note__lead {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.note__check {
+  margin-left: -0.4rem;
+}
+
+.note__icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border-radius: 0.75rem;
+  background: var(--zh-muted);
+  color: var(--zh-muted-foreground);
+
+  mat-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 1.25rem;
+  }
+
+  &--primary,
+  &--info {
+    background: color-mix(in oklab, var(--zh-primary) 14%, transparent);
+    color: var(--zh-primary);
+  }
+
+  &--success {
+    background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+    color: var(--zh-success-text);
+  }
+
+  &--warning {
+    background: color-mix(in oklab, var(--zh-warning) 22%, transparent);
+    color: var(--zh-warning-text);
+  }
+
+  &--danger {
+    background: color-mix(in oklab, var(--zh-destructive) 14%, transparent);
+    color: var(--zh-destructive-text);
+  }
+
+  &--purple {
+    background: color-mix(in oklab, oklch(62% 0.2 300) 15%, transparent);
+    color: oklch(58% 0.2 300);
+  }
+}
+
+.note__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+
+  .note--link & {
+    cursor: pointer;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--zh-primary);
+    outline-offset: 4px;
+    border-radius: 0.25rem;
+  }
+}
+
+.note__top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.note__title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--zh-foreground);
+
+  .note--unread & {
+    font-weight: 700;
+  }
+}
+
+.note__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--zh-primary);
+}
+
+.note__body {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--zh-muted-foreground);
+}
+
+.note__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--zh-muted-foreground);
+}
+
+.note__tag {
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background: var(--zh-muted);
+  font-weight: 600;
+
+  &--primary,
+  &--info {
+    background: color-mix(in oklab, var(--zh-primary) 12%, transparent);
+    color: var(--zh-primary);
+  }
+
+  &--success {
+    background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+    color: var(--zh-success-text);
+  }
+
+  &--warning {
+    background: color-mix(in oklab, var(--zh-warning) 22%, transparent);
+    color: var(--zh-warning-text);
+  }
+
+  &--danger {
+    background: color-mix(in oklab, var(--zh-destructive) 14%, transparent);
+    color: var(--zh-destructive-text);
+  }
+
+  &--purple {
+    background: color-mix(in oklab, oklch(62% 0.2 300) 15%, transparent);
+    color: oklch(58% 0.2 300);
+  }
+}
+
+.note__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  color: var(--zh-primary);
+  font-weight: 600;
+
+  mat-icon {
+    width: 0.95rem;
+    height: 0.95rem;
+    font-size: 0.95rem;
+  }
+}
+
+.note__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  color: var(--zh-muted-foreground);
+  // Quiet until the row is hovered or focused (always visible on touch screens, see below).
+  opacity: 0;
+  transition: opacity 120ms;
+
+  .note:hover &,
+  .note:focus-within & {
+    opacity: 1;
+  }
+}
+
+// —— Approve / reject right from the notification ——
+.note__review,
+.note__decided {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.1rem;
+}
+
+.note__review button {
+  height: 2.1rem;
+  font-size: 0.8125rem;
+}
+
+.note__reject {
+  color: var(--zh-destructive-text);
+  border-color: color-mix(in oklab, var(--zh-destructive) 40%, var(--zh-border));
+}
+
+.note__decided {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--zh-muted-foreground);
+
+  mat-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    font-size: 1.05rem;
+  }
+}
+
+// —— Bulk bar and pager ——
+.bulk {
+  position: sticky;
+  top: 4.25rem;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid color-mix(in oklab, var(--zh-primary) 35%, var(--zh-border));
+  border-radius: var(--zh-radius);
+  background: color-mix(in oklab, var(--zh-primary) 8%, var(--zh-card));
+  box-shadow: var(--zh-shadow-md);
+  font-size: 0.875rem;
+}
+
+.bulk__spacer,
+.pager__spacer {
+  flex: 1;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.8125rem;
+  color: var(--zh-muted-foreground);
+}
+
+// —— Smaller screens ——
+@media (hover: none), (max-width: 900px) {
+  .note__actions {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .inbox__filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .inbox__actions {
+    width: 100%;
+
+    button[mat-flat-button],
+    button[mat-stroked-button] {
+      flex: 1;
+    }
+  }
+
+  .note {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 0.85rem 0.9rem;
+  }
+
+  .note__actions {
+    grid-column: 2;
+    grid-row: 3;
+    justify-content: flex-end;
+    margin-top: -0.25rem;
+  }
+
+  .note__review button {
+    flex: 1;
+  }
+
+  .pager {
+    flex-wrap: wrap;
+
+    .pager__spacer {
+      flex-basis: 100%;
+      order: 3;
+      height: 0;
+    }
+  }
+}
+
+.select-all {
+  margin: 0 0 0.5rem;
+  padding-left: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--zh-muted-foreground);
 }

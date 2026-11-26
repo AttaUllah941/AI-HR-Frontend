@@ -48,7 +48,8 @@ export class ReportsPayrollPageComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
   readonly currentYear = new Date().getFullYear();
-  readonly yearOptions = [this.currentYear - 1, this.currentYear, this.currentYear + 1];
+  /** Next year down to five years back, so past payroll stays reachable. */
+  readonly yearOptions = Array.from({ length: 7 }, (_, i) => this.currentYear + 1 - i);
   readonly monthOptions = [
     { value: null as number | null, label: 'All months' },
     { value: 1, label: 'Jan' },

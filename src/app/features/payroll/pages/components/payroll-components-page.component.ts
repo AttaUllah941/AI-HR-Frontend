@@ -130,7 +130,8 @@ export class PayrollComponentsPageComponent implements OnInit {
   }
 
   kindLabel(kind: SalaryComponentKind): string {
-    return kind.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const text = kind.replace(/_/g, ' ').toLowerCase();
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   calcLabel(calc: string): string {

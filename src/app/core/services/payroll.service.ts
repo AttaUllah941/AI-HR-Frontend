@@ -90,6 +90,7 @@ export interface PayrollRun {
   entryCount?: number;
   totalGross?: number;
   totalNet?: number;
+  currency?: string;
 }
 
 export interface PayrollEntryLine {
@@ -145,6 +146,8 @@ export interface Payslip {
 export interface PayrollSummary {
   scope?: 'company' | 'employee';
   year: number;
+  /** ISO currency of the company; every amount here is in it. */
+  currency?: string;
   activeSalaryStructures: number;
   runsByStatus?: Record<string, number>;
   draftRuns: number;
@@ -168,6 +171,7 @@ export interface PayrollSummary {
 export interface PayrollMySummary {
   scope?: 'employee';
   year: number;
+  currency?: string;
   employeeId: string;
   payslipCount: number;
   ytdGross: number;
@@ -182,6 +186,7 @@ export interface PayrollMySummary {
 
 export interface PayrollReport {
   year: number;
+  currency?: string;
   byStatus: Array<{
     status: PayrollRunStatus;
     count: number;
@@ -444,16 +449,19 @@ export class PayrollService {
       );
   }
 
+  /** "PKR 4,706,250" (whole amounts have no decimals; fractions keep two). Pass the company currency. */
   formatMoney(amount: number, currency = 'USD'): string {
+    const value = amount ?? 0;
+    const whole = Number.isInteger(value);
     try {
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency,
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(amount ?? 0);
+        minimumFractionDigits: whole ? 0 : 2,
+        maximumFractionDigits: whole ? 0 : 2,
+      }).format(value);
     } catch {
-      return `${currency} ${(amount ?? 0).toFixed(2)}`;
+      return `${currency} ${value.toLocaleString('en-US')}`;
     }
   }
 

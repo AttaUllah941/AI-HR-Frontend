@@ -34,15 +34,9 @@
         <input matInput formControlName="currency" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Start date</mat-label>
-        <input matInput type="date" formControlName="startDate" />
-      </mat-form-field>
+      <app-date-field label="Start date" formControlName="startDate" />
 
-      <mat-form-field appearance="outline">
-        <mat-label>Expires</mat-label>
-        <input matInput type="date" formControlName="expiresAt" />
-      </mat-form-field>
+      <app-date-field label="Expires" formControlName="expiresAt" />
 
       <mat-form-field appearance="outline" class="recruitment-form__full">
         <mat-label>Notes</mat-label>

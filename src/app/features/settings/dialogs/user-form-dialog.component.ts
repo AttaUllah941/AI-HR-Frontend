@@ -14,6 +14,8 @@ import {
 } from '../../../core/services/settings.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
+import { USER_STATUS_FILTERS } from '../utils/labels';
 
 export interface UserFormDialogData {
   user?: SettingsUser | null;
@@ -52,7 +54,14 @@ export class UserFormDialogComponent {
   readonly data = inject<UserFormDialogData>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);
+  readonly showPassword = signal(false);
+  /** An existing account can be set active, inactive or suspended; "pending verification" is not a choice. */
+  readonly statusOptions = USER_STATUS_FILTERS.filter((s) => s.value !== 'PENDING_VERIFICATION');
   readonly isEdit = this.data.mode === 'edit';
+
+  constructor() {
+    guardDirtyDialog(this.dialogRef, () => this.form.dirty && !this.saving());
+  }
 
   readonly form = this.fb.nonNullable.group({
     firstName: [

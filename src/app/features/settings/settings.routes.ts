@@ -60,6 +60,7 @@ export const SETTINGS_ROUTES: Routes = [
       },
       {
         path: 'system',
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./pages/system/settings-system-page.component').then(
             (m) => m.SettingsSystemPageComponent,

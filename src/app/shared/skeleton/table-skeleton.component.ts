@@ -38,11 +38,15 @@ import { SkeletonComponent } from './skeleton.component';
       grid-template-columns: repeat(var(--ts-cols, 5), minmax(0, 1fr));
       align-items: center;
       gap: 1rem;
-      padding: 0.9rem 1rem;
+      /* Same height as a real table row, so nothing moves when the rows arrive. */
+      min-height: 4.1rem;
+      box-sizing: border-box;
+      padding: 0.7rem 1rem;
       border-bottom: 1px solid var(--mat-sys-outline-variant, var(--zh-border, #e5e7eb));
     }
     .ts__row--head {
-      padding-block: 0.7rem;
+      min-height: 2.6rem;
+      padding-block: 0.6rem;
     }
     .ts__lead {
       display: flex;

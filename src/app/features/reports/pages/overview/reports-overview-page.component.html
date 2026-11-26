@@ -1,12 +1,13 @@
-<app-organization-status
+<app-organization-status skeleton="kpi"
   [loading]="loading()"
+  [hasData]="summary() !== null"
   [error]="error()"
   loadingMessage="Loading reports overview…"
   errorTitle="Reports overview unavailable"
   (retry)="reload()"
 >
   @if (exporting()) {
-    <app-smart-loader class="long-op" [messages]="exportMessages" [diameter]="28" />
+    <app-smart-loader class="long-op reports-export-loader" [messages]="exportMessages" [diameter]="28" />
   }
   <section class="reports-page" aria-label="Reports overview">
     <div class="reports-action-bar">
@@ -15,7 +16,7 @@
         <p class="reports-sub">
           Cross-module KPIs and recent exports
           @if (summary(); as s) {
-            · generated {{ s.generatedAt | date: 'medium' }}
+            · generated {{ s.generatedAt | appDate: 'datetime' }}
           }
         </p>
       </div>
@@ -188,7 +189,7 @@
                         </span>
                       </td>
                       <td data-label="File">{{ row.fileName || '—' }}</td>
-                      <td data-label="When">{{ row.createdAt | date: 'short' }}</td>
+                      <td data-label="When">{{ row.createdAt | appDate: 'datetime' }}</td>
                     </tr>
                   }
                 </tbody>

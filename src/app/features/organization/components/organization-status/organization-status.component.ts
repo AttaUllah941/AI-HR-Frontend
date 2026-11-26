@@ -1,14 +1,16 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { CardsSkeletonComponent } from '../../../../shared/skeleton/cards-skeleton.component';
 import { ChartSkeletonComponent } from '../../../../shared/skeleton/chart-skeleton.component';
+import { FormSkeletonComponent } from '../../../../shared/skeleton/form-skeleton.component';
 import { KpiCardSkeletonComponent } from '../../../../shared/skeleton/kpi-card-skeleton.component';
+import { SkeletonComponent } from '../../../../shared/skeleton/skeleton.component';
 import { ListSkeletonComponent } from '../../../../shared/skeleton/list-skeleton.component';
 import { ProfileSkeletonComponent } from '../../../../shared/skeleton/profile-skeleton.component';
 import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 
-/** Placeholder shown on first load. `none` falls back to a small spinner. */
-export type StatusSkeleton = 'none' | 'profile' | 'table' | 'list' | 'kpi';
+/** Placeholder shown on first load. `none` shows a generic stack of cards (never a spinner). */
+export type StatusSkeleton = 'none' | 'profile' | 'table' | 'list' | 'kpi' | 'stats' | 'form';
 
 /**
  * Loading / error wrapper for a page section.
@@ -20,10 +22,12 @@ export type StatusSkeleton = 'none' | 'profile' | 'table' | 'list' | 'kpi';
   selector: 'app-organization-status',
   standalone: true,
   imports: [
-    MatProgressSpinnerModule,
     ErrorStateComponent,
+    CardsSkeletonComponent,
     ChartSkeletonComponent,
+    FormSkeletonComponent,
     KpiCardSkeletonComponent,
+    SkeletonComponent,
     ListSkeletonComponent,
     ProfileSkeletonComponent,
     TableSkeletonComponent,

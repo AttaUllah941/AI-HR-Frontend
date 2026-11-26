@@ -5,6 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SettingsService, SettingsSummary } from '../../../../core/services/settings.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
+import { emailProviderLabel, storageProviderLabel } from '../../utils/labels';
+import { NotificationsService } from '../../../../core/services/notifications.service';
 
 interface SettingsCatalogCard {
   title: string;
@@ -121,6 +123,12 @@ export class SettingsOverviewPageComponent implements OnInit {
     this.reload();
   }
 
+  private readonly notifications = inject(NotificationsService);
+  /** The mail provider the server is really using (from its environment), not the saved setting. */
+  readonly runtimeEmail = signal<string | null>(null);
+  protected readonly emailLabel = emailProviderLabel;
+  protected readonly storageLabel = storageProviderLabel;
+
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
@@ -128,6 +136,11 @@ export class SettingsOverviewPageComponent implements OnInit {
       next: (data) => {
         this.summary.set(data);
         this.loading.set(false);
+        // Best effort: needs notification access. Without it the page just says "Unknown".
+        this.notifications.getStatus().subscribe({
+          next: (status) => this.runtimeEmail.set(status.emailProvider),
+          error: () => this.runtimeEmail.set(null),
+        });
       },
       error: (err: { error?: { message?: string }; message?: string }) => {
         this.error.set(err?.error?.message || err?.message || 'Unable to load settings.');

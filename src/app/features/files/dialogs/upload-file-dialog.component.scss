@@ -3,6 +3,15 @@ mat-dialog-content {
   padding-top: 0.5rem;
 }
 
-mat-dialog-actions {
-  gap: 0.5rem;
+.files-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+.files-option-detail {
+  margin-left: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--zh-muted-foreground);
 }

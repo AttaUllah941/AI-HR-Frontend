@@ -21,6 +21,7 @@ import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skelet
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { InterviewFormDialogComponent } from '../../dialogs/interview-form-dialog.component';
 import { InterviewCompleteDialogComponent } from '../../dialogs/interview-complete-dialog.component';
+import { formatDate, formatDateTime, formatTime } from '../../../../core/utils/date-format';
 
 const STATUS_OPTIONS: Array<{ value: InterviewStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -230,9 +231,17 @@ export class RecruitmentInterviewsPageComponent implements OnInit {
     return e ? `${e.firstName} ${e.lastName}` : '—';
   }
 
+  whenDate(value: string): string {
+    return formatDate(value, value);
+  }
+
+  whenTime(value: string): string {
+    return formatTime(value, '');
+  }
+
   formatWhen(value: string): string {
     try {
-      return new Date(value).toLocaleString();
+      return formatDateTime(value);
     } catch {
       return value;
     }

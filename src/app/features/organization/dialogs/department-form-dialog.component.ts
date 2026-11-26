@@ -5,6 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 
@@ -50,6 +51,7 @@ import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
     MatSelectModule,
 
     MatButtonModule,
+    MatCheckboxModule,
 
     MatIconModule,
 
@@ -101,6 +103,7 @@ export class DepartmentFormDialogComponent implements OnInit {
     branchId: [this.data.department?.branchId ?? ''],
 
     parentId: [this.data.department?.parentId ?? ''],
+    isActive: [this.data.department?.isActive ?? true],
 
   });
 
@@ -185,6 +188,7 @@ export class DepartmentFormDialogComponent implements OnInit {
       branchId: raw.branchId || null,
 
       parentId: raw.parentId || null,
+      isActive: raw.isActive,
 
     };
 
@@ -206,11 +210,11 @@ export class DepartmentFormDialogComponent implements OnInit {
 
       },
 
-      error: () => {
+      error: (err: { error?: { message?: string } }) => {
 
         this.saving.set(false);
 
-        this.toast.error('Unable to save department');
+        this.toast.error(err?.error?.message || 'Unable to save department');
 
       },
 

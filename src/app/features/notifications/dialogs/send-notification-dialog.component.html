@@ -1,21 +1,55 @@
-<h2 mat-dialog-title>Send notification</h2>
-
+<h2 mat-dialog-title class="org-dialog-title">
+  <mat-icon aria-hidden="true">send</mat-icon>
+  Send notification
+</h2>
 <mat-dialog-content>
+  <p class="org-dialog-subtitle">Send a message to one person through the channels you choose.</p>
+
   <form [formGroup]="form" class="notifications-form" id="send-notification-form" (ngSubmit)="submit()">
     <div class="notifications-form__grid">
       <mat-form-field appearance="outline" class="notifications-form__full">
-        <mat-label>Recipient user ID</mat-label>
-        <input matInput formControlName="userId" />
+        <mat-label>Recipient</mat-label>
+        <input
+          matInput
+          type="text"
+          [formControl]="recipient"
+          [matAutocomplete]="recipientAuto"
+          placeholder="Search by name or email"
+          autocomplete="off"
+        />
+        <mat-autocomplete #recipientAuto="matAutocomplete" [displayWith]="displayPerson">
+          @for (option of recipientOptions(); track option.id) {
+            <mat-option [value]="option">
+              {{ option.name }} <span class="notifications-option-detail">{{ option.detail }}</span>
+            </mat-option>
+          }
+        </mat-autocomplete>
+        @if (searchFailed()) {
+          <mat-hint>Your account can't search users. Keep the selected recipient.</mat-hint>
+        }
+        @if (recipient.hasError('required')) {
+          <mat-error>Choose who should receive this</mat-error>
+        } @else if (recipient.hasError('notSelected')) {
+          <mat-error>Pick a person from the list</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="notifications-form__full">
         <mat-label>Title</mat-label>
-        <input matInput formControlName="title" />
+        <input matInput formControlName="title" [maxlength]="limits.title" />
+        <mat-hint align="end">{{ form.controls.title.value.length }}/{{ limits.title }}</mat-hint>
+        @if (form.controls.title.hasError('required')) {
+          <mat-error>Enter a title</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="notifications-form__full">
-        <mat-label>Body</mat-label>
-        <textarea matInput rows="3" formControlName="body"></textarea>
+        <mat-label>Message</mat-label>
+        <textarea matInput rows="3" formControlName="body" [maxlength]="limits.body"></textarea>
+        <mat-hint align="end">{{ form.controls.body.value.length }}/{{ limits.body }}</mat-hint>
+        @if (form.controls.body.hasError('required')) {
+          <mat-error>Enter the message</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
@@ -34,6 +68,9 @@
             <mat-option [value]="ch">{{ channelLabel(ch) }}</mat-option>
           }
         </mat-select>
+        @if (form.controls.channels.hasError('required')) {
+          <mat-error>Choose at least one channel</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="notifications-form__full">
@@ -43,17 +80,17 @@
     </div>
   </form>
 </mat-dialog-content>
-
-<mat-dialog-actions align="end">
+<mat-dialog-actions align="end" class="org-dialog-actions">
   <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
   <button
     mat-flat-button
     color="primary"
     type="submit"
     form="send-notification-form"
-    [disabled]="form.invalid || saving()"
-    [appButtonSpinner]="saving()">
-    @if (!saving()) { <mat-icon aria-hidden="true">send</mat-icon> }
+    class="org-dialog-actions__save"
+    [disabled]="saving()"
+    [appButtonSpinner]="saving()"
+  >
     {{ saving() ? 'Sending…' : 'Send' }}
   </button>
 </mat-dialog-actions>

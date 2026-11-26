@@ -1,154 +1,139 @@
 <app-organization-section-header
-
   title="Departments"
-
   description="Organize teams into departments and define reporting hierarchy."
-
   icon="account_tree"
-
   [count]="loading() || error() ? null : items().length"
-
 >
-
   @if (canCreate) {
-
     <button mat-flat-button color="primary" type="button" (click)="openForm()">
-
       <mat-icon aria-hidden="true">add</mat-icon>
-
       Add department
-
     </button>
-
   }
-
 </app-organization-section-header>
 
-
-
 <app-organization-status
-
   [loading]="loading()"
-
   [error]="error()"
   skeleton="table"
   [hasData]="items().length > 0"
-
   loadingMessage="Loading departments…"
-
   errorTitle="Departments unavailable"
-
   (retry)="reload()"
-
 >
-
   @if (items().length === 0) {
-
     <app-empty-state
-
       title="No departments yet"
-
       message="Create departments to group teams and build your org structure."
-
       icon="account_tree"
       [actionLabel]="canCreate ? 'Add your first department' : ''"
       (action)="openForm()"
     />
-
   } @else {
+    <app-organization-list-toolbar [list]="list" [prefs]="prefs" [columns]="columns" noun="departments" />
 
-    <div class="org-entity-list" role="list" aria-label="Departments">
-
-      @for (item of items(); track item.id) {
-
-        <mat-card class="org-entity-card" role="listitem">
-
-          <div class="org-entity-card__body">
-
-            <div class="org-entity-card__title">
-
-              <strong>{{ item.name }}</strong>
-
-              <code class="org-entity-card__code">{{ item.code }}</code>
-
-            </div>
-
-            <p class="org-entity-card__meta">
-
-              <span>{{ item.branch?.name || 'Company-wide' }}</span>
-
-              @if (item.parent) {
-
-                <span aria-hidden="true">·</span>
-
-                <span>Parent: {{ item.parent.name }}</span>
-
+    <div class="org-table-card">
+      @if (list.total() === 0) {
+        <app-empty-state
+          title="No matching departments"
+          message="Try a different search or clear the filters."
+          icon="search_off"
+          actionLabel="Clear filters"
+          actionIcon="filter_alt_off"
+          (action)="list.clearFilters()"
+        />
+      } @else {
+        <div class="org-table-wrap" [attr.data-density]="prefs.density()" [attr.data-hide]="prefs.hiddenAttr()">
+          <table class="org-table" data-responsive>
+            <thead>
+              <tr>
+                <th scope="col" [attr.aria-sort]="list.ariaSort('name')">
+                  <button type="button" class="org-sort" (click)="list.sort('name')">
+                    Department <mat-icon aria-hidden="true">{{ list.sortIcon('name') }}</mat-icon>
+                  </button>
+                </th>
+                <th scope="col" data-col="code" [attr.aria-sort]="list.ariaSort('code')">
+                  <button type="button" class="org-sort" (click)="list.sort('code')">
+                    Code <mat-icon aria-hidden="true">{{ list.sortIcon('code') }}</mat-icon>
+                  </button>
+                </th>
+                <th scope="col" data-col="branch" [attr.aria-sort]="list.ariaSort('branch')">
+                  <button type="button" class="org-sort" (click)="list.sort('branch')">
+                    Branch <mat-icon aria-hidden="true">{{ list.sortIcon('branch') }}</mat-icon>
+                  </button>
+                </th>
+                <th scope="col" data-col="parent" [attr.aria-sort]="list.ariaSort('parent')">
+                  <button type="button" class="org-sort" (click)="list.sort('parent')">
+                    Parent <mat-icon aria-hidden="true">{{ list.sortIcon('parent') }}</mat-icon>
+                  </button>
+                </th>
+                <th scope="col" data-col="teams" [attr.aria-sort]="list.ariaSort('teams')">
+                  <button type="button" class="org-sort" (click)="list.sort('teams')">
+                    Teams <mat-icon aria-hidden="true">{{ list.sortIcon('teams') }}</mat-icon>
+                  </button>
+                </th>
+                <th scope="col" data-col="status" [attr.aria-sort]="list.ariaSort('status')">
+                  <button type="button" class="org-sort" (click)="list.sort('status')">
+                    Status <mat-icon aria-hidden="true">{{ list.sortIcon('status') }}</mat-icon>
+                  </button>
+                </th>
+                <th scope="col" class="org-table__actions-col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of list.pageItems(); track item.id) {
+                <tr>
+                  <td data-label="Name">
+                    <div class="org-table__name">
+                      <strong>{{ item.name }}</strong>
+                      @if (item.description) {
+                        <span [title]="item.description">{{ item.description }}</span>
+                      }
+                    </div>
+                  </td>
+                  <td data-col="code" data-label="Code"><span class="org-table__code">{{ item.code }}</span></td>
+                  <td data-col="branch" data-label="Branch">{{ item.branch?.name || 'Company-wide' }}</td>
+                  <td data-col="parent" data-label="Parent">{{ item.parent?.name || '—' }}</td>
+                  <td data-col="teams" data-label="Teams">{{ item.teamCount ?? 0 }}</td>
+                  <td data-col="status" data-label="Status">
+                    <span class="org-status-pill" [class.org-status-pill--active]="item.isActive">
+                      <span class="org-status-pill__dot" aria-hidden="true"></span>
+                      {{ item.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td class="org-table__actions-col" data-label="">
+                    @if (canUpdate) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        [attr.aria-label]="'Edit ' + item.name"
+                        [disabled]="deletingId() === item.id"
+                        (click)="openForm(item)"
+                      >
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    }
+                    @if (canDelete) {
+                      <button
+                        mat-icon-button
+                        type="button"
+                        class="org-table__delete"
+                        [attr.aria-label]="'Delete ' + item.name"
+                        [disabled]="deletingId() === item.id"
+                        (click)="remove(item)"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
               }
+            </tbody>
+          </table>
+        </div>
 
-              <span aria-hidden="true">·</span>
-
-              <span>{{ item.teamCount ?? 0 }} teams</span>
-
-            </p>
-
-          </div>
-
-          <div class="org-entity-card__actions">
-
-            @if (canUpdate) {
-
-              <button
-
-                mat-icon-button
-
-                type="button"
-
-                aria-label="Edit {{ item.name }}"
-
-                [disabled]="deletingId() === item.id"
-
-                (click)="openForm(item)"
-
-              >
-
-                <mat-icon>edit</mat-icon>
-
-              </button>
-
-            }
-
-            @if (canDelete) {
-
-              <button
-
-                mat-icon-button
-
-                type="button"
-
-                aria-label="Delete {{ item.name }}"
-
-                [disabled]="deletingId() === item.id"
-
-                (click)="remove(item)"
-
-              >
-
-                <mat-icon>delete</mat-icon>
-
-              </button>
-
-            }
-
-          </div>
-
-        </mat-card>
-
+        <app-organization-list-footer [list]="list" noun="departments" />
       }
-
     </div>
-
   }
-
 </app-organization-status>
-
-

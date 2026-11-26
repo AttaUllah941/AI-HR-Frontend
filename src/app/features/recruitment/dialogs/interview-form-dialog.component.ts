@@ -15,6 +15,7 @@ import {
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { DateTimeFieldComponent } from '../../../shared/components/date-field/datetime-field.component';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface InterviewFormDialogData {
@@ -35,6 +36,7 @@ const INTERVIEW_TYPES: InterviewType[] = [
   selector: 'app-interview-form-dialog',
   standalone: true,
   imports: [
+    DateTimeFieldComponent,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,

@@ -2,116 +2,254 @@
   color: var(--zh-muted-foreground);
 }
 
-.state-card {
-  padding: 1.25rem !important;
-  max-width: 28rem;
-
-  h3 {
-    margin: 0 0 0.4rem;
-  }
-
-  p {
-    margin: 0 0 1rem;
-    color: var(--zh-muted-foreground);
-  }
+// Every card on this page shares one surface so KPI tiles, the AI banner and chart panels line up.
+%surface {
+  border: 1px solid var(--zh-border) !important;
+  border-radius: 1.25rem !important;
+  background: var(--zh-card) !important;
+  box-shadow: var(--zh-shadow-sm) !important;
 }
 
-// —— KPI cards (4 × 2 grid) ——
+// —— KPI cards: up to eight in one row on desktop, 4 per row on narrower screens, 2 on phones. ——
+// The row always fills the full width whatever the number of cards (a role can have 4, 6, 8 or more):
+// `--kpi-count` is set by the template, and every card grows to share the space of its row, so a
+// short last row stretches instead of leaving a gap. Fewer cards also get a bit more height
+// (see data-size below).
 .kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
+  --kpi-gap: 0.75rem;
+  --cols: min(var(--kpi-count, 8), 8);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kpi-gap);
+  margin-bottom: 0.75rem;
+
+  > .kpi-card {
+    // 1px under an exact share so sub-pixel rounding can never push the last card of a full row onto
+    // a new line; the cards grow to fill the row anyway.
+    flex: 1 1 calc((100% - (var(--cols) - 1) * var(--kpi-gap)) / var(--cols) - 1px);
+  }
+
+  // Six or fewer cards (employee view): small, fixed-width tiles that do not stretch across the row.
+  // Super admin (7+ cards) keeps the default compact sizing above.
+  &[data-size='roomy'],
+  &[data-size='spacious'] {
+    // Keep tile width, spread the free space between tiles so the row spans the full container.
+    justify-content: space-between;
+
+    > .kpi-card {
+      flex: 1 1 0;
+      max-width: 12.5rem;
+      // Tablet/phone: tiles wrap onto more lines once they would get narrower than this.
+      min-width: 9rem;
+      padding: 0.5rem 0.65rem !important;
+      gap: 0;
+      border-radius: 0.8rem !important;
+    }
+
+    // Desktop: always one line. Tiles shrink evenly (up to 12.5rem) instead of wrapping.
+    @media (min-width: 1001px) {
+      flex-wrap: nowrap;
+
+      > .kpi-card {
+        min-width: 0;
+      }
+    }
+
+    .kpi-card__header {
+      margin-bottom: 0.15rem;
+    }
+
+    .kpi-card__icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 0.45rem;
+
+      mat-icon {
+        font-size: 0.85rem;
+        width: 0.85rem;
+        height: 0.85rem;
+      }
+    }
+
+    .kpi-card__label {
+      font-size: 0.7rem;
+    }
+
+    .kpi-card__value {
+      font-size: 1.15rem;
+      line-height: 1.25;
+    }
+
+    .kpi-card__value--text {
+      font-size: 0.75rem;
+      line-height: 1.6;
+    }
+
+    .kpi-card__spark {
+      display: none;
+    }
+  }
 }
 
 .kpi-card {
-  padding: 1.15rem 1.25rem !important;
-  min-height: 7.5rem;
-  border: 1px solid #e8edf3 !important;
-  border-radius: 0.875rem !important;
-  background: #fff !important;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  @extend %surface;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.8rem 0.9rem !important;
+  border-radius: 1rem !important;
+  min-height: 0;
+  min-width: 0;
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    border-color: color-mix(in oklab, var(--zh-primary) 30%, var(--zh-border)) !important;
+    box-shadow: var(--zh-shadow-md) !important;
+  }
 }
 
 .kpi-card__header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 1.35rem;
+  gap: 0.4rem;
+  margin-bottom: 0.45rem;
+  min-width: 0;
+}
+
+.kpi-card__body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.kpi-card__spark {
+  flex: 0 1 45%;
+  height: 2.25rem;
+  min-width: 3.5rem;
+}
+
+// Too narrow for a sparkline next to the number.
+@container (max-width: 15rem) {
+  .kpi-card__spark {
+    display: none;
+  }
+}
+
+.kpi-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .kpi-card__icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 999px;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 0.6rem;
   display: grid;
   place-items: center;
   flex-shrink: 0;
 
   mat-icon {
-    font-size: 1.15rem;
-    width: 1.15rem;
-    height: 1.15rem;
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
   }
 }
 
 .kpi-card__trend {
   display: inline-flex;
   align-items: center;
-  gap: 0.1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
+  gap: 0.15rem;
+  padding: 0.22rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 500;
   line-height: 1;
-  padding-top: 0.15rem;
 
   mat-icon {
-    font-size: 0.95rem;
-    width: 0.95rem;
-    height: 0.95rem;
+    font-size: 0.9rem;
+    width: 0.9rem;
+    height: 0.9rem;
   }
 
   &.is-positive {
-    color: #16a34a;
+    background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+    color: var(--zh-success-text);
   }
 
   &.is-negative {
-    color: #dc2626;
+    background: color-mix(in oklab, var(--zh-destructive) 14%, transparent);
+    color: var(--zh-destructive-text);
   }
 
   &.is-neutral {
-    color: #64748b;
+    background: var(--zh-muted);
+    color: var(--zh-muted-foreground);
   }
 }
 
 .kpi-card__label {
-  margin: 0 0 0.3rem;
-  font-size: 0.84rem;
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-size: 0.78rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--zh-muted-foreground);
+}
+
+.kpi-card__sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.68rem;
+  color: var(--zh-muted-foreground);
 }
 
 .kpi-card__value {
   display: block;
-  font-size: 1.65rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--zh-font-display);
+  font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  color: #0f172a;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  color: var(--zh-foreground);
+
+  &--text {
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    line-height: 2.1;
+  }
 }
 
 // —— AI Insights banner ——
 .ai-banner {
-  margin-bottom: 1.25rem;
-  padding: 1.25rem 1.35rem !important;
-  border: 1px solid #dbeafe !important;
-  border-radius: 0.875rem !important;
-  background: #f0f7ff !important;
-  box-shadow: none !important;
+  @extend %surface;
+  margin-top: 0.75rem;
+  padding: 1.35rem 1.5rem !important;
+  border-color: color-mix(in oklab, var(--zh-primary) 22%, var(--zh-border)) !important;
+  background: color-mix(in oklab, var(--zh-primary) 5%, var(--zh-card)) !important;
 }
 
 .ai-banner__header {
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.75rem;
 }
 
 .ai-banner__title {
@@ -122,53 +260,54 @@
 
   h2 {
     margin: 0;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #1e3a5f;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--zh-foreground);
   }
 }
 
 .ai-banner__icon {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 999px;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.7rem;
   display: grid;
   place-items: center;
-  background: #3b82f6;
-  color: #fff;
+  background: var(--zh-primary-gradient);
+  color: var(--zh-primary-foreground);
   flex-shrink: 0;
 
   mat-icon {
-    font-size: 1rem;
-    width: 1rem;
-    height: 1rem;
+    font-size: 1.05rem;
+    width: 1.05rem;
+    height: 1.05rem;
   }
 }
 
 .ai-banner__live {
-  padding: 0.12rem 0.45rem;
-  border-radius: 0.3rem;
-  background: #dbeafe;
-  color: #2563eb;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--zh-primary) 14%, transparent);
+  color: var(--zh-primary-text);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .ai-banner__list {
-  margin: 0 0 0.9rem;
+  margin: 0 0 0.85rem;
   padding-left: 1.15rem;
   display: grid;
-  gap: 0.45rem;
+  gap: 0.4rem;
 
   li {
-    font-size: 0.84rem;
+    font-size: 0.875rem;
     line-height: 1.55;
-    color: #334155;
+    color: var(--zh-muted-foreground);
 
     strong {
-      font-weight: 700;
-      color: #0f172a;
+      font-weight: 600;
+      color: var(--zh-foreground);
     }
   }
 }
@@ -177,15 +316,15 @@
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
-  color: #2563eb;
-  font-size: 0.84rem;
+  color: var(--zh-primary-text);
+  font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
 
   mat-icon {
-    font-size: 0.95rem;
-    width: 0.95rem;
-    height: 0.95rem;
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
   }
 
   &:hover {
@@ -197,14 +336,12 @@
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .panel {
-  padding: 1.1rem !important;
-  border: 1px solid #e8edf3 !important;
-  border-radius: 0.875rem !important;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  @extend %surface;
+  padding: 1.4rem 1.5rem 1.25rem !important;
 }
 
 .panel__header {
@@ -216,35 +353,54 @@
 
   h3 {
     margin: 0;
-    font-size: 0.98rem;
-    font-weight: 700;
-    color: #0f172a;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--zh-foreground);
   }
 
   p {
     margin: 0.2rem 0 0;
-    font-size: 0.78rem;
-    color: #64748b;
+    font-size: 0.8125rem;
+    color: var(--zh-muted-foreground);
   }
 }
 
 .panel--attendance {
-  grid-column: span 8;
+  grid-column: span 7;
 }
 
 .panel--departments {
-  grid-column: span 4;
+  grid-column: span 5;
 }
 
 .panel--funnel {
-  grid-column: span 4;
+  grid-column: span 5;
 }
 
 .panel--growth {
-  grid-column: span 8;
+  grid-column: span 7;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1280px) {
+  .panel--attendance,
+  .panel--growth {
+    grid-column: span 7;
+  }
+
+  .panel--departments,
+  .panel--funnel {
+    grid-column: span 5;
+  }
+}
+
+@media (max-width: 1279px) {
+  .kpi-grid {
+    --cols: min(var(--kpi-count, 8), 4);
+  }
+}
+
+@media (max-width: 1000px) {
   .panel--attendance,
   .panel--departments,
   .panel--funnel,
@@ -253,15 +409,22 @@
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 640px) {
   .kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    --cols: min(var(--kpi-count, 8), 2);
   }
-}
 
-@media (max-width: 480px) {
-  .kpi-grid {
-    grid-template-columns: 1fr;
+  .kpi-card {
+    min-height: 0;
+    padding: 0.9rem !important;
+  }
+
+  .kpi-card__spark {
+    display: none;
+  }
+
+  .kpi-card__value {
+    font-size: 1.5rem;
   }
 }
 
@@ -272,4 +435,86 @@
   min-height: 12rem;
   margin: 0;
   text-align: center;
+}
+
+// —— Loading skeleton (mirrors the real layout so nothing moves when data arrives) ——
+.sk-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.sk-line {
+  display: flex;
+  align-items: center;
+}
+
+.sk-clock {
+  @extend %surface;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 5rem;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.sk-clock__times {
+  display: flex;
+  flex: 1;
+  gap: 3rem;
+}
+
+.sk-clock__action {
+  margin-left: auto;
+}
+
+.sk-kpi {
+  justify-content: flex-start;
+}
+
+.sk-ai {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.15rem 1.35rem !important;
+  min-height: 10.5rem;
+  box-sizing: border-box;
+}
+
+.sk-ai__title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.sk-ai__lines {
+  gap: 0.7rem;
+}
+
+.sk-panel__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 0.75rem;
+  min-height: 2.5rem;
+}
+
+@media (max-width: 1000px) {
+  .sk-clock {
+    flex-wrap: wrap;
+    min-height: 11rem;
+  }
+
+  .sk-clock__times {
+    flex-basis: 100%;
+    order: 3;
+    gap: 1.5rem;
+  }
+
+  .sk-clock__action {
+    margin-left: 0;
+  }
 }

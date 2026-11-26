@@ -35,8 +35,30 @@ body {
   font-family: var(--zh-font-sans);
   font-size: 0.875rem;
   line-height: 1.5;
+  /* Inter: single-storey "a", clearer 1/l/I, and fixed-width digits so columns of numbers line up. */
+  font-feature-settings: 'cv11';
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+.mat-mdc-dialog-title,
+.mat-mdc-card-title {
+  font-family: var(--zh-font-display);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  letter-spacing: 0;
+}
+
+table,
+time,
+.kpi-card__value {
+  font-variant-numeric: tabular-nums;
 }
 
 a {
@@ -69,35 +91,40 @@ select {
   border: 0;
 }
 
-/* Inline spinner injected by ButtonSpinnerDirective. */
-.app-btn-spinner {
-  display: inline-block;
-  flex: none;
-  box-sizing: border-box;
-  width: 1rem;
-  height: 1rem;
-  margin-inline-end: 0.5rem;
-  vertical-align: -0.15em;
-  border: 2px solid currentColor;
-  border-inline-end-color: transparent;
-  border-radius: 50%;
-  animation: app-btn-spin 0.8s linear infinite;
-}
-
+/*
+ * Pending action buttons (ButtonSpinnerDirective): a skeleton-style shimmer sweeps across the button.
+ * Nothing is inserted into the button, so its size never changes while it saves.
+ */
 .app-btn-pending {
+  position: relative;
+  overflow: hidden;
   cursor: progress;
-  opacity: 0.75;
+  opacity: 0.85;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.38) 50%, transparent 100%);
+    background-size: 60% 100%;
+    background-repeat: no-repeat;
+    background-position: -80% 0;
+    animation: app-btn-shimmer 1.2s ease-in-out infinite;
+  }
 }
 
-@keyframes app-btn-spin {
+@keyframes app-btn-shimmer {
   to {
-    transform: rotate(360deg);
+    background-position: 180% 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .app-btn-spinner {
-    animation-duration: 2.4s;
+  .app-btn-pending::after {
+    animation: none;
+    background-position: 50% 0;
+    opacity: 0.4;
   }
 }
 
@@ -222,10 +249,46 @@ select {
   padding-block: 0.4rem;
 }
 
+[data-hide~='code'] [data-col='code'],
 [data-hide~='department'] [data-col='department'],
 [data-hide~='position'] [data-col='position'],
 [data-hide~='manager'] [data-col='manager'],
 [data-hide~='status'] [data-col='status'],
-[data-hide~='joined'] [data-col='joined'] {
+[data-hide~='joined'] [data-col='joined'],
+[data-hide~='branch'] [data-col='branch'],
+[data-hide~='parent'] [data-col='parent'],
+[data-hide~='teams'] [data-col='teams'],
+[data-hide~='location'] [data-col='location'],
+[data-hide~='level'] [data-col='level'] {
   display: none;
+}
+
+/* Phones: dialogs use (almost) the full width instead of Material's 80vw cap, and their form grids stack. */
+@media (max-width: 640px) {
+  .cdk-overlay-pane.mat-mdc-dialog-panel {
+    width: calc(100vw - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
+  }
+
+  .mat-mdc-dialog-container {
+    --mat-dialog-container-max-width: calc(100vw - 1rem);
+    --mat-dialog-container-min-width: 0;
+  }
+
+  .mat-mdc-dialog-content {
+    max-height: 68vh;
+  }
+
+  [class*='-form__grid'] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  [class*='-form'] {
+    min-width: 0 !important;
+  }
+}
+
+/* Reserve the scrollbar width so the page does not jump sideways when content grows past the viewport. */
+html {
+  scrollbar-gutter: stable;
 }

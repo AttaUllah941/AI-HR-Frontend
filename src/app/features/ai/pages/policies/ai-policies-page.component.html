@@ -1,125 +1,187 @@
-<app-organization-status
-  [loading]="loading()"
-  [error]="error()"
-  loadingMessage="Loading policy drafts…"
-  errorTitle="Policies unavailable"
-  (retry)="reload()"
->
-  <section class="ai-page" aria-label="AI policies">
-    <div class="ai-action-bar">
-      <div>
-        <h2 class="ai-page-heading">Policy drafts</h2>
-        <p class="ai-page-sub">
-          Describe a topic and Nova drafts markdown policy text you can refine with HR.
-        </p>
-      </div>
+<section class="ai-page" aria-label="Policy drafts">
+  <div class="ai-action-bar">
+    <div>
+      <h2 class="ai-page-heading">Policy drafts</h2>
+      <p class="ai-page-sub">
+        Describe a topic and Nova drafts policy text you can refine with HR.
+      </p>
     </div>
+  </div>
 
+  <div class="policy-layout">
     @if (canCreate) {
-      <mat-card class="ai-result-card">
-        <h3 class="ai-result-card__title">Generate policy</h3>
-        <form [formGroup]="form" class="ai-form" (ngSubmit)="generate()">
-          <div class="ai-form__grid">
-            <mat-form-field appearance="outline" class="ai-form__full">
-              <mat-label>Topic</mat-label>
-              <input matInput formControlName="topic" placeholder="e.g. Remote work expectations" />
-            </mat-form-field>
+      <div class="policy-card policy-layout__generate">
+        <h3 class="policy-card__title">Generate policy</h3>
+        <form [formGroup]="form" class="policy-form" (ngSubmit)="generate()">
+          <mat-form-field appearance="outline">
+            <mat-label>Topic</mat-label>
+            <input
+              matInput
+              formControlName="topic"
+              [maxlength]="limits.topic"
+              placeholder="e.g. Remote work expectations"
+            />
+            <mat-hint align="end">{{ form.controls.topic.value.length }}/{{ limits.topic }}</mat-hint>
+            @if (form.controls.topic.hasError('required')) {
+              <mat-error>Enter the policy topic</mat-error>
+            } @else if (form.controls.topic.hasError('minlength')) {
+              <mat-error>Use at least 3 characters</mat-error>
+            }
+          </mat-form-field>
 
+          <div class="policy-form__row">
             <mat-form-field appearance="outline">
               <mat-label>Audience (optional)</mat-label>
-              <input matInput formControlName="audience" placeholder="e.g. All employees" />
+              <input
+                matInput
+                formControlName="audience"
+                [maxlength]="limits.audience"
+                placeholder="e.g. All employees"
+              />
             </mat-form-field>
-
             <mat-form-field appearance="outline">
               <mat-label>Tone</mat-label>
               <mat-select formControlName="tone">
-                @for (t of tones; track t) {
-                  <mat-option [value]="t">{{ t }}</mat-option>
+                @for (t of tones; track t.value) {
+                  <mat-option [value]="t.value">{{ t.label }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
-
-            <mat-form-field appearance="outline" class="ai-form__full">
-              <mat-label>Additional context (optional)</mat-label>
-              <textarea matInput rows="3" formControlName="additionalContext"></textarea>
-            </mat-form-field>
           </div>
 
-          <div class="ai-action-bar__actions">
-            <button
-              mat-flat-button
-              color="primary"
-              type="submit"
-              class="ai-add-btn"
-              [disabled]="form.invalid || generating()"
-              [appButtonSpinner]="generating()">
-              @if (!generating()) { <mat-icon aria-hidden="true">policy</mat-icon> }
-              {{ generating() ? 'Generating…' : 'Generate with Nova' }}
-            </button>
-          </div>
+          <mat-form-field appearance="outline">
+            <mat-label>Additional context (optional)</mat-label>
+            <textarea
+              matInput
+              rows="3"
+              formControlName="additionalContext"
+              [maxlength]="limits.additionalContext"
+            ></textarea>
+            <mat-hint align="end">
+              {{ form.controls.additionalContext.value.length }}/{{ limits.additionalContext }}
+            </mat-hint>
+          </mat-form-field>
+
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            class="policy-form__submit"
+            [disabled]="generating()"
+            [appButtonSpinner]="generating()"
+          >
+            @if (!generating()) {
+              <mat-icon aria-hidden="true">auto_awesome</mat-icon>
+            }
+            {{ generating() ? 'Generating…' : 'Generate with Nova' }}
+          </button>
         </form>
         @if (generating()) {
           <app-smart-loader class="long-op" [messages]="generationMessages" [diameter]="28" />
         }
-      </mat-card>
-    }
-
-    @if (draft(); as d) {
-      <mat-card class="ai-result-card">
-        <h3 class="ai-result-card__title">
-          {{ d.topic || 'Generated policy' }}
-        </h3>
-        <pre class="ai-result-card__body">{{ d.markdown || 'No content returned.' }}</pre>
-      </mat-card>
-    }
-
-    @if (items().length === 0 && !draft()) {
-      <app-empty-state
-        title="No policy drafts"
-        message="Generate a policy from a topic to see markdown output here."
-        icon="policy"
-      />
-    } @else if (items().length) {
-      <div class="ai-table-card">
-        <div class="ai-table-wrap">
-          <table class="ai-table" data-responsive>
-            <thead>
-              <tr>
-                <th scope="col">Topic</th>
-                <th scope="col">Created</th>
-                <th scope="col">Status</th>
-                <th scope="col" class="ai-table__actions-col"></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of items(); track item.id) {
-                <tr
-                  class="ai-table__row"
-                  style="cursor: pointer"
-                  (click)="selectGeneration(item)"
-                >
-                  <td data-label="Topic">{{ topicPreview(item) }}</td>
-                  <td data-label="Created">{{ createdLabel(item.createdAt) }}</td>
-                  <td data-label="Status">{{ item.status }}</td>
-                  <td class="ai-table__actions-col" (click)="$event.stopPropagation()" data-label="">
-                    @if (canDelete) {
-                      <button
-                        mat-icon-button
-                        type="button"
-                        class="ai-table__menu-btn"
-                        aria-label="Delete"
-                        (click)="deleteGeneration(item.id)"
-                      >
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    }
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
       </div>
     }
-  </section>
-</app-organization-status>
+
+    <div class="policy-card policy-layout__viewer">
+      @if (selected(); as generation) {
+        <header class="policy-viewer__header">
+          <div class="policy-viewer__heading">
+            <h3 class="policy-card__title">{{ title() }}</h3>
+            <p class="policy-viewer__meta">Generated {{ createdLabel(generation.createdAt) }}</p>
+          </div>
+          @if (!failed()) {
+            <div class="policy-viewer__actions">
+              <button mat-stroked-button type="button" class="policy-action-btn" (click)="copy()">
+                <mat-icon aria-hidden="true">content_copy</mat-icon>
+                Copy
+              </button>
+              <button mat-stroked-button type="button" class="policy-action-btn" (click)="download()">
+                <mat-icon aria-hidden="true">download</mat-icon>
+                Download .md
+              </button>
+            </div>
+          }
+        </header>
+
+        <p class="policy-notice" role="note">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          <span>
+            AI-generated draft. It may be incomplete or inaccurate, so have HR and legal review it
+            before you publish or share it.
+          </span>
+        </p>
+
+        @if (failed()) {
+          <p class="policy-viewer__empty" role="alert">This draft could not be generated. Try again.</p>
+        } @else if (markdown()) {
+          <article class="policy-doc" [innerHTML]="html()"></article>
+        } @else {
+          <p class="policy-viewer__empty">No content was returned for this draft.</p>
+        }
+      } @else if (loading()) {
+        <p class="policy-viewer__empty" role="status">Loading policy drafts…</p>
+      } @else if (error()) {
+        <p class="policy-viewer__empty">Past drafts could not be loaded. Use Retry in the history panel.</p>
+      } @else {
+        <app-empty-state
+          title="No policy drafts yet"
+          [message]="canCreate ? 'Generate a policy from a topic and the draft will appear here.' : 'Policy drafts generated by your team will appear here.'"
+          icon="policy"
+        />
+      }
+    </div>
+
+    <div class="policy-card policy-layout__history">
+      <h3 class="policy-card__title">History</h3>
+      <app-organization-status
+        skeleton="list"
+        [loading]="loading()"
+        [error]="error()"
+        [hasData]="items().length > 0"
+        loadingMessage="Loading policy drafts…"
+        errorTitle="Policy drafts unavailable"
+        (retry)="reload()"
+      >
+        @if (items().length === 0) {
+          <p class="policy-history__empty">Nothing here yet.</p>
+        } @else {
+          <ul class="policy-history" aria-label="Past policy drafts">
+            @for (item of items(); track item.id) {
+              <li class="policy-history__row" [class.is-selected]="item.id === selectedId()">
+                <button
+                  type="button"
+                  class="policy-history__item"
+                  [attr.aria-current]="item.id === selectedId() ? 'true' : null"
+                  (click)="select(item)"
+                >
+                  <span class="policy-history__topic">{{ topicPreview(item) }}</span>
+                  <span class="policy-history__meta">
+                    {{ createdLabel(item.createdAt) }}
+                    @if (item.status === 'FAILED') {
+                      <span class="policy-history__badge">Failed</span>
+                    }
+                  </span>
+                </button>
+                @if (canDelete) {
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="policy-history__delete"
+                    [attr.aria-label]="'Delete ' + topicPreview(item)"
+                    [disabled]="deletingId() !== null"
+                    (click)="deleteGeneration(item)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+          @if (total() > items().length) {
+            <p class="policy-history__note">Showing the latest {{ items().length }} of {{ total() }} drafts.</p>
+          }
+        }
+      </app-organization-status>
+    </div>
+  </div>
+</section>

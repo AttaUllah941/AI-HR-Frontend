@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   ProfileActivityItem,
   ProfileService,
@@ -15,7 +14,6 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
   imports: [
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     OrganizationStatusComponent,
   ],
@@ -28,6 +26,10 @@ export class ProfileActivityPageComponent implements OnInit {
 
   readonly items = signal<ProfileActivityItem[]>([]);
   readonly loading = signal(true);
+  /** True once the first load finished, so Refresh keeps the page on screen. */
+  readonly loaded = signal(false);
+  /** How many recent events are requested; the page says so when it may be hiding older ones. */
+  readonly limit = 50;
   readonly error = signal<string | null>(null);
 
   ngOnInit(): void {
@@ -37,10 +39,11 @@ export class ProfileActivityPageComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.profile.listActivity(50).subscribe({
+    this.profile.listActivity(this.limit).subscribe({
       next: (res) => {
         this.items.set(res.items);
         this.loading.set(false);
+        this.loaded.set(true);
       },
       error: (err: { error?: { message?: string }; message?: string }) => {
         this.error.set(err?.error?.message || err?.message || 'Unable to load activity.');

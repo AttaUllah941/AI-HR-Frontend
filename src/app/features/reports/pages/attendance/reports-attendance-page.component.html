@@ -1,12 +1,13 @@
-<app-organization-status
+<app-organization-status skeleton="kpi"
   [loading]="loading()"
+  [hasData]="report() !== null"
   [error]="error()"
   loadingMessage="Loading attendance report…"
   errorTitle="Attendance report unavailable"
   (retry)="reload()"
 >
   @if (exporting()) {
-    <app-smart-loader class="long-op" [messages]="exportMessages" [diameter]="28" />
+    <app-smart-loader class="long-op reports-export-loader" [messages]="exportMessages" [diameter]="28" />
   }
   <section class="reports-page" aria-label="Attendance report">
     <div class="reports-action-bar">
@@ -38,18 +39,34 @@
     </div>
 
     <div class="reports-filters">
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>From</mat-label>
-        <input matInput type="date" [formControl]="dateFrom" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>To</mat-label>
-        <input matInput type="date" [formControl]="dateTo" />
-      </mat-form-field>
-      <button mat-stroked-button type="button" (click)="reload()">
+      <app-date-field label="From" [formControl]="dateFrom" subscriptSizing="dynamic" />
+      <app-date-field label="To" [formControl]="dateTo" subscriptSizing="dynamic" />
+      <button
+        mat-stroked-button
+        type="button"
+        class="reports-filters__apply"
+        [disabled]="!!rangeError() || loading()"
+        (click)="reload()"
+      >
         <mat-icon aria-hidden="true">filter_alt</mat-icon>
         Apply
       </button>
+    </div>
+    @if (rangeError(); as message) {
+      <p class="reports-filters__error" role="alert">{{ message }}</p>
+    }
+    <div class="reports-presets" role="group" aria-label="Quick date ranges">
+      <span class="reports-presets__label">Quick range</span>
+      @for (preset of presets; track preset.id) {
+        <button
+          type="button"
+          [class.is-on]="activePreset() === preset.id"
+          [attr.aria-pressed]="activePreset() === preset.id"
+          (click)="applyPreset(preset.id)"
+        >
+          {{ preset.label }}
+        </button>
+      }
     </div>
 
     @if (report(); as r) {
@@ -59,14 +76,12 @@
           <strong class="reports-kpi-card__value">{{ formatNumber(r.totals.records) }}</strong>
         </mat-card>
         <mat-card class="reports-kpi-card">
-          <p class="reports-kpi-card__label">Work minutes</p>
-          <strong class="reports-kpi-card__value">{{ formatNumber(r.totals.workMinutes) }}</strong>
+          <p class="reports-kpi-card__label">Work time</p>
+          <strong class="reports-kpi-card__value">{{ minutes(r.totals.workMinutes) }}</strong>
         </mat-card>
         <mat-card class="reports-kpi-card">
-          <p class="reports-kpi-card__label">Overtime minutes</p>
-          <strong class="reports-kpi-card__value">{{
-            formatNumber(r.totals.overtimeMinutes)
-          }}</strong>
+          <p class="reports-kpi-card__label">Overtime</p>
+          <strong class="reports-kpi-card__value">{{ minutes(r.totals.overtimeMinutes) }}</strong>
         </mat-card>
       </div>
 
@@ -101,7 +116,7 @@
                 <tr>
                   <th scope="col">Status</th>
                   <th scope="col">Count</th>
-                  <th scope="col">Work minutes</th>
+                  <th scope="col">Work time</th>
                   <th scope="col">Overtime</th>
                 </tr>
               </thead>
@@ -115,8 +130,8 @@
                       </span>
                     </td>
                     <td data-label="Count">{{ formatNumber(row.count) }}</td>
-                    <td data-label="Work minutes">{{ formatNumber(row.workMinutes) }}</td>
-                    <td data-label="Overtime">{{ formatNumber(row.overtimeMinutes) }}</td>
+                    <td data-label="Work time">{{ minutes(row.workMinutes) }}</td>
+                    <td data-label="Overtime">{{ minutes(row.overtimeMinutes) }}</td>
                   </tr>
                 }
               </tbody>

@@ -1,6 +1,8 @@
 <app-organization-status
+  skeleton="form"
   [loading]="loading()"
   [error]="error()"
+  [hasData]="loaded()"
   loadingMessage="Loading security settings…"
   errorTitle="Security settings unavailable"
   (retry)="reload()"
@@ -10,50 +12,56 @@
       <div>
         <h2 class="settings-page-heading">Security</h2>
         <p class="settings-page-sub">
-          Lockouts, password policy, MFA guidance, allowlists, and hardening review.
+          Sign-in lockouts, password rules, two-step sign-in, network limits and a hardening review.
         </p>
       </div>
       @if (canUpdate) {
-        <div class="settings-action-bar__actions">
+        <div class="settings-save">
+          @if (form.dirty && !saving()) {
+            <span class="settings-dirty" role="status">Unsaved changes</span>
+          }
           <button
             mat-flat-button
             color="primary"
-            type="button"
+            type="submit"
+            form="security-form"
             class="settings-add-btn"
-            [disabled]="form.invalid || saving()"
-            (click)="save()"
-            [appButtonSpinner]="saving()">
-            @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
-            Save policy
+            [disabled]="saving() || !form.dirty"
+            [appButtonSpinner]="saving()"
+          >
+            @if (!saving()) {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
+            {{ saving() ? 'Saving…' : 'Save policy' }}
           </button>
         </div>
+      } @else {
+        <p class="settings-dirty" role="note">View only</p>
       }
     </div>
 
     @if (status(); as s) {
       <div class="settings-meta-grid">
         <div class="settings-meta-chip">
-          <span class="settings-meta-chip__label">MFA coverage</span>
+          <span class="settings-meta-chip__label">Two-step sign-in coverage</span>
           <span class="settings-meta-chip__value">{{ s.metrics.mfaCoveragePct }}%</span>
-          <span class="settings-meta-chip__hint"
-            >{{ s.metrics.mfaEnabled }}/{{ s.metrics.users }} users</span
-          >
+          <span class="settings-meta-chip__hint">{{ s.metrics.mfaEnabled }} of {{ s.metrics.users }} users</span>
         </div>
         <div class="settings-meta-chip">
-          <span class="settings-meta-chip__label">Privileged without MFA</span>
+          <span class="settings-meta-chip__label">Admins without two-step</span>
           <span class="settings-meta-chip__value">{{ s.metrics.privilegedWithoutMfa }}</span>
-          <span class="settings-meta-chip__hint">Super Admin / HR Admin</span>
+          <span class="settings-meta-chip__hint">Super Admin and HR Admin</span>
         </div>
         <div class="settings-meta-chip">
           <span class="settings-meta-chip__label">Locked accounts</span>
           <span class="settings-meta-chip__value">{{ s.metrics.lockedUsers }}</span>
-          <span class="settings-meta-chip__hint">Active lockouts</span>
+          <span class="settings-meta-chip__hint">Locked right now</span>
         </div>
         <div class="settings-meta-chip">
-          <span class="settings-meta-chip__label">Failed logins (24h)</span>
+          <span class="settings-meta-chip__label">Failed sign-ins (24h)</span>
           <span class="settings-meta-chip__value">{{ s.metrics.failedLogins24h }}</span>
           <span class="settings-meta-chip__hint">
-            JWT {{ s.runtime.jwtSecretsLookStrong ? 'OK' : 'weak' }} · {{ s.runtime.nodeEnv }}
+            Token secrets {{ s.runtime.jwtSecretsLookStrong ? 'look strong' : 'look weak' }} · {{ s.runtime.nodeEnv }}
           </span>
         </div>
       </div>
@@ -61,7 +69,7 @@
 
     <div class="settings-panel-card">
       <div class="settings-action-bar">
-        <h3 class="settings-page-heading">Hardening review</h3>
+        <h3 class="settings-section-title">Hardening review</h3>
         @if (review(); as r) {
           <p class="settings-page-sub">
             {{ r.summary.pass }} pass · {{ r.summary.warn }} warn · {{ r.summary.fail }} fail
@@ -87,10 +95,15 @@
                     [class.settings-badge--ok]="check.status === 'pass'"
                     [class.settings-badge--warn]="check.status === 'warn'"
                     [class.settings-badge--fail]="check.status === 'fail'"
-                    >{{ statusLabel(check.status) }}</span
                   >
+                    {{ statusLabel(check.status) }}
+                  </span>
                 </td>
                 <td data-label="Detail">{{ check.detail }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3">The review is not available right now.</td>
               </tr>
             }
           </tbody>
@@ -99,101 +112,138 @@
     </div>
 
     <div class="settings-panel-card">
-      <h3 class="settings-page-heading">Security policy</h3>
-      <form [formGroup]="form" class="settings-form" (ngSubmit)="save()">
+      <h3 class="settings-section-title">Security policy</h3>
+      <form [formGroup]="form" class="settings-form" id="security-form" (ngSubmit)="save()">
         <div class="settings-form__grid">
           <mat-form-field appearance="outline">
-            <mat-label>Max failed logins</mat-label>
-            <input matInput type="number" formControlName="maxFailedLogins" />
+            <mat-label>Failed sign-ins before lockout</mat-label>
+            <input matInput type="number" formControlName="maxFailedLogins" min="1" max="50" />
+            @if (form.controls.maxFailedLogins.invalid) {
+              <mat-error>Enter a number from 1 to 50</mat-error>
+            }
           </mat-form-field>
           <mat-form-field appearance="outline">
-            <mat-label>Lockout minutes</mat-label>
-            <input matInput type="number" formControlName="lockoutMinutes" />
+            <mat-label>Lockout length (minutes)</mat-label>
+            <input matInput type="number" formControlName="lockoutMinutes" min="1" max="1440" />
+            @if (form.controls.lockoutMinutes.invalid) {
+              <mat-error>Enter a number from 1 to 1440</mat-error>
+            }
           </mat-form-field>
           <mat-form-field appearance="outline">
-            <mat-label>Password min length</mat-label>
-            <input matInput type="number" formControlName="passwordMinLength" />
+            <mat-label>Minimum password length</mat-label>
+            <input matInput type="number" formControlName="passwordMinLength" min="8" max="128" />
+            @if (form.controls.passwordMinLength.invalid) {
+              <mat-error>Enter a number from 8 to 128</mat-error>
+            }
           </mat-form-field>
           <mat-form-field appearance="outline">
-            <mat-label>Refresh rate limit / window</mat-label>
-            <input matInput type="number" formControlName="refreshRateLimitPerWindow" />
-            <mat-hint>Stored for policy; runtime refresh limiter uses the platform default</mat-hint>
+            <mat-label>Refresh limit per window</mat-label>
+            <input matInput type="number" formControlName="refreshRateLimitPerWindow" min="5" />
+            <mat-hint>Saved only. The server uses its own platform default.</mat-hint>
+            @if (form.controls.refreshRateLimitPerWindow.invalid) {
+              <mat-error>Enter 5 or more</mat-error>
+            }
           </mat-form-field>
+
           <div class="settings-form__full">
-            <mat-checkbox formControlName="passwordRequireLetter">Require letter</mat-checkbox>
+            <mat-checkbox formControlName="passwordRequireLetter">Require a letter</mat-checkbox>
           </div>
           <div class="settings-form__full">
-            <mat-checkbox formControlName="passwordRequireNumber">Require number</mat-checkbox>
+            <mat-checkbox formControlName="passwordRequireNumber">Require a number</mat-checkbox>
           </div>
           <div class="settings-form__full">
-            <mat-checkbox formControlName="passwordRequireSpecial">Require special character</mat-checkbox>
+            <mat-checkbox formControlName="passwordRequireSpecial">Require a special character</mat-checkbox>
           </div>
           <div class="settings-form__full">
-            <mat-checkbox formControlName="requireMfaForPrivileged"
-              >Warn privileged accounts without MFA on sign-in</mat-checkbox
-            >
+            <mat-checkbox formControlName="requireMfaForPrivileged">
+              Warn admins who have no two-step sign-in when they sign in
+            </mat-checkbox>
           </div>
           <div class="settings-form__full">
-            <mat-checkbox formControlName="allowSelfRegistration"
-              >Allow self-registration policy flag</mat-checkbox
-            >
+            <mat-checkbox formControlName="allowSelfRegistration">Allow self-registration</mat-checkbox>
+            <p class="settings-page-sub">
+              Read only. Whether new companies can sign up is controlled by the server, not by this
+              setting.
+            </p>
           </div>
+
           <mat-form-field appearance="outline" class="settings-form__full">
-            <mat-label>IP allowlist (one IP/CIDR per line; empty = allow all)</mat-label>
-            <textarea matInput rows="4" formControlName="ipAllowlistText"></textarea>
+            <mat-label>Allowed networks for sign-in</mat-label>
+            <textarea
+              matInput
+              rows="4"
+              formControlName="ipAllowlistText"
+              placeholder="203.0.113.10&#10;10.0.0.0/8"
+              spellcheck="false"
+            ></textarea>
+            <mat-hint>One IP address or range (CIDR) per line. Leave empty to allow any network.</mat-hint>
+            @if (form.controls.ipAllowlistText.hasError('ipList')) {
+              <mat-error>"{{ form.controls.ipAllowlistText.errors?.['ipList'] }}" is not a valid IP address or range</mat-error>
+            }
           </mat-form-field>
+          <p class="settings-notice settings-notice--warn settings-form__full" role="note">
+            <mat-icon aria-hidden="true">warning</mat-icon>
+            <span>
+              The allowlist applies to everyone in the company when they sign in. If your own network
+              is not on it, you will not be able to sign back in.
+            </span>
+          </p>
         </div>
       </form>
     </div>
 
     <div class="settings-panel-card">
       <div class="settings-action-bar">
-        <h3 class="settings-page-heading">Recent login attempts</h3>
+        <div>
+          <h3 class="settings-section-title">Recent sign-in attempts</h3>
+          <p class="settings-page-sub">The latest 20 attempts that match the filters.</p>
+        </div>
         <div class="settings-action-bar__actions">
-          <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
-            <input matInput [formControl]="attemptEmail" placeholder="Filter by email" />
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Result</mat-label>
-            <mat-select [formControl]="attemptSuccess">
-              <mat-option value="all">All</mat-option>
-              <mat-option value="true">Success</mat-option>
-              <mat-option value="false">Failed</mat-option>
-            </mat-select>
-          </mat-form-field>
+          <label class="org-toolbar__search">
+            <mat-icon aria-hidden="true">search</mat-icon>
+            <input type="search" [formControl]="attemptEmail" placeholder="Filter by email…" aria-label="Filter sign-in attempts by email" />
+          </label>
+          <label class="settings-select">
+            <span class="sr-only">Result</span>
+            <select [formControl]="attemptSuccess" aria-label="Filter by result">
+              <option value="all">All results</option>
+              <option value="true">Successful</option>
+              <option value="false">Failed</option>
+            </select>
+          </label>
         </div>
       </div>
       <div class="settings-table-wrap">
-        <table class="settings-table">
+        <table class="settings-table" data-responsive>
           <thead>
             <tr>
               <th scope="col">Email</th>
               <th scope="col">Result</th>
               <th scope="col">Reason</th>
-              <th scope="col">IP</th>
+              <th scope="col">Network</th>
               <th scope="col">When</th>
             </tr>
           </thead>
           <tbody>
             @for (item of attempts(); track item.id) {
               <tr>
-                <td>{{ item.email }}</td>
-                <td>
+                <td data-label="Email">{{ item.email }}</td>
+                <td data-label="Result">
                   <span
                     class="settings-badge"
                     [class.settings-badge--ok]="item.success"
                     [class.settings-badge--fail]="!item.success"
-                    >{{ item.success ? 'Success' : 'Failed' }}</span
                   >
+                    {{ item.success ? 'Successful' : 'Failed' }}
+                  </span>
                 </td>
-                <td>{{ item.reason || '—' }}</td>
-                <td>{{ item.ipAddress || '—' }}</td>
-                <td>{{ item.createdAt | date: 'medium' }}</td>
+                <td data-label="Reason">{{ item.reason || '—' }}</td>
+                <td data-label="Network">{{ item.ipAddress || '—' }}</td>
+                <td data-label="When">{{ item.createdAt | appDate: 'datetime' }}</td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="5">No login attempts recorded yet.</td>
+                <td colspan="5">No sign-in attempts match.</td>
               </tr>
             }
           </tbody>

@@ -204,38 +204,38 @@
   }
 
   &--success {
-    background: #ecfdf5;
-    color: #059669;
+    background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+    color: var(--zh-success-text);
 
     .profile-status-pill__dot {
-      background: #10b981;
+      background: var(--zh-success);
     }
   }
 
   &--pending {
-    background: #fff7ed;
-    color: #ea580c;
+    background: color-mix(in oklab, var(--zh-warning) 22%, transparent);
+    color: var(--zh-warning-text);
 
     .profile-status-pill__dot {
-      background: #f97316;
+      background: var(--zh-warning);
     }
   }
 
   &--info {
-    background: #eff6ff;
-    color: #2563eb;
+    background: color-mix(in oklab, var(--zh-secondary) 16%, transparent);
+    color: color-mix(in oklab, var(--zh-secondary) 60%, var(--zh-foreground));
 
     .profile-status-pill__dot {
-      background: #3b82f6;
+      background: var(--zh-secondary);
     }
   }
 
   &--error {
-    background: #fef2f2;
-    color: #dc2626;
+    background: color-mix(in oklab, var(--zh-destructive) 12%, transparent);
+    color: var(--zh-destructive-text);
 
     .profile-status-pill__dot {
-      background: #ef4444;
+      background: var(--zh-destructive);
     }
   }
 }
@@ -300,5 +300,160 @@
 
   .profile-meta-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Identity header, notices, dirty indicator ---- */
+.profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 1.25rem;
+  background: var(--zh-card);
+  box-shadow: var(--zh-shadow-sm);
+}
+
+.profile-identity__avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--zh-primary-soft);
+  color: var(--zh-primary-text);
+  font-size: 1.1rem;
+  font-weight: 700;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.profile-identity__text {
+  min-width: 0;
+
+  strong {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+
+  span {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--zh-muted-foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.profile-identity__roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.profile-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid color-mix(in oklab, var(--zh-secondary) 35%, var(--zh-border));
+  border-radius: 0.85rem;
+  background: color-mix(in oklab, var(--zh-secondary) 10%, transparent);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+
+  mat-icon {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: color-mix(in oklab, var(--zh-secondary) 60%, var(--zh-foreground));
+  }
+}
+
+.profile-save {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profile-dirty {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--zh-warning-text);
+}
+
+.profile-section-title {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.profile-current {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--zh-primary-soft);
+  color: var(--zh-primary-text);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.profile-match {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 0.8125rem;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &--ok {
+    color: var(--zh-success-text);
+  }
+
+  &--bad {
+    color: var(--zh-destructive-text);
+  }
+}
+
+.profile-table__row.is-current {
+  background: var(--zh-primary-soft);
+}
+
+.profile-pref-group {
+  margin: 0 0 1.25rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .profile-identity {
+    flex-wrap: wrap;
+  }
+
+  .profile-identity__roles {
+    margin-left: 0;
+    width: 100%;
   }
 }

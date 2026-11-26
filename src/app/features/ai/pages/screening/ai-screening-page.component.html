@@ -1,6 +1,7 @@
 <app-organization-status
   [loading]="loading()"
   [error]="error()"
+  [hasData]="loaded()"
   loadingMessage="Loading resume screenings…"
   errorTitle="Screening unavailable"
   (retry)="reload()"
@@ -10,7 +11,7 @@
       <div>
         <h2 class="ai-page-heading">Resume screening</h2>
         <p class="ai-page-sub">
-          Run Nova against a candidate resume and review the scorecard — strengths, gaps, and
+          Run Nova against a candidate profile and review the scorecard: strengths, gaps, and
           recommendation.
         </p>
       </div>
@@ -23,10 +24,25 @@
     </div>
 
     @if (scorecard(); as card) {
-      <mat-card class="ai-result-card">
-        <h3 class="ai-result-card__title">Latest scorecard</h3>
-        <div class="ai-action-bar" style="margin-bottom: 0.75rem">
-          <div class="ai-score">
+      <div class="ai-result-card">
+        <h3 class="ai-result-card__title">
+          Scorecard
+          @if (selectedSubject(); as subject) {
+            for {{ subject.name }}
+            @if (subject.detail) {
+              <span class="ai-result-card__for">· {{ subject.detail }}</span>
+            }
+          }
+        </h3>
+        <p class="ai-notice" role="note">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          <span>
+            AI-generated and based only on the profile fields, not the resume file. Use it to help a
+            person decide, never to decide for them.
+          </span>
+        </p>
+        <div class="ai-result-card__head">
+          <div class="ai-score" [attr.aria-label]="'Score ' + (card.score ?? 'not available') + ' out of 100'">
             {{ card.score ?? '—' }}
             <span>/ 100</span>
           </div>
@@ -41,7 +57,7 @@
           <p class="ai-result-card__body">{{ card.summary }}</p>
         }
         @if (card.strengths.length) {
-          <h4 class="ai-page-heading" style="margin-top: 1rem; font-size: 0.9rem">Strengths</h4>
+          <h4 class="ai-result-card__sub">Strengths</h4>
           <ul>
             @for (s of card.strengths; track s) {
               <li>{{ s }}</li>
@@ -49,7 +65,7 @@
           </ul>
         }
         @if (card.gaps.length) {
-          <h4 class="ai-page-heading" style="margin-top: 0.5rem; font-size: 0.9rem">Gaps</h4>
+          <h4 class="ai-result-card__sub">Gaps</h4>
           <ul>
             @for (g of card.gaps; track g) {
               <li>{{ g }}</li>
@@ -59,7 +75,7 @@
         @if (!card.summary && card.rawText) {
           <p class="ai-result-card__body">{{ card.rawText }}</p>
         }
-      </mat-card>
+      </div>
     }
 
     @if (items().length === 0) {
@@ -80,20 +96,28 @@
           <table class="ai-table" data-responsive>
             <thead>
               <tr>
+                <th scope="col">Candidate</th>
+                <th scope="col">Job opening</th>
                 <th scope="col">Created</th>
                 <th scope="col">Status</th>
-                <th scope="col">Provider</th>
                 <th scope="col">Score</th>
-                <th scope="col" class="ai-table__actions-col"></th>
+                <th scope="col" class="ai-table__actions-col"><span class="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>
               @for (item of items(); track item.id) {
-                <tr
-                  class="ai-table__row"
-                  style="cursor: pointer"
-                  (click)="selectGeneration(item)"
-                >
+                <tr class="ai-table__row" [class.is-selected]="item.id === selected()?.id">
+                  <td data-label="Candidate">
+                    <button
+                      type="button"
+                      class="ai-link"
+                      [attr.aria-current]="item.id === selected()?.id ? 'true' : null"
+                      (click)="selectGeneration(item)"
+                    >
+                      {{ subjectOf(item).name }}
+                    </button>
+                  </td>
+                  <td data-label="Job opening">{{ subjectOf(item).detail || '—' }}</td>
                   <td data-label="Created">{{ createdLabel(item.createdAt) }}</td>
                   <td data-label="Status">
                     <span
@@ -103,19 +127,18 @@
                       [class.ai-status-pill--pending]="item.status === 'PENDING'"
                     >
                       <span class="ai-status-pill__dot" aria-hidden="true"></span>
-                      {{ item.status }}
+                      {{ statusLabel(item.status) }}
                     </span>
                   </td>
-                  <td data-label="Provider">{{ item.provider || '—' }}</td>
                   <td data-label="Score">{{ scoreFor(item) }}</td>
-                  <td class="ai-table__actions-col" (click)="$event.stopPropagation()" data-label="">
+                  <td class="ai-table__actions-col" data-label="">
                     @if (canDelete) {
                       <button
                         mat-icon-button
                         type="button"
                         class="ai-table__menu-btn"
-                        aria-label="Delete"
-                        (click)="deleteGeneration(item.id)"
+                        [attr.aria-label]="'Delete screening for ' + subjectOf(item).name"
+                        (click)="deleteGeneration(item)"
                       >
                         <mat-icon>delete</mat-icon>
                       </button>

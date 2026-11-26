@@ -302,6 +302,11 @@ export class PayrollRunsPageComponent implements OnInit {
     return this.payroll.monthLabel(month);
   }
 
+  /** Run totals in the company currency (the list API supplies it with each run). */
+  money(item: PayrollRun, amount: number | undefined): string {
+    return amount == null ? '—' : this.payroll.formatMoney(amount, item.currency ?? 'USD');
+  }
+
   entryCount(item: PayrollRun): number {
     return item.entryCount ?? item._count?.entries ?? 0;
   }
@@ -311,7 +316,8 @@ export class PayrollRunsPageComponent implements OnInit {
   }
 
   statusLabel(status: PayrollRunStatus): string {
-    return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const text = status.replace(/_/g, ' ').toLowerCase();
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   canProcess(item: PayrollRun): boolean {

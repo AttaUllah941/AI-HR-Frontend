@@ -14,7 +14,9 @@ import { EmployeeListItem, EmployeeService } from '../../../../core/services/emp
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
+import { DateFieldComponent } from '../../../../shared/components/date-field/date-field.component';
 import { Subscription } from 'rxjs';
+import { formatTime, formatWeekdayDate, toIsoDate } from '../../../../core/utils/date-format';
 
 function monthStart(): string {
   const now = new Date();
@@ -22,13 +24,14 @@ function monthStart(): string {
 }
 
 function today(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toIsoDate(new Date());
 }
 
 @Component({
   selector: 'app-attendance-timesheet-page',
   standalone: true,
   imports: [
+    DateFieldComponent,
     ReactiveFormsModule,
     MatButtonModule,
     MatFormFieldModule,
@@ -99,23 +102,14 @@ export class AttendanceTimesheetPageComponent implements OnInit {
   }
 
   formatDate(value: string): string {
-    return new Date(value).toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    });
+    return formatWeekdayDate(value);
   }
 
   formatHours(minutes: number): string {
     return `${Math.round((minutes / 60) * 10) / 10}h`;
   }
 
-  formatTime(value: string | null): string {
-    if (!value) {
-      return '—';
-    }
-    return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+  readonly formatTime = formatTime;
 
   statusLabel(item: AttendanceRecord): string {
     return item.status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());

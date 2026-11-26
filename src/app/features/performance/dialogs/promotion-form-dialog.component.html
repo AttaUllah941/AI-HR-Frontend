@@ -34,10 +34,7 @@
         <input matInput formControlName="proposedTitle" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Effective date</mat-label>
-        <input matInput type="date" formControlName="effectiveDate" />
-      </mat-form-field>
+      <app-date-field label="Effective date" formControlName="effectiveDate" />
 
       <mat-form-field appearance="outline" class="performance-form__full">
         <mat-label>Reason</mat-label>

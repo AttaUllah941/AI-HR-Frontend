@@ -5,12 +5,18 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { filter } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { SettingsService } from '../../../../core/services/settings.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
+import { TIME_ZONES, localeValidator, timeZoneValidator } from '../../../../shared/forms/validators';
+
+/** Optional http(s) address. Empty is fine. */
+const URL_PATTERN = /^$|^https?:\/\/[^\s/$.?#][^\s]*$/i;
 
 @Component({
   selector: 'app-settings-company-page',
@@ -34,21 +40,25 @@ export class SettingsCompanyPageComponent implements OnInit, HasUnsavedChanges {
   private readonly settings = inject(SettingsService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly confirm = inject(ConfirmDialogService);
 
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
+  /** Whether the company was active when last loaded or saved; turning it off needs a confirmation. */
+  private readonly wasActive = signal(true);
   readonly canUpdate = this.auth.hasPermission('settings:update');
+  readonly timeZones = TIME_ZONES;
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
-    legalName: [''],
-    email: [''],
-    phone: [''],
-    website: [''],
-    logoUrl: [''],
-    timezone: ['UTC', [Validators.required]],
-    locale: ['en-US', [Validators.required]],
+    legalName: ['', Validators.maxLength(200)],
+    email: ['', Validators.email],
+    phone: ['', Validators.maxLength(50)],
+    website: ['', Validators.pattern(URL_PATTERN)],
+    logoUrl: ['', Validators.pattern(URL_PATTERN)],
+    timezone: ['UTC', [Validators.required, timeZoneValidator]],
+    locale: ['en-US', [Validators.required, localeValidator]],
     isActive: [true],
   });
 
@@ -72,6 +82,7 @@ export class SettingsCompanyPageComponent implements OnInit, HasUnsavedChanges {
           locale: data.locale ?? 'en-US',
           isActive: data.isActive ?? true,
         });
+        this.wasActive.set(data.isActive ?? true);
         if (!this.canUpdate) {
           this.form.disable();
         }
@@ -85,10 +96,33 @@ export class SettingsCompanyPageComponent implements OnInit, HasUnsavedChanges {
   }
 
   save(): void {
-    if (!this.canUpdate || this.form.invalid || this.saving()) {
+    if (!this.canUpdate || this.saving()) {
+      return;
+    }
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
+    const raw = this.form.getRawValue();
+    if (this.wasActive() && !raw.isActive) {
+      // Deactivating blocks every sign-in for the company, including the person pressing Save.
+      this.confirm
+        .open({
+          title: 'Deactivate this company?',
+          message:
+            'Everyone in this company, including you, will be signed out and unable to sign in until the platform administrator turns it back on.',
+          confirmLabel: 'Deactivate company',
+          destructive: true,
+          icon: 'warning',
+        })
+        .pipe(filter(Boolean))
+        .subscribe(() => this.persist());
+      return;
+    }
+    this.persist();
+  }
+
+  private persist(): void {
     this.saving.set(true);
     const raw = this.form.getRawValue();
     this.settings
@@ -106,6 +140,7 @@ export class SettingsCompanyPageComponent implements OnInit, HasUnsavedChanges {
       .subscribe({
         next: () => {
           this.form.markAsPristine();
+          this.wasActive.set(raw.isActive);
           this.toast.success('Company profile updated.');
           this.saving.set(false);
         },
@@ -119,5 +154,4 @@ export class SettingsCompanyPageComponent implements OnInit, HasUnsavedChanges {
   hasUnsavedChanges(): boolean {
     return this.form.dirty && !this.saving();
   }
-
 }

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { toIsoDate } from '../../../core/utils/date-format';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,12 +12,14 @@ import { AuthService } from '../../../core/services/auth.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { DateFieldComponent } from '../../../shared/components/date-field/date-field.component';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-overtime-form-dialog',
   standalone: true,
   imports: [
+    DateFieldComponent,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -46,7 +49,7 @@ export class OvertimeFormDialogComponent {
 
   readonly form = this.fb.nonNullable.group({
     employeeId: ['', Validators.required],
-    date: [new Date().toISOString().slice(0, 10), Validators.required],
+    date: [toIsoDate(new Date()), Validators.required],
     minutes: [60, [Validators.required, Validators.min(1)]],
     reason: [''],
   });

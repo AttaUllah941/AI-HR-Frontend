@@ -42,7 +42,7 @@
             <th scope="col">Title</th>
             <th scope="col">Candidate</th>
             <th scope="col">Job</th>
-            <th scope="col">Salary</th>
+            <th scope="col" class="recruitment-table__num">Salary</th>
             <th scope="col">Status</th>
             <th scope="col" class="recruitment-table__actions-col">
               <span class="sr-only">Actions</span>
@@ -57,7 +57,7 @@
               </td>
               <td data-label="Candidate">{{ candidateName(item) }}</td>
               <td data-label="Job">{{ jobTitle(item) }}</td>
-              <td data-label="Salary">{{ formatMoney(item) }}</td>
+              <td data-label="Salary" class="recruitment-table__num">{{ formatMoney(item) }}</td>
               <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="recruitment-status-pill__dot" aria-hidden="true"></span>

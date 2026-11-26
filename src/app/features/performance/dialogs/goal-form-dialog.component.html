@@ -67,15 +67,9 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Start date</mat-label>
-        <input matInput type="date" formControlName="startDate" />
-      </mat-form-field>
+      <app-date-field label="Start date" formControlName="startDate" />
 
-      <mat-form-field appearance="outline">
-        <mat-label>Due date</mat-label>
-        <input matInput type="date" formControlName="dueDate" />
-      </mat-form-field>
+      <app-date-field label="Due date" formControlName="dueDate" />
     </div>
   </form>
 </mat-dialog-content>

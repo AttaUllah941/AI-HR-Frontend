@@ -35,7 +35,7 @@
       }
     </div>
 
-    <div class="performance-kpi-grid" style="grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <div class="performance-kpi-grid performance-kpi-grid--4">
       @for (card of kpis(); track card.key) {
         <mat-card class="performance-kpi-card">
           <div class="performance-kpi-card__header">
@@ -43,11 +43,48 @@
               <mat-icon aria-hidden="true">{{ card.icon }}</mat-icon>
             </span>
           </div>
-          <p class="performance-kpi-card__label">{{ card.label }}</p>
-          <strong class="performance-kpi-card__value">{{ card.value }}</strong>
+          <div>
+            <p class="performance-kpi-card__label">{{ card.label }}</p>
+            <strong class="performance-kpi-card__value">{{ card.value }}</strong>
+          </div>
         </mat-card>
       }
     </div>
+
+    @if (!isEmployeeView() && (totalGoals() > 0 || totalReviews() > 0)) {
+      <div class="pf-grid">
+        <section class="pf-card pf-goals" aria-labelledby="pf-goals-title">
+          <header class="pf-card__head">
+            <h3 id="pf-goals-title">Goals by status</h3>
+            <p>{{ year }} objectives across the company</p>
+          </header>
+          <div class="pf-goals__body">
+            <app-echart [build]="goalChart()" label="Goals by status" height="12rem" />
+            <ul class="pf-legend">
+              @for (item of goalLegend(); track item.key) {
+                <li>
+                  <span class="pf-legend__dot" [style.background]="item.color"></span>
+                  <span class="pf-legend__label">{{ item.label }}</span>
+                  <strong>{{ item.value }}</strong>
+                </li>
+              }
+            </ul>
+          </div>
+        </section>
+
+        <section class="pf-card pf-reviews" aria-labelledby="pf-reviews-title">
+          <header class="pf-card__head">
+            <h3 id="pf-reviews-title">Reviews by status</h3>
+            <p>Where each performance review is in the cycle</p>
+          </header>
+          @if (totalReviews() > 0) {
+            <app-echart [build]="reviewChart()" label="Reviews by status" height="12rem" />
+          } @else {
+            <p class="pf-empty">No reviews have been started this year.</p>
+          }
+        </section>
+      </div>
+    }
 
     <div>
       <div class="performance-action-bar">
@@ -59,9 +96,9 @@
           title="No goals yet"
           message="Create goals to track employee objectives."
           icon="flag"
-      [actionLabel]="canCreate ? 'New goal' : ''"
-      (action)="openCreateGoal()"
-    />
+          [actionLabel]="canCreate ? 'New goal' : ''"
+          (action)="openCreateGoal()"
+        />
       } @else {
         <div class="performance-table-card">
           <div class="performance-table-wrap">
@@ -85,7 +122,14 @@
                     @if (!isEmployeeView()) {
                       <td data-label="Employee">{{ employeeLabel(goal.employee) }}</td>
                     }
-                    <td data-label="Progress">{{ goal.progress }}%</td>
+                    <td data-label="Progress">
+                      <div class="pf-progress">
+                        <span class="pf-progress__track" aria-hidden="true">
+                          <span class="pf-progress__fill" [style.width.%]="progressWidth(goal.progress)"></span>
+                        </span>
+                        <span class="pf-progress__value">{{ goal.progress }}%</span>
+                      </div>
+                    </td>
                     <td data-label="Status">
                       <span [class]="statusClass(goal.status)">
                         <span class="performance-status-pill__dot" aria-hidden="true"></span>
@@ -119,6 +163,7 @@
               <thead>
                 <tr>
                   <th scope="col">Employee</th>
+                  <th scope="col">Cycle</th>
                   <th scope="col">Overall</th>
                   <th scope="col">Status</th>
                 </tr>
@@ -127,7 +172,14 @@
                 @for (review of recentReviews(); track review.id) {
                   <tr class="performance-table__row">
                     <td data-label="Employee">{{ employeeLabel(review.employee) }}</td>
-                    <td data-label="Overall">{{ review.overallRating ?? '—' }}</td>
+                    <td data-label="Cycle">{{ review.cycle?.name || '—' }}</td>
+                    <td data-label="Overall">
+                      @if (review.overallRating != null) {
+                        <span class="pf-rating"><mat-icon aria-hidden="true">star</mat-icon>{{ rating(review.overallRating) }}</span>
+                      } @else {
+                        <span class="pf-muted">Not rated</span>
+                      }
+                    </td>
                     <td data-label="Status">
                       <span [class]="statusClass(review.status)">
                         <span class="performance-status-pill__dot" aria-hidden="true"></span>

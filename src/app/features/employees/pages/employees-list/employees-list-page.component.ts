@@ -1,7 +1,17 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Router, RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
+import {
+  EMPTY,
+  Subscription,
+  debounceTime,
+  distinctUntilChanged,
+  expand,
+  filter,
+  reduce,
+  startWith,
+} from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -24,28 +34,33 @@ import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skelet
 import { EmployeeFormDialogComponent } from '../../dialogs/employee-form-dialog.component';
 import { downloadBlob } from '../../../../shared/utils/download-blob';
 import { SavedFilters, TablePrefs } from '../../../../core/utils/table-prefs';
+import { formatDate } from '../../../../core/utils/date-format';
 
 const STATUS_OPTIONS: Array<{ value: EmployeeStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
   { value: 'ACTIVE', label: 'Active' },
   { value: 'ON_LEAVE', label: 'On leave' },
   { value: 'PROBATION', label: 'Probation' },
+  { value: 'NOTICE_PERIOD', label: 'Notice period' },
+  { value: 'TERMINATED', label: 'Terminated' },
+  { value: 'RESIGNED', label: 'Resigned' },
   { value: 'DRAFT', label: 'Draft' },
   { value: 'INACTIVE', label: 'Inactive' },
 ];
 
-const AVATAR_COLORS = [
-  { bg: '#dbeafe', color: '#2563eb' },
-  { bg: '#ccfbf1', color: '#0d9488' },
-  { bg: '#ffedd5', color: '#ea580c' },
-  { bg: '#fee2e2', color: '#dc2626' },
-  { bg: '#dcfce7', color: '#16a34a' },
-  { bg: '#ede9fe', color: '#7c3aed' },
-  { bg: '#fef3c7', color: '#d97706' },
-  { bg: '#e0e7ff', color: '#4f46e5' },
-  { bg: '#fce7f3', color: '#db2777' },
-  { bg: '#f3f4f6', color: '#4b5563' },
-];
+/** Eight evenly spaced hues. The same person always gets the same one; shades come from CSS so dark mode works. */
+const AVATAR_HUES = [25, 70, 150, 190, 230, 265, 305, 345];
+
+export const PAGE_SIZES = [10, 25, 50, 100] as const;
+
+type SortKey = 'lastName' | 'employeeCode' | 'department' | 'designation' | 'status' | 'joinDate';
+
+/** Stops spreadsheet apps from running a cell that starts with = + - @ as a formula. */
+function csvCell(value: unknown): string {
+  const text = String(value ?? '');
+  const safe = /^[=+\-@]/.test(text) ? `'${text}` : text;
+  return `"${safe.replace(/"/g, '""')}"`;
+}
 
 interface EmployeeFilterPreset {
   search: string;
@@ -64,6 +79,7 @@ interface EmployeeFilterPreset {
     MatSelectModule,
     MatIconModule,
     MatMenuModule,
+    RouterLink,
     EmptyStateComponent,
     ErrorStateComponent,
     TableSkeletonComponent,
@@ -85,6 +101,7 @@ export class EmployeesListPageComponent implements OnInit {
   readonly prefs = new TablePrefs('employees');
   readonly savedFilters = new SavedFilters<EmployeeFilterPreset>('employees');
   readonly columnOptions = [
+    { id: 'code', label: 'ID' },
     { id: 'department', label: 'Department' },
     { id: 'position', label: 'Position' },
     { id: 'manager', label: 'Manager' },
@@ -99,6 +116,11 @@ export class EmployeesListPageComponent implements OnInit {
   readonly page = signal(1);
   readonly total = signal(0);
   readonly totalPages = signal(0);
+  readonly pageSize = signal<number>(10);
+  readonly pageSizes = PAGE_SIZES;
+  readonly sortBy = signal<SortKey>('lastName');
+  readonly sortDir = signal<'asc' | 'desc'>('asc');
+  readonly exporting = signal(false);
   readonly departments = signal<Department[]>([]);
   readonly filtersOpen = signal(false);
   readonly menuItem = signal<EmployeeListItem | null>(null);
@@ -112,6 +134,34 @@ export class EmployeesListPageComponent implements OnInit {
   readonly searchControl = new FormControl('', { nonNullable: true });
   readonly statusControl = new FormControl<EmployeeStatus | ''>('', { nonNullable: true });
   readonly departmentControl = new FormControl('', { nonNullable: true });
+
+  private readonly searchValue = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
+  private readonly statusValue = toSignal(this.statusControl.valueChanges.pipe(startWith('' as EmployeeStatus | '')), {
+    initialValue: '' as EmployeeStatus | '',
+  });
+  private readonly departmentValue = toSignal(this.departmentControl.valueChanges.pipe(startWith('')), {
+    initialValue: '',
+  });
+
+  /** Removable chips for every filter that is currently narrowing the list. */
+  readonly activeChips = computed(() => {
+    const chips: Array<{ key: 'search' | 'status' | 'department'; label: string }> = [];
+    const search = this.searchValue().trim();
+    if (search) chips.push({ key: 'search', label: `Search: "${search}"` });
+    const status = this.statusValue();
+    if (status) {
+      chips.push({ key: 'status', label: `Status: ${STATUS_OPTIONS.find((o) => o.value === status)?.label ?? status}` });
+    }
+    const dept = this.departmentValue();
+    if (dept) {
+      chips.push({ key: 'department', label: `Department: ${this.departments().find((d) => d.id === dept)?.name ?? '…'}` });
+    }
+    return chips;
+  });
+  readonly activeFilterCount = computed(() => this.activeChips().filter((c) => c.key !== 'search').length);
+
+  readonly rangeStart = computed(() => (this.total() === 0 ? 0 : (this.page() - 1) * this.pageSize() + 1));
+  readonly rangeEnd = computed(() => Math.min(this.page() * this.pageSize(), this.total()));
 
   ngOnInit(): void {
     this.org.listDepartments().subscribe({ next: (items) => this.departments.set(items) });
@@ -136,15 +186,7 @@ export class EmployeesListPageComponent implements OnInit {
 
     this.inflight?.unsubscribe();
     this.inflight = this.employees
-      .list({
-        page: this.page(),
-        pageSize: 10,
-        search: this.searchControl.value.trim() || undefined,
-        status: this.statusControl.value || undefined,
-        departmentId: this.departmentControl.value || undefined,
-        sortBy: 'lastName',
-        sortDir: 'asc',
-      })
+      .list(this.queryParams(this.page(), this.pageSize()))
       .subscribe({
         next: (data) => {
           this.items.set(data.items);
@@ -157,6 +199,63 @@ export class EmployeesListPageComponent implements OnInit {
           this.loading.set(false);
         },
       });
+  }
+
+  private queryParams(page: number, pageSize: number) {
+    return {
+      page,
+      pageSize,
+      search: this.searchControl.value.trim() || undefined,
+      status: this.statusControl.value || undefined,
+      departmentId: this.departmentControl.value || undefined,
+      sortBy: this.sortBy(),
+      sortDir: this.sortDir(),
+    };
+  }
+
+  /** Click a header: sort by it (ascending first), click again to flip the direction. */
+  sort(key: SortKey): void {
+    if (this.sortBy() === key) {
+      this.sortDir.update((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      this.sortBy.set(key);
+      // Dates read best newest-first; everything else A-Z.
+      this.sortDir.set(key === 'joinDate' ? 'desc' : 'asc');
+    }
+    this.page.set(1);
+    this.reload();
+  }
+
+  sortIcon(key: SortKey): string {
+    if (this.sortBy() !== key) return 'unfold_more';
+    return this.sortDir() === 'asc' ? 'arrow_upward' : 'arrow_downward';
+  }
+
+  ariaSort(key: SortKey): 'ascending' | 'descending' | 'none' {
+    if (this.sortBy() !== key) return 'none';
+    return this.sortDir() === 'asc' ? 'ascending' : 'descending';
+  }
+
+  setPageSize(value: string | number): void {
+    const size = Number(value);
+    if (!PAGE_SIZES.includes(size as (typeof PAGE_SIZES)[number])) return;
+    this.pageSize.set(size);
+    this.page.set(1);
+    this.reload();
+  }
+
+  clearFilter(key: 'search' | 'status' | 'department'): void {
+    if (key === 'search') this.searchControl.setValue('');
+    if (key === 'status') this.statusControl.setValue('');
+    if (key === 'department') this.departmentControl.setValue('');
+  }
+
+  clearAllFilters(): void {
+    this.searchControl.setValue('', { emitEvent: false });
+    this.statusControl.setValue('', { emitEvent: false });
+    this.departmentControl.setValue('', { emitEvent: false });
+    this.page.set(1);
+    this.reload();
   }
 
   savePreset(input: HTMLInputElement): void {
@@ -235,33 +334,50 @@ export class EmployeesListPageComponent implements OnInit {
       });
   }
 
+  /** Downloads every employee matching the current search/filters/sort (all pages), not just this page. */
   exportCsv(): void {
-    const rows = this.items();
-    if (rows.length === 0) {
-      this.toast.info('No employees to export');
-      return;
-    }
+    if (this.exporting()) return;
+    this.exporting.set(true);
+    const fetchPage = (page: number) => this.employees.list(this.queryParams(page, 100));
 
-    const header = ['Name', 'Email', 'Department', 'Position', 'Manager', 'Status', 'Joined'];
-    const lines = rows.map((item) =>
-      [
-        `${item.firstName} ${item.lastName}`,
-        item.email,
-        item.department?.name ?? '',
-        item.designation?.name ?? '',
-        this.managerName(item),
-        this.statusLabel(item),
-        this.formatJoined(item.joinDate),
-      ]
-        .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
-        .join(','),
-    );
-
-    const blob = new Blob([[header.join(','), ...lines].join('\n')], {
-      type: 'text/csv;charset=utf-8;',
-    });
-    downloadBlob(blob, 'employees.csv');
-    this.toast.success('Employees exported');
+    fetchPage(1)
+      .pipe(
+        expand((r) => (r.pagination.page < r.pagination.totalPages ? fetchPage(r.pagination.page + 1) : EMPTY)),
+        reduce((all, r) => all.concat(r.items), [] as EmployeeListItem[]),
+      )
+      .subscribe({
+        next: (rows) => {
+          this.exporting.set(false);
+          if (rows.length === 0) {
+            this.toast.info('No employees to export');
+            return;
+          }
+          const header = ['ID', 'Name', 'Email', 'Department', 'Position', 'Manager', 'Status', 'Joined'];
+          const lines = rows.map((item) =>
+            [
+              item.employeeCode,
+              `${item.firstName} ${item.lastName}`,
+              item.email,
+              item.department?.name ?? '',
+              item.designation?.name ?? '',
+              this.managerName(item),
+              this.statusLabel(item),
+              this.formatJoined(item.joinDate),
+            ]
+              .map(csvCell)
+              .join(','),
+          );
+          const blob = new Blob([[header.map(csvCell).join(','), ...lines].join('\r\n')], {
+            type: 'text/csv;charset=utf-8;',
+          });
+          downloadBlob(blob, 'employees.csv');
+          this.toast.success(`Exported ${rows.length} employees`);
+        },
+        error: () => {
+          this.exporting.set(false);
+          this.toast.error('Unable to export employees');
+        },
+      });
   }
 
   prevPage(): void {
@@ -282,11 +398,13 @@ export class EmployeesListPageComponent implements OnInit {
     return `${item.firstName.charAt(0)}${item.lastName.charAt(0)}`.toUpperCase();
   }
 
-  avatarStyle(item: EmployeeListItem): { background: string; color: string } {
-    const index =
-      [...item.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % AVATAR_COLORS.length;
-    const palette = AVATAR_COLORS[index];
-    return { background: palette.bg, color: palette.color };
+  /** Stable colour per person (from their employee code), one of eight hues. */
+  avatarHue(item: EmployeeListItem): number {
+    let hash = 0;
+    for (const ch of item.employeeCode || item.id) {
+      hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+    }
+    return AVATAR_HUES[hash % AVATAR_HUES.length]!;
   }
 
   managerName(item: EmployeeListItem): string {
@@ -297,14 +415,7 @@ export class EmployeesListPageComponent implements OnInit {
   }
 
   formatJoined(value: string | null): string {
-    if (!value) {
-      return '—';
-    }
-    return new Date(value).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    return formatDate(value);
   }
 
   statusLabel(item: EmployeeListItem): string {

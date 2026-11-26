@@ -1,4 +1,5 @@
 <app-organization-status
+  skeleton="form"
   [loading]="loading()"
   [error]="error()"
   loadingMessage="Loading preferences…"
@@ -9,27 +10,33 @@
     <div class="profile-action-bar">
       <div>
         <h2 class="profile-page-heading">Preferences</h2>
-        <p class="profile-page-sub">
-          Locale, timezone, and display formats. Theme is stored for upcoming theming support.
-        </p>
+        <p class="profile-page-sub">How the app looks for you, and your regional settings.</p>
       </div>
-      <div class="profile-action-bar__actions">
+      <div class="profile-save">
+        @if (form.dirty && !saving()) {
+          <span class="profile-dirty" role="status">Unsaved changes</span>
+        }
         <button
           mat-flat-button
           color="primary"
-          type="button"
+          type="submit"
+          form="preferences-form"
           class="profile-add-btn"
-          [disabled]="form.invalid || saving()"
-          (click)="save()"
-          [appButtonSpinner]="saving()">
-          @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
+          [disabled]="saving() || !form.dirty"
+          [appButtonSpinner]="saving()"
+        >
+          @if (!saving()) {
+            <mat-icon aria-hidden="true">save</mat-icon>
+          }
           {{ saving() ? 'Saving…' : 'Save preferences' }}
         </button>
       </div>
     </div>
 
-    <div class="profile-panel-card">
-      <form [formGroup]="form" class="profile-form" (ngSubmit)="save()">
+    <form [formGroup]="form" id="preferences-form" (ngSubmit)="save()">
+      <div class="profile-panel-card profile-pref-group">
+        <h3 class="profile-section-title">Appearance</h3>
+        <p class="profile-page-sub">Applies as soon as you save.</p>
         <div class="profile-form__grid">
           <mat-form-field appearance="outline">
             <mat-label>Theme</mat-label>
@@ -38,44 +45,54 @@
                 <mat-option [value]="theme">{{ themeLabels[theme] }}</mat-option>
               }
             </mat-select>
+            <mat-hint>"System" follows your device's light or dark setting.</mat-hint>
           </mat-form-field>
+        </div>
+      </div>
 
+      <div class="profile-panel-card profile-pref-group">
+        <h3 class="profile-section-title">Regional settings</h3>
+        <p class="profile-notice" role="note">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          <span>
+            These are saved to your profile, but the app currently shows dates and times in one
+            format for everyone (for example 26 Nov 2026, 09:05 PM). Changing them does not change
+            what you see yet.
+          </span>
+        </p>
+        <div class="profile-form__grid">
           <mat-form-field appearance="outline">
-            <mat-label>Locale</mat-label>
+            <mat-label>Language and region</mat-label>
             <mat-select formControlName="locale">
               @for (locale of locales(); track locale) {
-                <mat-option [value]="locale">{{ locale }}</mat-option>
+                <mat-option [value]="locale">{{ localeLabel(locale) }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-
           <mat-form-field appearance="outline">
             <mat-label>Timezone</mat-label>
             <mat-select formControlName="timezone">
               @for (tz of timezones(); track tz) {
-                <mat-option [value]="tz">{{ tz }}</mat-option>
+                <mat-option [value]="tz">{{ timezoneLabel(tz) }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-
           <mat-form-field appearance="outline">
             <mat-label>Date format</mat-label>
             <mat-select formControlName="dateFormat">
               @for (fmt of dateFormats(); track fmt) {
-                <mat-option [value]="fmt">{{ fmt }}</mat-option>
+                <mat-option [value]="fmt">{{ dateFormatLabel(fmt) }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-
           <mat-form-field appearance="outline">
             <mat-label>Time format</mat-label>
             <mat-select formControlName="timeFormat">
               @for (fmt of timeFormats; track fmt) {
-                <mat-option [value]="fmt">{{ fmt }}</mat-option>
+                <mat-option [value]="fmt">{{ timeFormatLabel(fmt) }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-
           <mat-form-field appearance="outline">
             <mat-label>Week starts on</mat-label>
             <mat-select formControlName="weekStartsOn">
@@ -85,7 +102,7 @@
             </mat-select>
           </mat-form-field>
         </div>
-      </form>
-    </div>
+      </div>
+    </form>
   </section>
 </app-organization-status>

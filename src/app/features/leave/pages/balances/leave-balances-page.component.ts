@@ -104,6 +104,21 @@ export class LeaveBalancesPageComponent implements OnInit {
       });
   }
 
+  /** Share of the entitlement already used or booked (drives the little meter). */
+  usedPercent(balance: LeaveBalance): number {
+    const total = balance.entitled + balance.carriedForward;
+    return total > 0 ? Math.min(100, ((balance.used + balance.pending) / total) * 100) : 0;
+  }
+
+  tone(balance: LeaveBalance): 'ok' | 'warn' | 'low' {
+    const total = balance.entitled + balance.carriedForward;
+    if (total <= 0) {
+      return 'ok';
+    }
+    const left = this.available(balance) / total;
+    return left <= 0 ? 'low' : left <= 0.2 ? 'warn' : 'ok';
+  }
+
   available(balance: LeaveBalance): number {
     return Math.round(this.leave.availableDays(balance) * 10) / 10;
   }

@@ -22,6 +22,7 @@ import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skelet
 import { OrganizationSectionHeaderComponent } from '../../../organization/components/organization-section-header/organization-section-header.component';
 import { LeaveRequestFormDialogComponent } from '../../dialogs/leave-request-form-dialog.component';
 import { optimistic } from '../../../../core/utils/optimistic';
+import { formatDate, formatDateRange } from '../../../../core/utils/date-format';
 
 const STATUS_OPTIONS: Array<{ value: LeaveRequestStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -271,15 +272,11 @@ export class LeaveRequestsPageComponent implements OnInit {
   }
 
   formatDate(value: string): string {
-    const [y, m, d] = value.slice(0, 10).split('-').map(Number);
-    if (!y || !m || !d) {
-      return value;
-    }
-    return new Date(y, m - 1, d).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    return formatDate(value, value);
+  }
+
+  dateRange(item: LeaveRequest): string {
+    return formatDateRange(item.startDate, item.endDate);
   }
 
   dayTypeLabel(value: string): string {

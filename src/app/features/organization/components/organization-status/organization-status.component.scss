@@ -1,13 +1,54 @@
+/* Stands in for the page's own heading row (title, subtitle, primary action) so the tiles do not jump. */
+.org-status-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.75rem;
+  margin-bottom: 1rem;
+}
+
+.org-status-head__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+}
 
 .org-status-kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
   margin-bottom: 1rem;
 }
 
+/* Mirrors the real overview layout (a wide chart beside a narrower one). */
 .org-status-charts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 1rem;
+
+  > :first-child {
+    grid-column: span 7;
+  }
+
+  > :last-child {
+    grid-column: span 5;
+  }
+}
+
+@media (max-width: 1100px) {
+  .org-status-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .org-status-charts > * {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .org-status-kpis {
+    grid-template-columns: 1fr;
+  }
 }

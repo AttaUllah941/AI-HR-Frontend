@@ -5,9 +5,9 @@
 
 <mat-dialog-content>
   @if (loading()) {
-    <div class="org-status--loading">
-      <mat-spinner diameter="32" />
-      <span>Loading employee…</span>
+    <div role="status">
+      <span class="sr-only">Loading employee…</span>
+      <app-form-skeleton [fields]="8" />
     </div>
   } @else {
     <p class="org-dialog-subtitle">

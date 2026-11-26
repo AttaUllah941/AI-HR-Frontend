@@ -23,9 +23,9 @@
 
 <div class="performance-table-card" style="margin-bottom: 1.5rem">
   @if (cyclesLoading()) {
-    <div class="performance-table-state">
-      <mat-spinner diameter="32" />
-      <span>Loading cycles…</span>
+    <div role="status">
+      <span class="sr-only">Loading cycles…</span>
+      <app-table-skeleton [rows]="3" [cols]="5" />
     </div>
   } @else if (cyclesError()) {
     <div class="performance-table-state performance-table-state--error">
@@ -169,7 +169,13 @@
             <tr class="performance-table__row">
               <td data-label="Employee">{{ employeeLabel(item) }}</td>
               <td data-label="Reviewer">{{ reviewerLabel(item) }}</td>
-              <td data-label="Overall">{{ item.overallRating ?? '—' }}</td>
+              <td data-label="Overall">
+                @if (item.overallRating != null) {
+                  <span class="performance-rating"><mat-icon aria-hidden="true">star</mat-icon>{{ item.overallRating.toFixed(1) }}</span>
+                } @else {
+                  <span class="performance-table__sub">Not rated</span>
+                }
+              </td>
               <td data-label="Status">
                 <span [class]="statusClass(item.status)">
                   <span class="performance-status-pill__dot" aria-hidden="true"></span>

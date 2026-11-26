@@ -3,24 +3,24 @@
 
 :root {
   /* Brand */
-  --zh-primary: oklch(54.8% 0.22 265);
+  --zh-primary: oklch(64% 0.205 45);
   --zh-primary-foreground: oklch(99% 0 0);
-  --zh-primary-soft: oklch(95% 0.04 260);
+  --zh-primary-soft: oklch(95.5% 0.035 60);
   --zh-secondary: oklch(72% 0.14 230);
   --zh-secondary-foreground: oklch(99% 0 0);
 
   /* Surfaces */
-  --zh-background: oklch(98.4% 0.005 247);
-  --zh-foreground: oklch(28% 0.03 260);
+  --zh-background: oklch(97.6% 0.004 85);
+  --zh-foreground: oklch(21% 0.012 60);
   --zh-card: oklch(100% 0 0);
-  --zh-card-foreground: oklch(28% 0.03 260);
-  --zh-muted: oklch(96.5% 0.008 250);
-  --zh-muted-foreground: oklch(50% 0.02 258);
-  --zh-accent: oklch(96% 0.02 260);
-  --zh-accent-foreground: oklch(28% 0.03 260);
-  --zh-border: oklch(92% 0.008 255);
-  --zh-input: oklch(92% 0.008 255);
-  --zh-ring: oklch(54.8% 0.22 265);
+  --zh-card-foreground: oklch(21% 0.012 60);
+  --zh-muted: oklch(96.2% 0.004 85);
+  --zh-muted-foreground: oklch(50% 0.012 70);
+  --zh-accent: oklch(96% 0.012 70);
+  --zh-accent-foreground: oklch(21% 0.012 60);
+  --zh-border: oklch(92.5% 0.005 85);
+  --zh-input: oklch(92.5% 0.005 85);
+  --zh-ring: oklch(64% 0.205 45);
 
   /* Sidebar */
   --zh-sidebar: oklch(22% 0.03 260);
@@ -30,6 +30,17 @@
   --zh-sidebar-border: oklch(30% 0.02 260);
   --zh-sidebar-primary: oklch(54.8% 0.22 265);
   --zh-sidebar-width: 16rem;
+
+  /* App navigation rail (light, like the reference). --zh-sidebar* stays dark for the auth screens. */
+  --zh-nav-bg: oklch(96.4% 0.004 85);
+  --zh-nav-border: oklch(92% 0.005 85);
+  --zh-nav-foreground: oklch(42% 0.012 70);
+  --zh-nav-hover: oklch(93.5% 0.005 85);
+  --zh-nav-active-bg: oklch(94% 0.006 85);
+  --zh-nav-active-foreground: oklch(20% 0.012 60);
+  --zh-primary-text: oklch(53% 0.18 42);
+  --zh-primary-gradient: linear-gradient(135deg, oklch(70% 0.195 50), oklch(61% 0.21 40));
+  --zh-hatch: repeating-linear-gradient(135deg, transparent 0 4px, oklch(88% 0.006 85) 4px 5px);
   --zh-sidebar-width-collapsed: 4.5rem;
 
   /* Feedback */
@@ -45,10 +56,12 @@
   --zh-destructive-text: oklch(52% 0.2 25);
 
   /* Shape & type */
-  --zh-radius: 0.875rem;
-  --zh-font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --zh-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  --zh-shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.08);
+  --zh-radius: 1rem;
+  --zh-font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Headings and big numbers: a little more character than the body face. */
+  --zh-font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --zh-shadow-sm: 0 1px 2px 0 rgb(40 30 20 / 0.03);
+  --zh-shadow-md: 0 8px 24px -6px rgb(40 30 20 / 0.1);
   --zh-header-height: 4rem;
 }
 
@@ -56,9 +69,9 @@
 @mixin zh-dark-tokens {
   color-scheme: dark;
 
-  --zh-primary: oklch(66% 0.19 265);
-  --zh-primary-foreground: oklch(16% 0.02 260);
-  --zh-primary-soft: oklch(30% 0.07 265);
+  --zh-primary: oklch(70% 0.19 48);
+  --zh-primary-foreground: oklch(16% 0.02 50);
+  --zh-primary-soft: oklch(31% 0.06 50);
   --zh-secondary: oklch(70% 0.13 230);
   --zh-secondary-foreground: oklch(16% 0.02 260);
 
@@ -72,10 +85,23 @@
   --zh-accent-foreground: oklch(94% 0.008 258);
   --zh-border: oklch(32% 0.02 260);
   --zh-input: oklch(32% 0.02 260);
-  --zh-ring: oklch(66% 0.19 265);
+  --zh-ring: oklch(70% 0.19 48);
+
+  /* Skeleton loaders: a block clearly lighter than the card, with a soft light sweep. */
+  --zh-skeleton-base: oklch(30% 0.02 260);
+  --zh-skeleton-shine: oklch(40% 0.022 260 / 0.65);
 
   --zh-sidebar: oklch(14% 0.02 260);
   --zh-sidebar-border: oklch(26% 0.02 260);
+
+  --zh-nav-bg: oklch(19% 0.012 60);
+  --zh-nav-border: oklch(28% 0.012 60);
+  --zh-nav-foreground: oklch(78% 0.012 70);
+  --zh-nav-hover: oklch(24% 0.012 60);
+  --zh-nav-active-bg: oklch(27% 0.014 60);
+  --zh-nav-active-foreground: oklch(96% 0.006 70);
+  --zh-primary-text: oklch(76% 0.15 50);
+  --zh-hatch: repeating-linear-gradient(135deg, transparent 0 4px, oklch(32% 0.012 60) 4px 5px);
 
   --zh-success: oklch(74% 0.17 145);
   --zh-warning: oklch(80% 0.15 75);

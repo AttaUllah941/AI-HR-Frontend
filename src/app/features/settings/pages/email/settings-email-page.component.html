@@ -1,4 +1,5 @@
 <app-organization-status
+  skeleton="form"
   [loading]="loading()"
   [error]="error()"
   loadingMessage="Loading email settings…"
@@ -9,61 +10,92 @@
     <div class="settings-action-bar">
       <div>
         <h2 class="settings-page-heading">Email settings</h2>
-        <p class="settings-page-sub">
-          Provider configuration for outbound mail.
-          @if (apiKeySet()) {
-            <span class="settings-badge settings-badge--ok">API key configured (environment)</span>
-          } @else {
-            <span class="settings-badge settings-badge--warn">API key not set in environment</span>
-          }
-        </p>
+        <p class="settings-page-sub">Outbound mail for password resets, invitations and notifications.</p>
       </div>
       @if (canUpdate) {
-        <div class="settings-action-bar__actions">
+        <div class="settings-save">
+          @if (form.dirty && !saving()) {
+            <span class="settings-dirty" role="status">Unsaved changes</span>
+          }
           <button
             mat-flat-button
             color="primary"
-            type="button"
+            type="submit"
+            form="email-form"
             class="settings-add-btn"
-            [disabled]="form.invalid || saving()"
-            (click)="save()"
-            [appButtonSpinner]="saving()">
-            @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
+            [disabled]="saving() || !form.dirty"
+            [appButtonSpinner]="saving()"
+          >
+            @if (!saving()) {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
             {{ saving() ? 'Saving…' : 'Save email' }}
           </button>
         </div>
+      } @else {
+        <p class="settings-dirty" role="note">View only</p>
       }
     </div>
 
+    @if (runtimeProvider(); as live) {
+      <p class="settings-notice" [class.settings-notice--warn]="live === 'console'" role="status">
+        <mat-icon aria-hidden="true">{{ live === 'console' ? 'mail_lock' : 'mark_email_read' }}</mat-icon>
+        <span>
+          <strong>In use on the server: {{ providerLabel(live) }}.</strong>
+          @if (live === 'console') {
+            Emails are only written to the server log, so nobody receives password resets,
+            invitations or notifications.
+          }
+        </span>
+      </p>
+    }
+    <p class="settings-notice" role="note">
+      <mat-icon aria-hidden="true">info</mat-icon>
+      <span>
+        What you save here is kept for your records. The mail service the platform really sends
+        through is set in the server configuration, so changing these values does not switch it.
+      </span>
+    </p>
+
     <div class="settings-panel-card">
-      <form [formGroup]="form" class="settings-form" (ngSubmit)="save()">
+      <form [formGroup]="form" class="settings-form" id="email-form" (ngSubmit)="save()">
         <div class="settings-form__grid">
           <mat-form-field appearance="outline">
             <mat-label>Provider</mat-label>
             <mat-select formControlName="emailProvider">
-              <mat-option value="console">console (dev)</mat-option>
-              <mat-option value="smtp">smtp</mat-option>
+              <mat-option value="smtp">Mail relay</mat-option>
+              <mat-option value="console">Log only (development)</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>From address</mat-label>
-            <input matInput formControlName="emailFrom" />
+            <input matInput formControlName="emailFrom" type="email" autocomplete="off" placeholder="no-reply@example.com" />
+            @if (form.controls.emailFrom.hasError('email')) {
+              <mat-error>Enter a valid email address</mat-error>
+            }
           </mat-form-field>
           <mat-form-field appearance="outline" class="settings-form__full">
-            <mat-label>SMTP URL</mat-label>
+            <mat-label>Mail relay URL</mat-label>
             <input
               matInput
               formControlName="emailSmtpUrl"
+              type="url"
               autocomplete="off"
-              [placeholder]="maskedSmtpUrl() || 'smtps://user:pass@host:465'"
+              [placeholder]="maskedSmtpUrl() || 'https://mail-relay.example.com/send'"
             />
-            <mat-hint>
-              @if (maskedSmtpUrl()) {
-                Current: {{ maskedSmtpUrl() }} (credentials hidden). Leave blank to keep it.
-              } @else {
-                Enter a relay URL to configure SMTP.
-              }
-            </mat-hint>
+            @if (form.controls.emailSmtpUrl.hasError('relayRequired')) {
+              <mat-error>Enter the relay URL to use the mail relay</mat-error>
+            } @else if (form.controls.emailSmtpUrl.hasError('pattern')) {
+              <mat-error>Use an address starting with http:// or https://</mat-error>
+            } @else {
+              <mat-hint>
+                @if (maskedSmtpUrl()) {
+                  Saved: {{ maskedSmtpUrl() }} (credentials hidden). Leave blank to keep it.
+                } @else {
+                  An HTTPS address that receives each email as JSON.
+                }
+              </mat-hint>
+            }
           </mat-form-field>
           <mat-form-field appearance="outline" class="settings-form__full">
             <mat-label>API key</mat-label>
@@ -76,8 +108,8 @@
               [placeholder]="apiKeySet() ? '' : 'Not configured'"
             />
             <mat-hint>
-              The API key is configured via the EMAIL_API_KEY server environment variable and
-              cannot be changed here.
+              {{ apiKeySet() ? 'A key is configured on the server.' : 'No key is configured on the server.' }}
+              It is set with the EMAIL_API_KEY server variable and cannot be changed here.
             </mat-hint>
           </mat-form-field>
         </div>

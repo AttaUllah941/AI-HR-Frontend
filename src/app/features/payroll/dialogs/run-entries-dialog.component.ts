@@ -2,13 +2,13 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   PayrollEntry,
   PayrollRun,
   PayrollService,
 } from '../../../core/services/payroll.service';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { TableSkeletonComponent } from '../../../shared/skeleton/table-skeleton.component';
 
 export interface RunEntriesDialogData {
   run: PayrollRun;
@@ -21,7 +21,7 @@ export interface RunEntriesDialogData {
     MatDialogModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    TableSkeletonComponent,
     EmptyStateComponent,
   ],
   templateUrl: './run-entries-dialog.component.html',

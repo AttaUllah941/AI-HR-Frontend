@@ -33,10 +33,7 @@
         <input matInput type="number" min="15" max="480" formControlName="durationMinutes" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="recruitment-form__full">
-        <mat-label>Scheduled at</mat-label>
-        <input matInput type="datetime-local" formControlName="scheduledAt" />
-      </mat-form-field>
+      <app-datetime-field label="Scheduled at" formControlName="scheduledAt" class="recruitment-form__full" />
 
       <mat-form-field appearance="outline" class="recruitment-form__full">
         <mat-label>Location / link</mat-label>

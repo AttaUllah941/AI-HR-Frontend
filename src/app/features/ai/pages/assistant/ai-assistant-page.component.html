@@ -21,7 +21,6 @@
         </button>
       }
     </div>
-
     <div class="ai-chat">
       <aside class="ai-chat-sidebar" aria-label="Conversations">
         <div class="ai-chat-sidebar__header">
@@ -36,53 +35,92 @@
             />
           } @else {
             @for (conv of conversations(); track conv.id) {
-              <button
-                type="button"
-                class="ai-chat-conv"
-                [class.ai-chat-conv--active]="activeId() === conv.id"
-                (click)="selectConversation(conv.id)"
-              >
-                <span class="ai-chat-conv__title">{{ conversationTitle(conv) }}</span>
+              <div class="ai-chat-conv" [class.ai-chat-conv--active]="activeId() === conv.id">
+                <button
+                  type="button"
+                  class="ai-chat-conv__select"
+                  [attr.aria-current]="activeId() === conv.id ? 'true' : null"
+                  (click)="selectConversation(conv.id)"
+                >
+                  <span class="ai-chat-conv__title">{{ conversationTitle(conv) }}</span>
+                </button>
                 @if (canDelete) {
-                  <mat-icon
+                  <button
+                    type="button"
                     class="ai-chat-conv__delete"
-                    aria-label="Delete conversation"
-                    (click)="deleteConversation($event, conv.id)"
-                    >delete</mat-icon
+                    [attr.aria-label]="'Delete conversation: ' + conversationTitle(conv)"
+                    (click)="deleteConversation(conv)"
                   >
+                    <mat-icon aria-hidden="true">delete</mat-icon>
+                  </button>
                 }
-              </button>
+              </div>
             }
           }
         </div>
       </aside>
-
       <div class="ai-chat-main">
         <div class="ai-chat-main__header">
-          <h3>{{ activeId() ? 'Conversation' : 'New conversation' }}</h3>
+          <h3>{{ activeTitle() }}</h3>
           <p>Nova · Zenith HR assistant</p>
         </div>
-
-        <div class="ai-chat-thread" #threadEl>
+        <div
+          class="ai-chat-thread"
+          #threadEl
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions"
+          aria-label="Conversation with Nova"
+          [attr.aria-busy]="loadingThread() || sending()"
+        >
           @if (loadingThread()) {
-            <div class="ai-chat-empty">
-              <mat-spinner diameter="28" />
-              <p>Loading messages…</p>
+            <div class="ai-chat-skeleton" role="status">
+              <span class="sr-only">Loading messages…</span>
+              <app-skeleton width="55%" height="3.5rem" style="border-radius: 1rem" />
+              <app-skeleton class="ai-chat-skeleton__mine" width="40%" height="2.5rem" style="border-radius: 1rem" />
+              <app-skeleton width="70%" height="5rem" style="border-radius: 1rem" />
             </div>
-          } @else if (messages().length === 0) {
+          } @else if (thread().length === 0) {
             <div class="ai-chat-empty">
               <mat-icon aria-hidden="true">auto_awesome</mat-icon>
               <strong>Hi, I am Nova</strong>
               <p>
-                Your Zenith HR assistant. Ask a question below — a new conversation is created when
-                you send your first message.
+                Your Zenith HR assistant. Ask a question below, or start from an example. A new
+                conversation is created when you send your first message.
               </p>
+              @if (canCreate) {
+                <div class="ai-chat-starters" role="group" aria-label="Example questions">
+                  @for (prompt of starterPrompts; track prompt) {
+                    <button type="button" class="ai-chat-starter" (click)="useStarter(prompt)">
+                      {{ prompt }}
+                    </button>
+                  }
+                </div>
+              }
             </div>
           } @else {
-            @for (msg of messages(); track msg.id) {
+            @for (msg of thread(); track msg.id) {
               <div [class]="bubbleClass(msg.role)">
-                <span class="ai-chat-bubble__meta">{{ roleLabel(msg.role) }}</span>
-                {{ msg.content }}
+                <span class="ai-chat-bubble__meta">
+                  {{ roleLabel(msg.role) }}
+                  @if (timeAgo(msg.createdAt); as when) {
+                    <time [attr.datetime]="msg.createdAt" [title]="fullTime(msg.createdAt)">· {{ when }}</time>
+                  }
+                </span>
+                @if (msg.html !== null) {
+                  <div class="ai-chat-prose" [innerHTML]="msg.html"></div>
+                  <button
+                    type="button"
+                    class="ai-chat-bubble__copy"
+                    aria-label="Copy this reply"
+                    (click)="copyReply(msg)"
+                  >
+                    <mat-icon aria-hidden="true">content_copy</mat-icon>
+                    Copy
+                  </button>
+                } @else {
+                  {{ msg.content }}
+                }
               </div>
             }
             @if (sending()) {
@@ -93,16 +131,17 @@
             }
           }
         </div>
-
         <div class="ai-chat-composer">
           <textarea
-            rows="2"
+            #composerEl
+            rows="1"
             [ngModel]="draft()"
             (ngModelChange)="draft.set($event)"
             (keydown)="onComposerKeydown($event)"
             [disabled]="!canCreate || sending()"
-            placeholder="{{ canCreate ? 'Message Nova…' : 'You need ai:create to chat' }}"
+            [attr.placeholder]="canCreate ? 'Message Nova…' : 'You do not have permission to chat with Nova.'"
             aria-label="Message Nova"
+            aria-describedby="nova-composer-hint"
           ></textarea>
           <button
             mat-flat-button
@@ -115,6 +154,10 @@
             Send
           </button>
         </div>
+        <p class="ai-chat-hint" id="nova-composer-hint">
+          Enter to send, Shift+Enter for a new line. Nova can make mistakes, so check anything
+          important with HR before acting on it.
+        </p>
       </div>
     </div>
   </section>

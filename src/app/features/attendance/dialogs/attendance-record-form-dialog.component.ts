@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { toIsoDate } from '../../../core/utils/date-format';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +17,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { EmployeeListItem, EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { DateFieldComponent } from '../../../shared/components/date-field/date-field.component';
+import { DateTimeFieldComponent } from '../../../shared/components/date-field/datetime-field.component';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 export interface AttendanceRecordDialogData {
@@ -63,6 +66,8 @@ function fromDateTimeLocal(value: string): string | null {
   selector: 'app-attendance-record-form-dialog',
   standalone: true,
   imports: [
+    DateTimeFieldComponent,
+    DateFieldComponent,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -96,7 +101,7 @@ export class AttendanceRecordFormDialogComponent {
   readonly form = this.fb.nonNullable.group({
     employeeId: [this.data.record?.employeeId ?? '', Validators.required],
     date: [
-      toDateInput(this.data.record?.date, this.data.defaultDate ?? new Date().toISOString().slice(0, 10)),
+      toDateInput(this.data.record?.date, this.data.defaultDate ?? toIsoDate(new Date())),
       Validators.required,
     ],
     checkInAt: [toDateTimeLocal(this.data.record?.checkInAt)],

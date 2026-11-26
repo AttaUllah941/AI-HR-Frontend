@@ -22,6 +22,7 @@ import { OrganizationStatusComponent } from '../../../organization/components/or
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
 import { ThemeService, isThemeMode } from '../../../../core/services/theme.service';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
+import { format } from 'date-fns';
 
 @Component({
   selector: 'app-profile-preferences-page',
@@ -145,6 +146,42 @@ export class ProfilePreferencesPageComponent implements OnInit, HasUnsavedChange
           this.saving.set(false);
         },
       });
+  }
+
+  /** "en-US" -> "American English (en-US)". Falls back to the code on browsers without the API. */
+  localeLabel(code: string): string {
+    try {
+      const name = new Intl.DisplayNames(['en'], { type: 'language' }).of(code);
+      return name && name !== code ? `${name} (${code})` : code;
+    } catch {
+      return code;
+    }
+  }
+
+  /** "Asia/Karachi" -> "Asia/Karachi (GMT+5)". */
+  timezoneLabel(zone: string): string {
+    try {
+      const part = new Intl.DateTimeFormat('en-US', { timeZone: zone, timeZoneName: 'shortOffset' })
+        .formatToParts(new Date())
+        .find((p) => p.type === 'timeZoneName');
+      return part ? `${zone} (${part.value})` : zone;
+    } catch {
+      return zone;
+    }
+  }
+
+  /** "DD MMM YYYY" -> "DD MMM YYYY, for example 26 Nov 2026". */
+  dateFormatLabel(pattern: string): string {
+    try {
+      const sample = format(new Date(), pattern.replace(/YYYY/g, 'yyyy').replace(/DD/g, 'dd'));
+      return `${pattern}  (${sample})`;
+    } catch {
+      return pattern;
+    }
+  }
+
+  timeFormatLabel(value: string): string {
+    return value === '12h' ? '12-hour (09:05 PM)' : value === '24h' ? '24-hour (21:05)' : value;
   }
 
   private withOption(options: string[], value: string): string[] {

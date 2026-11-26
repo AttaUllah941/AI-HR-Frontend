@@ -2,31 +2,37 @@
   [loading]="loading()"
   [error]="error()"
   skeleton="list"
-  [hasData]="items().length > 0"
+  [hasData]="loaded()"
   loadingMessage="Loading notifications…"
   errorTitle="Inbox unavailable"
   (retry)="reload()"
 >
-  <section class="notifications-page" aria-label="Notifications inbox">
-    <div class="notifications-action-bar">
+  <section class="inbox" aria-label="Notifications inbox">
+    <header class="inbox__head">
       <div>
-        <h2 class="notifications-page-heading">Inbox</h2>
-        <p class="notifications-page-sub">
-          {{ unreadCount() }} unread in-app · filter by category or show unread only
+        <h2 class="inbox__title">Inbox</h2>
+        <p class="inbox__sub">
+          @if (unreadCount() > 0) {
+            You have <strong>{{ unreadCount() }}</strong> unread {{ unreadCount() === 1 ? 'notification' : 'notifications' }}.
+          } @else {
+            You're all caught up.
+          }
         </p>
       </div>
-      <div class="notifications-action-bar__actions">
+      <div class="inbox__actions">
+        <button mat-icon-button type="button" matTooltip="Refresh" aria-label="Refresh" (click)="reload()">
+          <mat-icon aria-hidden="true">refresh</mat-icon>
+        </button>
         @if (canManage) {
           <button mat-stroked-button type="button" (click)="openSendDialog()">
             <mat-icon aria-hidden="true">send</mat-icon>
-            Send
+            Send notification
           </button>
         }
         <button
           mat-flat-button
           color="primary"
           type="button"
-          class="notifications-add-btn"
           [disabled]="unreadCount() === 0"
           (click)="markAllRead()"
         >
@@ -34,56 +40,72 @@
           Mark all read
         </button>
       </div>
-    </div>
+    </header>
 
-    @if (categoryChips().length) {
-      <div class="notifications-kpi-grid" aria-label="Unread by category">
+    <div class="inbox__filters">
+      <div class="seg" role="group" aria-label="Show">
+        <button type="button" class="seg__btn" [class.is-active]="!unreadOnly.value" (click)="setUnreadOnly(false)">
+          All
+        </button>
+        <button type="button" class="seg__btn" [class.is-active]="unreadOnly.value" (click)="setUnreadOnly(true)">
+          Unread
+          @if (unreadCount() > 0) {
+            <span class="seg__count">{{ unreadCount() }}</span>
+          }
+        </button>
+      </div>
+
+      <div class="chips" role="group" aria-label="Category">
+        <button type="button" class="chip" [class.is-active]="!category.value" (click)="filterByCategory('')">
+          All categories
+        </button>
         @for (chip of categoryChips(); track chip.category) {
           <button
             type="button"
-            class="notifications-kpi-chip"
-            [class.notifications-kpi-chip--active]="category.value === chip.category"
+            class="chip"
+            [class.is-active]="category.value === chip.category"
             (click)="filterByCategory(chip.category)"
           >
-            <span class="notifications-kpi-chip__label">{{ chip.label }}</span>
-            <span class="notifications-kpi-chip__value">{{ chip.unread }}</span>
+            <mat-icon aria-hidden="true">{{ iconFor(chip.category) }}</mat-icon>
+            {{ chip.label }}
+            @if (chip.unread > 0) {
+              <span class="chip__count">{{ chip.unread }}</span>
+            }
           </button>
         }
       </div>
-    }
-
-    <div class="notifications-filters">
-      <mat-form-field appearance="outline">
-        <mat-label>Category</mat-label>
-        <mat-select [formControl]="category" (selectionChange)="applyFilters()">
-          <mat-option value="">All categories</mat-option>
-          @for (cat of categories; track cat) {
-            <mat-option [value]="cat">{{ categoryLabel(cat) }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-checkbox [formControl]="unreadOnly" (change)="applyFilters()">
-        Unread only
-      </mat-checkbox>
-
-      <button mat-button type="button" (click)="reload()">
-        <mat-icon aria-hidden="true">refresh</mat-icon>
-        Refresh
-      </button>
     </div>
 
     @if (items().length === 0) {
       <app-empty-state
-        title="No notifications"
-        message="You're all caught up. New alerts will appear here."
+        [title]="unreadOnly.value ? 'No unread notifications' : 'No notifications'"
+        [message]="
+          unreadOnly.value || category.value
+            ? 'Nothing matches these filters. Try showing all notifications.'
+            : 'You\'re all caught up. New alerts will appear here as they happen.'
+        "
         icon="notifications_none"
+        [actionLabel]="hasFilters() ? 'Clear filters' : ''"
+        actionIcon="filter_alt_off"
+        (action)="clearFilters()"
       />
     } @else {
-      <div class="notifications-table-card">
+      <div class="feed">
+        @if (unreadItems().length > 1) {
+          <div class="select-all">
+            <mat-checkbox
+              [checked]="allSelected()"
+              [indeterminate]="selectedUnread().length > 0 && !allSelected()"
+              (change)="toggleAll()"
+            >
+              Select all unread on this page
+            </mat-checkbox>
+          </div>
+        }
         @if (selectedUnread().length > 0) {
-          <div class="notifications-bulk" role="region" aria-label="Bulk actions">
-            <span>{{ selectedUnread().length }} selected</span>
+          <div class="bulk" role="region" aria-label="Bulk actions">
+            <span><strong>{{ selectedUnread().length }}</strong> selected</span>
+            <span class="bulk__spacer"></span>
             <button mat-flat-button color="primary" type="button" (click)="markSelectedRead()">
               <mat-icon aria-hidden="true">mark_email_read</mat-icon>
               Mark as read
@@ -91,98 +113,116 @@
             <button mat-button type="button" (click)="clearSelection()">Clear</button>
           </div>
         }
-        <div class="notifications-table-wrap">
-          <table class="notifications-table" data-responsive>
-            <thead>
-              <tr>
-                <th scope="col" class="notifications-table__select-col">
-                  <mat-checkbox
-                    aria-label="Select all unread notifications"
-                    [checked]="allSelected()"
-                    [indeterminate]="selectedUnread().length > 0 && !allSelected()"
-                    [disabled]="unreadItems().length === 0"
-                    (change)="toggleAll()"
-                  />
-                </th>
-                <th scope="col">Notification</th>
-                <th scope="col">Category</th>
-                <th scope="col">Channel</th>
-                <th scope="col">Status</th>
-                <th scope="col">When</th>
-                <th scope="col" class="notifications-table__actions-col"></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of items(); track item.id) {
-                <tr
-                  class="notifications-table__row"
-                  [class.notifications-table__row--unread]="!isRead(item)"
-                >
-                  <td class="notifications-table__select-col" data-label="">
+
+        @for (group of groups(); track group.label) {
+          <h3 class="feed__day">{{ group.label }}</h3>
+          <ul class="feed__list">
+            @for (item of group.items; track item.id) {
+              <li
+                class="note"
+                [class.note--unread]="!isRead(item)"
+                [class.note--link]="!!linkOf(item)"
+                [class.note--selected]="selected().has(item.id)"
+              >
+                <div class="note__lead">
+                  @if (!isRead(item)) {
+                    <mat-checkbox
+                      class="note__check"
+                      [attr.aria-label]="'Select notification: ' + item.title"
+                      [checked]="selected().has(item.id)"
+                      (change)="toggleSelected(item.id)"
+                    />
+                  }
+                  <span class="note__icon note__icon--{{ toneFor(item.category) }}" aria-hidden="true">
+                    <mat-icon>{{ iconFor(item.category) }}</mat-icon>
+                  </span>
+                </div>
+
+                <button type="button" class="note__main" (click)="open(item)">
+                  <span class="note__top">
+                    <span class="note__title">{{ item.title }}</span>
                     @if (!isRead(item)) {
-                      <mat-checkbox
-                        [attr.aria-label]="'Select notification: ' + item.title"
-                        [checked]="selected().has(item.id)"
-                        (change)="toggleSelected(item.id)"
-                      />
+                      <span class="note__dot" aria-hidden="true"></span>
+                      <span class="sr-only">Unread</span>
                     }
-                  </td>
-                  <td data-label="Notification">
-                    <span class="notifications-table__title">{{ item.title }}</span>
-                    <span class="notifications-table__body">{{ item.body }}</span>
-                  </td>
-                  <td data-label="Category">{{ categoryLabel(item.category) }}</td>
-                  <td data-label="Channel">{{ channelLabel(item.channel) }}</td>
-                  <td data-label="Status">
-                    <span [class]="statusClass(item.status)">
-                      <span class="notifications-status-pill__dot" aria-hidden="true"></span>
-                      {{ isRead(item) ? 'Read' : statusLabel(item.status) }}
-                    </span>
-                  </td>
-                  <td data-label="When">{{ relativeTime(item.createdAt) }}</td>
-                  <td class="notifications-table__actions-col" data-label="">
-                    @if (!isRead(item)) {
-                      <button
-                        mat-icon-button
-                        type="button"
-                        class="notifications-table__menu-btn"
-                        matTooltip="Mark as read"
-                        aria-label="Mark as read"
-                        (click)="markRead(item)"
-                      >
-                        <mat-icon>mark_email_read</mat-icon>
-                      </button>
+                  </span>
+                  <span class="note__body">{{ item.body }}</span>
+                  <span class="note__meta">
+                    <span class="note__tag note__tag--{{ toneFor(item.category) }}">{{ categoryLabel(item.category) }}</span>
+                    @if (item.channel !== 'IN_APP') {
+                      <span class="note__tag">{{ channelLabel(item.channel) }}</span>
                     }
+                    @if (item.status === 'FAILED') {
+                      <span class="note__tag note__tag--danger">Delivery failed</span>
+                    }
+                    <time [attr.datetime]="item.createdAt" [matTooltip]="fullTime(item.createdAt)">
+                      {{ relativeTime(item.createdAt) }}
+                    </time>
+                    @if (linkOf(item)) {
+                      <span class="note__open">Open <mat-icon aria-hidden="true">arrow_forward</mat-icon></span>
+                    }
+                  </span>
+                </button>
+
+                @if (canActOn(item)) {
+                  <div class="note__review" role="group" aria-label="Review this leave request">
+                    <button mat-flat-button color="primary" type="button" (click)="approveLeave(item)">
+                      <mat-icon aria-hidden="true">check</mat-icon>
+                      Approve
+                    </button>
+                    <button mat-stroked-button type="button" class="note__reject" (click)="rejectLeave(item)">
+                      <mat-icon aria-hidden="true">close</mat-icon>
+                      Reject
+                    </button>
+                  </div>
+                } @else if (decisionOf(item); as decision) {
+                  <div class="note__decided">
+                    <mat-icon aria-hidden="true">{{ decision === 'Approved' ? 'check_circle' : 'cancel' }}</mat-icon>
+                    {{ decision }}
+                  </div>
+                }
+
+                <div class="note__actions">
+                  @if (!isRead(item)) {
                     <button
                       mat-icon-button
                       type="button"
-                      class="notifications-table__menu-btn"
-                      matTooltip="Delete"
-                      aria-label="Delete"
-                      (click)="deleteItem(item)"
+                      matTooltip="Mark as read"
+                      [attr.aria-label]="'Mark as read: ' + item.title"
+                      (click)="markRead(item)"
                     >
-                      <mat-icon>delete</mat-icon>
+                      <mat-icon>mark_email_read</mat-icon>
                     </button>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        <div class="notifications-pagination">
-          <span>Page {{ page() }} of {{ totalPages() }} · {{ total() }} total</span>
-          <button mat-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+                  }
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Delete"
+                    [attr.aria-label]="'Delete notification: ' + item.title"
+                    (click)="deleteItem(item)"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+
+        <footer class="pager">
+          <span>
+            Showing {{ rangeStart() }}–{{ rangeEnd() }} of {{ total() }}
+          </span>
+          <span class="pager__spacer"></span>
+          <button mat-stroked-button type="button" [disabled]="page() <= 1" (click)="prevPage()">
+            <mat-icon aria-hidden="true">chevron_left</mat-icon>
             Previous
           </button>
-          <button
-            mat-button
-            type="button"
-            [disabled]="page() >= totalPages()"
-            (click)="nextPage()"
-          >
+          <button mat-stroked-button type="button" [disabled]="page() >= totalPages()" (click)="nextPage()">
             Next
+            <mat-icon iconPositionEnd aria-hidden="true">chevron_right</mat-icon>
           </button>
-        </div>
+        </footer>
       </div>
     }
   </section>

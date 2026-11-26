@@ -1,8 +1,15 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import {
+  CATEGORY_DESCRIPTIONS,
+  CATEGORY_ICONS,
+  CATEGORY_TONES,
+} from '../../notification-categories';
 import {
   NotificationPreference,
   NotificationsService,
@@ -18,9 +25,10 @@ import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     MatButtonModule,
-    MatCheckboxModule,
     MatIconModule,
+    MatSlideToggleModule,
     EmptyStateComponent,
     OrganizationStatusComponent,
     ButtonSpinnerDirective,
@@ -41,6 +49,22 @@ export class NotificationsPreferencesPageComponent implements OnInit, HasUnsaved
   readonly form = this.fb.group({
     preferences: this.fb.array<FormGroup>([]),
   });
+
+  /** Re-reads the template whenever any toggle changes (the view is OnPush). */
+  private readonly changes = toSignal(this.form.valueChanges);
+
+  /** True while there are edits that have not been saved. */
+  hasEdits(): boolean {
+    this.changes();
+    return this.form.dirty && !this.saving();
+  }
+
+  /** The Security category is the one place where turning everything off has a real cost. */
+  isMuted(group: AbstractControl): boolean {
+    this.changes();
+    const v = group.value as { inAppEnabled: boolean; emailEnabled: boolean; pushEnabled: boolean };
+    return !v.inAppEnabled && !v.emailEnabled && !v.pushEnabled;
+  }
 
   get preferences(): FormArray<FormGroup> {
     return this.form.get('preferences') as FormArray<FormGroup>;
@@ -95,6 +119,18 @@ export class NotificationsPreferencesPageComponent implements OnInit, HasUnsaved
 
   categoryLabel(category: string): string {
     return this.notifications.categoryLabel(category);
+  }
+
+  iconFor(category: string): string {
+    return CATEGORY_ICONS[category] ?? 'notifications';
+  }
+
+  toneFor(category: string): string {
+    return CATEGORY_TONES[category] ?? 'neutral';
+  }
+
+  describe(category: string): string {
+    return CATEGORY_DESCRIPTIONS[category] ?? '';
   }
 
   private createPrefGroup(pref: NotificationPreference): FormGroup {

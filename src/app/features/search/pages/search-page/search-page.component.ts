@@ -6,7 +6,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { debounceTime, distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
@@ -44,7 +43,6 @@ const TYPE_LABELS: Record<string, string> = {
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     EmptyStateComponent,
     PageHeaderComponent,
     OrganizationStatusComponent,
@@ -169,7 +167,11 @@ export class SearchPageComponent implements OnInit {
     });
   }
 
+  /** True when the next search was asked for on purpose, so it is worth remembering. */
+  private explicitSearch = false;
+
   submit(): void {
+    this.explicitSearch = true;
     this.applyQueryToUrl();
   }
 
@@ -177,6 +179,8 @@ export class SearchPageComponent implements OnInit {
     const raw = this.form.getRawValue();
     const q = raw.q.trim();
     if (!q) return;
+    const save = this.explicitSearch;
+    this.explicitSearch = false;
     this.loading.set(true);
     this.error.set(null);
     this.inflight?.unsubscribe();
@@ -190,6 +194,7 @@ export class SearchPageComponent implements OnInit {
         category: raw.category.trim() || undefined,
         page: 1,
         pageSize: 30,
+        saveRecent: save,
       })
       .subscribe({
         next: (data) => {
@@ -209,6 +214,7 @@ export class SearchPageComponent implements OnInit {
       q: item.query,
       types: item.types ?? [],
     });
+    this.explicitSearch = true;
     this.applyQueryToUrl();
   }
 

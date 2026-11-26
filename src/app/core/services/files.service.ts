@@ -3,6 +3,7 @@ import { Observable, map } from 'rxjs';
 import { ApiService } from './api.service';
 import { ApiResponse } from '../models/api.models';
 import { environment } from '../../../environments/environment';
+import { formatDateTime } from '../utils/date-format';
 
 export type FileCategory =
   | 'GENERAL'
@@ -187,7 +188,7 @@ export class FilesService {
     if (!iso) return '—';
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return '—';
-    return d.toLocaleString();
+    return formatDateTime(d);
   }
 
   private unwrap<T>(res: ApiResponse<T>): T {

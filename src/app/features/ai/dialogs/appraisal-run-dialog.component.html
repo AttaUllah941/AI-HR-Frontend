@@ -12,11 +12,26 @@
     <div class="ai-form__grid">
       <mat-form-field appearance="outline" class="ai-form__full">
         <mat-label>Employee</mat-label>
-        <mat-select formControlName="employeeId">
-          @for (emp of employees(); track emp.id) {
-            <mat-option [value]="emp.id">{{ employeeLabel(emp) }}</mat-option>
+        <input
+          matInput
+          type="text"
+          [formControl]="employee"
+          [matAutocomplete]="employeeAuto"
+          placeholder="Search by name or code"
+          autocomplete="off"
+        />
+        <mat-autocomplete #employeeAuto="matAutocomplete" [displayWith]="displayPerson">
+          @for (option of employeeOptions(); track option.id) {
+            <mat-option [value]="option">
+              {{ option.name }} <span class="ai-option-detail">{{ option.detail }}</span>
+            </mat-option>
           }
-        </mat-select>
+        </mat-autocomplete>
+        @if (employee.hasError('required')) {
+          <mat-error>Choose the employee</mat-error>
+        } @else if (employee.hasError('notSelected')) {
+          <mat-error>Pick an employee from the list</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="ai-form__full">
@@ -47,7 +62,7 @@
     color="primary"
     type="submit"
     form="appraisal-form"
-    [disabled]="form.invalid || saving()"
+    [disabled]="saving()"
     [appButtonSpinner]="saving()">
     
     {{ saving() ? 'Generating…' : 'Generate draft' }}

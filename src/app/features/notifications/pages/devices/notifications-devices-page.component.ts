@@ -18,6 +18,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { OrganizationStatusComponent } from '../../../organization/components/organization-status/organization-status.component';
 import { ButtonSpinnerDirective } from '../../../../shared/button-spinner/button-spinner.directive';
+import { formatDateTime } from '../../../../core/utils/date-format';
 
 @Component({
   selector: 'app-notifications-devices-page',
@@ -47,6 +48,8 @@ export class NotificationsDevicesPageComponent implements OnInit {
   readonly items = signal<PushDevice[]>([]);
   readonly loading = signal(true);
   readonly registering = signal(false);
+  /** True once the first load finished, so a reload after registering keeps the form on screen. */
+  readonly loaded = signal(false);
   readonly error = signal<string | null>(null);
 
   readonly platforms = PUSH_PLATFORMS;
@@ -67,6 +70,7 @@ export class NotificationsDevicesPageComponent implements OnInit {
     this.notifications.listDevices().subscribe({
       next: (res) => {
         this.items.set(res.items);
+        this.loaded.set(true);
         this.loading.set(false);
       },
       error: (err: { error?: { message?: string }; message?: string }) => {
@@ -123,9 +127,14 @@ export class NotificationsDevicesPageComponent implements OnInit {
       });
   }
 
+  platformLabel(platform: string): string {
+    const labels: Record<string, string> = { WEB: 'Web', IOS: 'iOS', ANDROID: 'Android' };
+    return labels[platform] ?? platform;
+  }
+
   createdLabel(iso: string): string {
     try {
-      return new Date(iso).toLocaleString();
+      return formatDateTime(iso);
     } catch {
       return iso;
     }

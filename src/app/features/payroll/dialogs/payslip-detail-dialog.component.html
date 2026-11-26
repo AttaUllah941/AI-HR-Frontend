@@ -5,9 +5,9 @@
 
 <mat-dialog-content>
   @if (loading()) {
-    <div class="payroll-table-state">
-      <mat-spinner diameter="28" />
-      <span>Loading payslip…</span>
+    <div role="status">
+      <span class="sr-only">Loading payslip…</span>
+      <app-form-skeleton [fields]="6" />
     </div>
   } @else if (error()) {
     <div class="payroll-table-state payroll-table-state--error">

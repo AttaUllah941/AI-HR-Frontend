@@ -1,6 +1,8 @@
 <app-organization-status
+  skeleton="form"
   [loading]="loading()"
   [error]="error()"
+  [hasData]="loaded()"
   loadingMessage="Loading security…"
   errorTitle="Security unavailable"
   (retry)="reload()"
@@ -10,17 +12,17 @@
       <div class="profile-action-bar">
         <div>
           <h2 class="profile-page-heading">Security</h2>
-          <p class="profile-page-sub">Password, MFA status, and account protection.</p>
+          <p class="profile-page-sub">Your password and two-step sign-in.</p>
         </div>
       </div>
 
       <div class="profile-meta-grid">
         <div class="profile-meta-chip">
           <span class="profile-meta-chip__label">Password last changed</span>
-          <span class="profile-meta-chip__value">{{ formatDate(data.passwordChangedAt) }}</span>
+          <span class="profile-meta-chip__value">{{ data.passwordChangedAt ? formatDate(data.passwordChangedAt) : 'Never' }}</span>
         </div>
         <div class="profile-meta-chip">
-          <span class="profile-meta-chip__label">Multi-factor authentication</span>
+          <span class="profile-meta-chip__label">Two-step sign-in</span>
           <span class="profile-meta-chip__value">
             <span
               class="profile-status-pill"
@@ -28,7 +30,7 @@
               [class.profile-status-pill--pending]="!data.mfaEnabled"
             >
               <span class="profile-status-pill__dot" aria-hidden="true"></span>
-              {{ data.mfaEnabled ? 'Enabled' : 'Not enabled' }}
+              {{ data.mfaEnabled ? 'On' : 'Off' }}
             </span>
           </span>
         </div>
@@ -36,46 +38,75 @@
 
       <div class="profile-security-card">
         <div>
-          <h3 class="profile-security-card__title">Two-factor authentication</h3>
+          <h3 class="profile-security-card__title">Two-step sign-in</h3>
           <p class="profile-security-card__desc">
-            Manage authenticator setup on the dedicated MFA page. Enabling MFA adds a second step
-            when signing in.
+            @if (data.mfaEnabled) {
+              A code from your authenticator app is required when you sign in. You can manage it or turn it off.
+            } @else {
+              Add a code from an authenticator app as a second step when you sign in. It protects your
+              account even if your password is stolen.
+            }
           </p>
         </div>
         <a mat-stroked-button routerLink="/mfa-setup" class="profile-add-btn">
           <mat-icon aria-hidden="true">phonelink_lock</mat-icon>
-          {{ data.mfaEnabled ? 'Manage MFA' : 'Set up MFA' }}
+          {{ data.mfaEnabled ? 'Manage' : 'Set up' }}
         </a>
       </div>
 
       <div class="profile-panel-card">
-        <h3 class="profile-page-heading">Change password</h3>
+        <h3 class="profile-section-title">Change password</h3>
         <p class="profile-page-sub">
-          Your new password must meet your company's password policy. Other sessions will be
-          revoked.
+          Your new password has to meet your company's password rules. Changing it signs you out of
+          your other devices.
         </p>
-        <form [formGroup]="form" class="profile-form" (ngSubmit)="changePassword()">
+        <form [formGroup]="form" class="profile-form" id="password-form" (ngSubmit)="changePassword()">
           <div class="profile-form__grid">
             <mat-form-field appearance="outline" class="profile-form__full">
               <mat-label>Current password</mat-label>
               <input
                 matInput
-                type="password"
+                [type]="visible().current ? 'text' : 'password'"
                 formControlName="currentPassword"
                 autocomplete="current-password"
               />
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                [attr.aria-label]="visible().current ? 'Hide current password' : 'Show current password'"
+                [attr.aria-pressed]="visible().current"
+                (click)="toggle('current')"
+              >
+                <mat-icon aria-hidden="true">{{ visible().current ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (form.controls.currentPassword.hasError('required')) {
+                <mat-error>Enter your current password</mat-error>
+              }
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>New password</mat-label>
               <input
                 matInput
-                type="password"
+                [type]="visible().next ? 'text' : 'password'"
                 formControlName="newPassword"
                 autocomplete="new-password"
               />
-              @if (form.controls.newPassword.touched && form.controls.newPassword.invalid) {
-                <mat-error>New password is required.</mat-error>
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                [attr.aria-label]="visible().next ? 'Hide new password' : 'Show new password'"
+                [attr.aria-pressed]="visible().next"
+                (click)="toggle('next')"
+              >
+                <mat-icon aria-hidden="true">{{ visible().next ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (form.controls.newPassword.hasError('required')) {
+                <mat-error>Enter a new password</mat-error>
+              } @else if (form.controls.newPassword.hasError('maxlength')) {
+                <mat-error>Use 128 characters or fewer</mat-error>
               }
             </mat-form-field>
 
@@ -83,12 +114,43 @@
               <mat-label>Confirm new password</mat-label>
               <input
                 matInput
-                type="password"
+                [type]="visible().confirm ? 'text' : 'password'"
                 formControlName="confirmPassword"
                 autocomplete="new-password"
               />
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                [attr.aria-label]="visible().confirm ? 'Hide confirmation' : 'Show confirmation'"
+                [attr.aria-pressed]="visible().confirm"
+                (click)="toggle('confirm')"
+              >
+                <mat-icon aria-hidden="true">{{ visible().confirm ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (form.controls.confirmPassword.hasError('required')) {
+                <mat-error>Repeat the new password</mat-error>
+              }
             </mat-form-field>
           </div>
+
+          @if (matchState() === 'mismatch') {
+            <p class="profile-match profile-match--bad" role="alert">
+              <mat-icon aria-hidden="true">error</mat-icon>
+              The two passwords do not match.
+            </p>
+          } @else if (matchState() === 'match') {
+            <p class="profile-match profile-match--ok" role="status">
+              <mat-icon aria-hidden="true">check_circle</mat-icon>
+              The passwords match.
+            </p>
+          }
+          @if (sameAsCurrent()) {
+            <p class="profile-match profile-match--bad" role="alert">
+              <mat-icon aria-hidden="true">error</mat-icon>
+              Choose a password that is different from your current one.
+            </p>
+          }
 
           <div class="profile-action-bar__actions">
             <button
@@ -96,9 +158,12 @@
               color="primary"
               type="submit"
               class="profile-add-btn"
-              [disabled]="form.invalid || saving()"
-              [appButtonSpinner]="saving()">
-              @if (!saving()) { <mat-icon aria-hidden="true">lock</mat-icon> }
+              [disabled]="saving()"
+              [appButtonSpinner]="saving()"
+            >
+              @if (!saving()) {
+                <mat-icon aria-hidden="true">lock</mat-icon>
+              }
               {{ saving() ? 'Updating…' : 'Update password' }}
             </button>
           </div>

@@ -19,7 +19,9 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
 import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
+import { DateFieldComponent } from '../../../../shared/components/date-field/date-field.component';
 import { AttendanceRecordFormDialogComponent } from '../../dialogs/attendance-record-form-dialog.component';
+import { formatTime, toIsoDate } from '../../../../core/utils/date-format';
 
 const STATUS_OPTIONS: Array<{ value: AttendanceStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -34,21 +36,14 @@ const STATUS_OPTIONS: Array<{ value: AttendanceStatus | ''; label: string }> = [
   { value: 'EARLY_LEAVE', label: 'Early leave' },
 ];
 
-const AVATAR_COLORS = [
-  { bg: '#dbeafe', color: '#2563eb' },
-  { bg: '#ccfbf1', color: '#0d9488' },
-  { bg: '#ffedd5', color: '#ea580c' },
-  { bg: '#fee2e2', color: '#dc2626' },
-  { bg: '#dcfce7', color: '#16a34a' },
-  { bg: '#ede9fe', color: '#7c3aed' },
-  { bg: '#fef3c7', color: '#d97706' },
-  { bg: '#e0e7ff', color: '#4f46e5' },
-];
+/** Per-person hues. Lightness follows the theme, so initials stay readable in light and dark mode. */
+const AVATAR_HUES = [250, 180, 55, 25, 150, 300, 85, 265];
 
 @Component({
   selector: 'app-attendance-daily-page',
   standalone: true,
   imports: [
+    DateFieldComponent,
     ReactiveFormsModule,
     MatButtonModule,
     MatFormFieldModule,
@@ -88,7 +83,7 @@ export class AttendanceDailyPageComponent implements OnInit {
 
   readonly searchControl = new FormControl('', { nonNullable: true });
   readonly statusControl = new FormControl<AttendanceStatus | ''>('', { nonNullable: true });
-  readonly dateControl = new FormControl(new Date().toISOString().slice(0, 10), {
+  readonly dateControl = new FormControl(toIsoDate(new Date()), {
     nonNullable: true,
   });
 
@@ -219,17 +214,15 @@ export class AttendanceDailyPageComponent implements OnInit {
 
   avatarStyle(item: AttendanceRecord): { background: string; color: string } {
     const seed = item.employeeId || item.id;
-    const index = [...seed].reduce((sum, char) => sum + char.charCodeAt(0), 0) % AVATAR_COLORS.length;
-    const palette = AVATAR_COLORS[index];
-    return { background: palette.bg, color: palette.color };
+    const index = [...seed].reduce((sum, char) => sum + char.charCodeAt(0), 0) % AVATAR_HUES.length;
+    const hue = AVATAR_HUES[index];
+    return {
+      background: `color-mix(in oklab, oklch(66% 0.17 ${hue}) 20%, var(--zh-card))`,
+      color: `color-mix(in oklab, oklch(50% 0.19 ${hue}) 72%, var(--zh-foreground))`,
+    };
   }
 
-  formatTime(value: string | null): string {
-    if (!value) {
-      return '—';
-    }
-    return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+  readonly formatTime = formatTime;
 
   formatHours(minutes: number): string {
     return `${Math.round((minutes / 60) * 10) / 10}h`;

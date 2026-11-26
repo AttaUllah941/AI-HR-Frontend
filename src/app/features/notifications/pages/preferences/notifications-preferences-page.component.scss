@@ -1,3 +1,225 @@
 :host {
   display: block;
 }
+
+.prefs {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.prefs__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.prefs__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.prefs__sub {
+  margin: 0.2rem 0 0;
+  font-size: 0.875rem;
+  color: var(--zh-muted-foreground);
+}
+
+.prefs__card {
+  border: 1px solid var(--zh-border);
+  border-radius: var(--zh-radius);
+  background: var(--zh-card);
+  box-shadow: var(--zh-shadow-sm);
+  overflow: hidden;
+}
+
+// One grid for the header and every row so the columns line up exactly.
+.prefs__cols,
+.pref {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(3, 6.5rem);
+  align-items: center;
+  column-gap: 1rem;
+  padding: 0 1.25rem;
+}
+
+.prefs__cols {
+  min-height: 2.6rem;
+  border-bottom: 1px solid var(--zh-border);
+  background: color-mix(in srgb, var(--zh-muted) 35%, var(--zh-card));
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--zh-muted-foreground);
+
+  span:not(:first-child) {
+    text-align: center;
+  }
+}
+
+.pref {
+  min-height: 4.25rem;
+  padding-block: 0.7rem;
+  border-bottom: 1px solid var(--zh-border);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &:hover {
+    background: color-mix(in oklab, var(--zh-muted) 45%, transparent);
+  }
+}
+
+.pref__who {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.pref__icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 0.65rem;
+  background: var(--zh-muted);
+  color: var(--zh-muted-foreground);
+
+  mat-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    font-size: 1.15rem;
+  }
+
+  &--primary,
+  &--info {
+    background: color-mix(in oklab, var(--zh-primary) 14%, transparent);
+    color: var(--zh-primary);
+  }
+
+  &--success {
+    background: color-mix(in oklab, var(--zh-success) 16%, transparent);
+    color: var(--zh-success-text);
+  }
+
+  &--warning {
+    background: color-mix(in oklab, var(--zh-warning) 22%, transparent);
+    color: var(--zh-warning-text);
+  }
+
+  &--danger {
+    background: color-mix(in oklab, var(--zh-destructive) 14%, transparent);
+    color: var(--zh-destructive-text);
+  }
+
+  &--purple {
+    background: color-mix(in oklab, oklch(62% 0.2 300) 15%, transparent);
+    color: oklch(58% 0.2 300);
+  }
+}
+
+.pref__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pref__name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.pref__desc {
+  font-size: 0.8125rem;
+  color: var(--zh-muted-foreground);
+}
+
+.pref__toggle {
+  display: flex;
+  justify-content: center;
+}
+
+// The column header names the channel on wide screens; each toggle names it itself on phones.
+.pref__channel {
+  display: none;
+  font-size: 0.8125rem;
+  color: var(--zh-muted-foreground);
+}
+
+@media (max-width: 720px) {
+  .prefs__cols {
+    display: none;
+  }
+
+  .pref {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 0.75rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .pref__who {
+    grid-column: 1 / -1;
+  }
+
+  .pref__toggle {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .pref__channel {
+    display: block;
+  }
+}
+
+.prefs__save {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.prefs__dirty {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--zh-warning-text);
+}
+
+.prefs__note {
+  margin: -0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--zh-muted-foreground);
+
+  a {
+    color: var(--zh-primary-text);
+    font-weight: 600;
+  }
+}
+
+/* A full-width line under the row it belongs to. */
+.pref__warn {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  background: color-mix(in oklab, var(--zh-warning) 14%, transparent);
+  color: var(--zh-warning-text);
+  font-size: 0.8125rem;
+
+  mat-icon {
+    flex-shrink: 0;
+    font-size: 1.05rem;
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+}

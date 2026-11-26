@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { toIsoDate } from '../../../core/utils/date-format';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,12 +10,14 @@ import { MatInputModule } from '@angular/material/input';
 import { AttendanceService, Holiday } from '../../../core/services/attendance.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
+import { DateFieldComponent } from '../../../shared/components/date-field/date-field.component';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-holiday-form-dialog',
   standalone: true,
   imports: [
+    DateFieldComponent,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -44,7 +47,7 @@ export class HolidayFormDialogComponent {
   readonly form = this.fb.nonNullable.group({
     name: [this.data.holiday?.name ?? '', [Validators.required, Validators.maxLength(200)]],
     date: [
-      this.data.holiday?.date?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
+      this.data.holiday?.date?.slice(0, 10) ?? toIsoDate(new Date()),
       Validators.required,
     ],
     isOptional: [this.data.holiday?.isOptional ?? false],

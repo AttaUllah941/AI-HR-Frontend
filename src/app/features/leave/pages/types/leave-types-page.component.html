@@ -30,62 +30,67 @@
       (action)="openForm()"
     />
   } @else {
-    <div class="org-entity-list" role="list" aria-label="Leave types">
+    <div class="lt-grid" role="list" aria-label="Leave types">
       @for (item of items(); track item.id) {
-        <mat-card class="org-entity-card" role="listitem">
-          <div class="org-entity-card__body">
-            <div class="org-entity-card__title">
-              <span
-                class="leave-type-swatch"
-                [style.background]="item.color"
-                aria-hidden="true"
-              ></span>
+        <article class="lt-card" role="listitem" [class.is-inactive]="!item.isActive" [style.--ev]="item.color || 'var(--zh-primary)'">
+          <header class="lt-card__head">
+            <span class="lt-card__swatch" aria-hidden="true"></span>
+            <div class="lt-card__title">
               <strong>{{ item.name }}</strong>
-              <code class="org-entity-card__code">{{ item.code }}</code>
-              @if (!item.isActive) {
-                <span class="org-entity-card__badge">Inactive</span>
-              }
-              @if (item.isPaid) {
-                <span class="org-entity-card__badge">Paid</span>
-              }
+              <span class="lt-card__code">{{ item.code }}</span>
             </div>
-            <p class="org-entity-card__meta">
-              <mat-icon aria-hidden="true">event</mat-icon>
-              Max {{ item.maxDaysPerYear }} days/year · Carry {{ item.carryForwardDays }}
-              @if (item.allowHalfDay) {
-                · Half day
-              }
-              @if (item.requiresApproval) {
-                · Approval required
-              }
-            </p>
-            @if (item.description) {
-              <p class="leave-type-desc">{{ item.description }}</p>
-            }
-          </div>
-          <div class="org-entity-card__actions">
             @if (canUpdate) {
-              <button
-                mat-icon-button
-                type="button"
-                aria-label="Edit {{ item.name }}"
-                [disabled]="deletingId() === item.id"
-                (click)="openForm(item)"
-              >
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                type="button"
-                aria-label="Delete {{ item.name }}"
-                [disabled]="deletingId() === item.id"
-                (click)="remove(item)"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
+              <div class="lt-card__actions">
+                <button
+                  mat-icon-button
+                  type="button"
+                  aria-label="Edit {{ item.name }}"
+                  [disabled]="deletingId() === item.id"
+                  (click)="openForm(item)"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  aria-label="Delete {{ item.name }}"
+                  [disabled]="deletingId() === item.id"
+                  (click)="remove(item)"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+          </header>
+
+          <div class="lt-card__chips">
+            <span class="lt-chip" [class.lt-chip--paid]="item.isPaid">{{ item.isPaid ? 'Paid' : 'Unpaid' }}</span>
+            @if (item.requiresApproval) {
+              <span class="lt-chip">Needs approval</span>
+            }
+            @if (item.allowHalfDay) {
+              <span class="lt-chip">Half days</span>
+            }
+            @if (!item.isActive) {
+              <span class="lt-chip lt-chip--off">Inactive</span>
             }
           </div>
-        </mat-card>
+
+          <dl class="lt-card__stats">
+            <div>
+              <dt>Days per year</dt>
+              <dd>{{ item.maxDaysPerYear > 0 ? item.maxDaysPerYear : 'No cap' }}</dd>
+            </div>
+            <div>
+              <dt>Carry forward</dt>
+              <dd>{{ item.carryForwardDays > 0 ? item.carryForwardDays + ' days' : 'None' }}</dd>
+            </div>
+          </dl>
+
+          @if (item.description) {
+            <p class="lt-card__desc">{{ item.description }}</p>
+          }
+        </article>
       }
     </div>
   }

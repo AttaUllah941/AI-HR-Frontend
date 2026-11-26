@@ -1,36 +1,42 @@
 <app-organization-status
+  skeleton="list"
   [loading]="loading()"
   [error]="error()"
-  skeleton="list"
-  [hasData]="items().length > 0"
+  [hasData]="loaded()"
   loadingMessage="Loading sessions…"
   errorTitle="Sessions unavailable"
   (retry)="reload()"
 >
-  <section class="profile-page" aria-label="Active sessions">
+  <section class="profile-page" aria-label="Signed-in devices">
     <div class="profile-action-bar">
       <div>
         <h2 class="profile-page-heading">Sessions</h2>
-        <p class="profile-page-sub">Review signed-in devices and revoke access when needed.</p>
+        <p class="profile-page-sub">
+          Devices that are signed in to your account. If you don't recognise one, sign it out and
+          change your password.
+        </p>
       </div>
       <div class="profile-action-bar__actions">
         <button
           mat-stroked-button
           type="button"
           class="profile-add-btn"
-          [disabled]="revokingOthers() || items().length === 0"
+          [disabled]="revokingOthers() || otherActive() === 0"
           (click)="revokeOthers()"
-          [appButtonSpinner]="revokingOthers()">
-          @if (!revokingOthers()) { <mat-icon aria-hidden="true">logout</mat-icon> }
-          {{ revokingOthers() ? 'Revoking…' : 'Revoke other sessions' }}
+          [appButtonSpinner]="revokingOthers()"
+        >
+          @if (!revokingOthers()) {
+            <mat-icon aria-hidden="true">logout</mat-icon>
+          }
+          {{ revokingOthers() ? 'Signing out…' : 'Sign out other devices' }}
         </button>
       </div>
     </div>
 
-    @if (items().length === 0) {
+    @if (sessions().length === 0) {
       <app-empty-state
         title="No sessions"
-        message="Session history will appear here once you are signed in."
+        message="Devices will appear here once you are signed in."
         icon="devices"
       />
     } @else {
@@ -40,23 +46,25 @@
             <thead>
               <tr>
                 <th scope="col">Device</th>
-                <th scope="col">IP</th>
+                <th scope="col">Network</th>
                 <th scope="col">Status</th>
-                <th scope="col">Created</th>
+                <th scope="col">Signed in</th>
                 <th scope="col">Expires</th>
-                <th scope="col" class="profile-table__actions-col"></th>
+                <th scope="col" class="profile-table__actions-col"><span class="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>
-              @for (item of items(); track item.id) {
-                <tr class="profile-table__row">
+              @for (item of sessions(); track item.id) {
+                <tr class="profile-table__row" [class.is-current]="item.current">
                   <td data-label="Device">
-                    <span class="profile-table__title">{{ item.deviceLabel || 'Unknown device' }}</span>
-                    @if (item.current) {
-                      <span class="profile-table__body">This device</span>
-                    }
+                    <span class="profile-table__title">
+                      {{ item.deviceLabel || 'Unknown device' }}
+                      @if (item.current) {
+                        <span class="profile-current">This device</span>
+                      }
+                    </span>
                   </td>
-                  <td data-label="IP">{{ item.ipAddress || '—' }}</td>
+                  <td data-label="Network">{{ item.ipAddress || '—' }}</td>
                   <td data-label="Status">
                     <span
                       class="profile-status-pill"
@@ -66,13 +74,10 @@
                       [class.profile-status-pill--error]="statusTone(item.status) === 'error'"
                     >
                       <span class="profile-status-pill__dot" aria-hidden="true"></span>
-                      {{ item.status }}
-                      @if (item.current) {
-                        · Current
-                      }
+                      {{ statusLabel(item.status) }}
                     </span>
                   </td>
-                  <td data-label="Created">{{ formatDate(item.createdAt) }}</td>
+                  <td data-label="Signed in">{{ formatDate(item.createdAt) }}</td>
                   <td data-label="Expires">{{ formatDate(item.expiresAt) }}</td>
                   <td class="profile-table__actions-col" data-label="">
                     @if (!item.current && item.active) {
@@ -80,11 +85,12 @@
                         mat-icon-button
                         type="button"
                         class="profile-table__menu-btn"
-                        matTooltip="Revoke session"
-                        aria-label="Revoke session"
+                        matTooltip="Sign out this device"
+                        [attr.aria-label]="'Sign out ' + (item.deviceLabel || 'unknown device')"
+                        [disabled]="revokingId() === item.id"
                         (click)="revokeSession(item)"
                       >
-                        <mat-icon>block</mat-icon>
+                        <mat-icon>logout</mat-icon>
                       </button>
                     }
                   </td>

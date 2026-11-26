@@ -1,5 +1,6 @@
-<app-organization-status
+<app-organization-status skeleton="table"
   [loading]="loading()"
+  [hasData]="loaded()"
   [error]="error()"
   loadingMessage="Loading templates…"
   errorTitle="Templates unavailable"
@@ -44,6 +45,8 @@
         title="No templates yet"
         message="Create a template to reuse titles and bodies when sending notifications."
         icon="description"
+        [actionLabel]="canManage ? 'New template' : ''"
+        (action)="openCreate()"
       />
     } @else {
       <div class="notifications-table-card">
@@ -86,7 +89,7 @@
                       type="button"
                       class="notifications-table__menu-btn"
                       matTooltip="Send with template"
-                      aria-label="Send with template"
+                      [attr.aria-label]="'Send with template ' + item.code"
                       (click)="openSend(item)"
                     >
                       <mat-icon>send</mat-icon>
@@ -96,7 +99,7 @@
                       type="button"
                       class="notifications-table__menu-btn"
                       matTooltip="Edit"
-                      aria-label="Edit template"
+                      [attr.aria-label]="'Edit template ' + item.code"
                       (click)="openEdit(item)"
                     >
                       <mat-icon>edit</mat-icon>
@@ -106,7 +109,7 @@
                       type="button"
                       class="notifications-table__menu-btn"
                       matTooltip="Delete"
-                      aria-label="Delete template"
+                      [attr.aria-label]="'Delete template ' + item.code"
                       (click)="deleteTemplate(item)"
                     >
                       <mat-icon>delete</mat-icon>

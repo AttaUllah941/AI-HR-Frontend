@@ -1,4 +1,5 @@
 <app-organization-status
+  skeleton="form"
   [loading]="loading()"
   [error]="error()"
   loadingMessage="Loading storage settings…"
@@ -9,50 +10,74 @@
     <div class="settings-action-bar">
       <div>
         <h2 class="settings-page-heading">File storage</h2>
-        <p class="settings-page-sub">
-          Configure where uploads will live (used by Phase 16 file management).
-        </p>
+        <p class="settings-page-sub">Where uploaded documents and resumes are kept.</p>
       </div>
       @if (canUpdate) {
-        <div class="settings-action-bar__actions">
+        <div class="settings-save">
+          @if (form.dirty && !saving()) {
+            <span class="settings-dirty" role="status">Unsaved changes</span>
+          }
           <button
             mat-flat-button
             color="primary"
-            type="button"
+            type="submit"
+            form="storage-form"
             class="settings-add-btn"
-            [disabled]="form.invalid || saving()"
-            (click)="save()"
-            [appButtonSpinner]="saving()">
-            @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
+            [disabled]="saving() || !form.dirty"
+            [appButtonSpinner]="saving()"
+          >
+            @if (!saving()) {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
             {{ saving() ? 'Saving…' : 'Save storage' }}
           </button>
         </div>
+      } @else {
+        <p class="settings-dirty" role="note">View only</p>
       }
     </div>
 
+    <p class="settings-notice settings-notice--warn" role="note">
+      <mat-icon aria-hidden="true">info</mat-icon>
+      <span>
+        These values are saved for your records only. Uploaded files are stored wherever the server is
+        configured to keep them, and changing a provider here does not move files or switch where new
+        files go.
+      </span>
+    </p>
+
     <div class="settings-panel-card">
-      <form [formGroup]="form" class="settings-form" (ngSubmit)="save()">
+      <form [formGroup]="form" class="settings-form" id="storage-form" (ngSubmit)="save()">
         <div class="settings-form__grid">
           <mat-form-field appearance="outline">
             <mat-label>Provider</mat-label>
             <mat-select formControlName="storageProvider">
-              <mat-option value="local">local</mat-option>
-              <mat-option value="s3">s3</mat-option>
-              <mat-option value="azure">azure</mat-option>
-              <mat-option value="gcs">gcs</mat-option>
+              <mat-option value="local">Server disk</mat-option>
+              <mat-option value="s3">Amazon S3</mat-option>
+              <mat-option value="azure">Azure Blob</mat-option>
+              <mat-option value="gcs">Google Cloud Storage</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Bucket / container</mat-label>
-            <input matInput formControlName="storageBucket" />
+            <input matInput formControlName="storageBucket" autocomplete="off" />
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Region</mat-label>
-            <input matInput formControlName="storageRegion" />
+            <input matInput formControlName="storageRegion" autocomplete="off" placeholder="e.g. eu-west-1" />
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Public base URL</mat-label>
-            <input matInput formControlName="storagePublicBaseUrl" />
+            <input
+              matInput
+              formControlName="storagePublicBaseUrl"
+              type="url"
+              autocomplete="off"
+              placeholder="https://files.example.com"
+            />
+            @if (form.controls.storagePublicBaseUrl.hasError('pattern')) {
+              <mat-error>Use an address starting with http:// or https://</mat-error>
+            }
           </mat-form-field>
         </div>
       </form>

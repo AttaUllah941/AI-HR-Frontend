@@ -1,12 +1,42 @@
-<h2 mat-dialog-title>Upload file</h2>
-
+<h2 mat-dialog-title class="org-dialog-title">
+  <mat-icon aria-hidden="true">upload_file</mat-icon>
+  Upload file
+</h2>
 <mat-dialog-content>
-  <form [formGroup]="form" class="files-form" (ngSubmit)="submit()">
-    <label class="files-dropzone files-form__full">
-      <mat-icon aria-hidden="true">upload_file</mat-icon>
-      <span>{{ selectedFile()?.name || 'Choose a file (PDF, Office, images, CSV, TXT)' }}</span>
-      <input type="file" hidden (change)="onFilePicked($event)" />
-    </label>
+  <p class="org-dialog-subtitle">Add a document or resume to the library.</p>
+
+  <form [formGroup]="form" class="files-form" id="upload-file-form" (ngSubmit)="submit()">
+    <div
+      class="files-dropzone files-form__full"
+      [class.is-over]="dragging()"
+      [class.has-file]="selectedFile()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="dragging.set(false)"
+      (drop)="onDrop($event)"
+    >
+      <mat-icon aria-hidden="true">{{ selectedFile() ? 'task' : 'cloud_upload' }}</mat-icon>
+      @if (selectedFile(); as file) {
+        <div class="files-dropzone__file">
+          <strong>{{ file.name }}</strong>
+          <span>{{ formatBytes(file.size) }}</span>
+        </div>
+        <div class="files-dropzone__actions">
+          <button mat-button type="button" (click)="picker.click()">Replace</button>
+          <button mat-button type="button" (click)="clearFile()">Remove</button>
+        </div>
+      } @else {
+        <p>Drag a file here, or</p>
+        <button mat-stroked-button type="button" (click)="picker.click()">Choose file</button>
+        <span class="files-dropzone__hint">
+          PDF, Office, images, CSV or TXT@if (maxBytes(); as max) { · up to {{ formatBytes(max) }} }
+        </span>
+      }
+      <!-- A real input, visually hidden: the buttons above are the keyboard-reachable controls. -->
+      <input #picker type="file" class="sr-only" tabindex="-1" aria-label="Choose a file" (change)="onFilePicked($event)" />
+    </div>
+    @if (fileError(); as message) {
+      <p class="files-dropzone__error files-form__full" role="alert">{{ message }}</p>
+    }
 
     <div class="files-form__grid">
       <mat-form-field appearance="outline">
@@ -19,38 +49,80 @@
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>Title (optional)</mat-label>
-        <input matInput formControlName="title" />
+        <input matInput formControlName="title" maxlength="200" />
       </mat-form-field>
       <mat-form-field appearance="outline" class="files-form__full">
-        <mat-label>Description</mat-label>
-        <textarea matInput rows="2" formControlName="description"></textarea>
+        <mat-label>Description (optional)</mat-label>
+        <textarea matInput rows="2" formControlName="description" maxlength="2000"></textarea>
       </mat-form-field>
+
       @if (canAttachEmployee) {
-        <mat-form-field appearance="outline">
-          <mat-label>Employee ID</mat-label>
-          <input matInput formControlName="employeeId" placeholder="Required for documents" />
+        <mat-form-field appearance="outline" class="files-form__full">
+          <mat-label>Employee</mat-label>
+          <input
+            matInput
+            type="text"
+            [formControl]="employee"
+            [matAutocomplete]="employeeAuto"
+            placeholder="Search by name or code"
+            autocomplete="off"
+          />
+          <mat-autocomplete #employeeAuto="matAutocomplete" [displayWith]="displayPerson">
+            @for (option of employeeOptions(); track option.id) {
+              <mat-option [value]="option">
+                {{ option.name }} <span class="files-option-detail">{{ option.detail }}</span>
+              </mat-option>
+            }
+          </mat-autocomplete>
+          <mat-hint>Required for employee documents</mat-hint>
+          @if (employee.hasError('required')) {
+            <mat-error>Choose the employee this document belongs to</mat-error>
+          } @else if (employee.hasError('notSelected')) {
+            <mat-error>Pick an employee from the list</mat-error>
+          }
         </mat-form-field>
       }
+
       @if (canAttachCandidate) {
-        <mat-form-field appearance="outline">
-          <mat-label>Candidate ID</mat-label>
-          <input matInput formControlName="candidateId" placeholder="Required for resumes" />
+        <mat-form-field appearance="outline" class="files-form__full">
+          <mat-label>Candidate</mat-label>
+          <input
+            matInput
+            type="text"
+            [formControl]="candidate"
+            [matAutocomplete]="candidateAuto"
+            placeholder="Search by name or email"
+            autocomplete="off"
+          />
+          <mat-autocomplete #candidateAuto="matAutocomplete" [displayWith]="displayPerson">
+            @for (option of candidateOptions(); track option.id) {
+              <mat-option [value]="option">
+                {{ option.name }} <span class="files-option-detail">{{ option.detail }}</span>
+              </mat-option>
+            }
+          </mat-autocomplete>
+          <mat-hint>Required for resumes</mat-hint>
+          @if (candidate.hasError('required')) {
+            <mat-error>Choose the candidate this resume belongs to</mat-error>
+          } @else if (candidate.hasError('notSelected')) {
+            <mat-error>Pick a candidate from the list</mat-error>
+          }
         </mat-form-field>
       }
     </div>
   </form>
 </mat-dialog-content>
-
-<mat-dialog-actions align="end">
+<mat-dialog-actions align="end" class="org-dialog-actions">
   <button mat-button type="button" mat-dialog-close [disabled]="saving()">Cancel</button>
   <button
     mat-flat-button
     color="primary"
-    type="button"
-    [disabled]="saving() || !selectedFile()"
-    (click)="submit()"
-    [appButtonSpinner]="saving()">
-    @if (!saving()) { <mat-icon aria-hidden="true">cloud_upload</mat-icon> }
+    type="submit"
+    form="upload-file-form"
+    class="org-dialog-actions__save"
+    [disabled]="saving()"
+    [appButtonSpinner]="saving()"
+  >
     {{ saving() ? 'Uploading…' : 'Upload' }}
   </button>
 </mat-dialog-actions>

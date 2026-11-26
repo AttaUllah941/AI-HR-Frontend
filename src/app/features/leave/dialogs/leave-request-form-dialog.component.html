@@ -42,18 +42,9 @@
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Start date</mat-label>
-        <input matInput type="date" formControlName="startDate" />
-      </mat-form-field>
+      <app-date-field label="Start date" formControlName="startDate" />
 
-      <mat-form-field appearance="outline">
-        <mat-label>End date</mat-label>
-        <input matInput type="date" formControlName="endDate" />
-        @if (form.touched && form.hasError('dateRange')) {
-          <mat-error>End date must be on or after start date</mat-error>
-        }
-      </mat-form-field>
+      <app-date-field label="End date" formControlName="endDate" [error]="form.touched && form.hasError('dateRange') ? 'End date must be on or after start date' : ''" />
 
       <mat-form-field appearance="outline" class="leave-form__full">
         <mat-label>Day type</mat-label>

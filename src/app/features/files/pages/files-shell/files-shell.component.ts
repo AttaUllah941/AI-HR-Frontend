@@ -32,7 +32,7 @@ export class FilesShellComponent {
   readonly tabs = [
     { label: 'Overview', route: 'overview', icon: 'dashboard' },
     { label: 'Library', route: 'library', icon: 'folder_open' },
-    { label: 'Documents', route: 'documents', icon: 'description' },
+    { label: 'Employee documents', route: 'documents', icon: 'description' },
     { label: 'Resumes', route: 'resumes', icon: 'badge' },
   ];
 

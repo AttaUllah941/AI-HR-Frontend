@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
+import { humanizeCode, initials } from '../../../../shared/utils/text';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
@@ -28,6 +30,24 @@ import {
 })
 export class ProfileShellComponent {
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+
+  /** Who is signed in, from the session already in memory (no extra request). */
+  readonly identity = computed(() => {
+    const user = this.auth.user();
+    if (!user) {
+      return null;
+    }
+    return {
+      name: `${user.firstName} ${user.lastName}`.trim() || user.email,
+      email: user.email,
+      avatarUrl: user.avatarUrl ?? null,
+      initials: initials(user.firstName, user.lastName, user.email),
+      roles: user.roles.map((role) => humanizeCode(role)),
+    };
+  });
+  /** Set when the picture cannot be loaded, so the initials show instead of a broken image. */
+  readonly avatarFailed = signal(false);
 
   readonly tabs = [
     { label: 'Overview', route: 'overview', icon: 'person' },

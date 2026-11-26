@@ -600,7 +600,8 @@ export class PerformanceService {
   }
 
   statusLabel(status: string): string {
-    return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const text = status.replace(/_/g, ' ').toLowerCase();
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   formatRating(value: number | null | undefined): string {

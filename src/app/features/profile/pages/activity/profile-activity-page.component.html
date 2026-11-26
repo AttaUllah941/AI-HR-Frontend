@@ -1,8 +1,8 @@
 <app-organization-status
+  skeleton="list"
   [loading]="loading()"
   [error]="error()"
-  skeleton="list"
-  [hasData]="items().length > 0"
+  [hasData]="loaded()"
   loadingMessage="Loading activity…"
   errorTitle="Activity unavailable"
   (retry)="reload()"
@@ -11,10 +11,13 @@
     <div class="profile-action-bar">
       <div>
         <h2 class="profile-page-heading">Activity</h2>
-        <p class="profile-page-sub">Recent actions on your account.</p>
+        <p class="profile-page-sub">
+          Recent actions on your account, newest first. If you see something you didn't do, change
+          your password.
+        </p>
       </div>
       <div class="profile-action-bar__actions">
-        <button mat-stroked-button type="button" class="profile-add-btn" (click)="reload()">
+        <button mat-stroked-button type="button" class="profile-add-btn" [disabled]="loading()" (click)="reload()">
           <mat-icon aria-hidden="true">refresh</mat-icon>
           Refresh
         </button>
@@ -24,7 +27,7 @@
     @if (items().length === 0) {
       <app-empty-state
         title="No activity yet"
-        message="Profile updates, password changes, and session events will show up here."
+        message="Profile updates, password changes and sign-ins will show up here."
         icon="history"
       />
     } @else {
@@ -34,8 +37,8 @@
             <thead>
               <tr>
                 <th scope="col">Event</th>
-                <th scope="col">Entity</th>
-                <th scope="col">IP</th>
+                <th scope="col">Record</th>
+                <th scope="col">Network</th>
                 <th scope="col">When</th>
               </tr>
             </thead>
@@ -46,20 +49,22 @@
                     <span class="profile-table__title">{{ item.title }}</span>
                     <span class="profile-table__body">{{ item.action }}</span>
                   </td>
-                  <td data-label="Entity">
+                  <td data-label="Record">
                     @if (item.entityType) {
                       {{ item.entityType }}
                       @if (item.entityId) {
-                        <span class="profile-table__body">{{ item.entityId }}</span>
+                        <span class="profile-table__body" [title]="item.entityId">{{ item.entityId }}</span>
                       }
                     } @else {
                       —
                     }
                   </td>
-                  <td data-label="IP">{{ item.ipAddress || '—' }}</td>
+                  <td data-label="Network">{{ item.ipAddress || '—' }}</td>
                   <td data-label="When">
-                    <span class="profile-table__title">{{ relative(item.createdAt) }}</span>
-                    <span class="profile-table__body">{{ formatDate(item.createdAt) }}</span>
+                    <time [attr.datetime]="item.createdAt" [title]="formatDate(item.createdAt)">
+                      <span class="profile-table__title">{{ relative(item.createdAt) }}</span>
+                      <span class="profile-table__body">{{ formatDate(item.createdAt) }}</span>
+                    </time>
                   </td>
                 </tr>
               }
@@ -67,6 +72,9 @@
           </table>
         </div>
       </div>
+      @if (items().length >= limit) {
+        <p class="profile-page-sub">Showing your {{ limit }} most recent events.</p>
+      }
     }
   </section>
 </app-organization-status>

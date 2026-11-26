@@ -1,0 +1,244 @@
+.cd {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: min(26rem, 88vw);
+}
+
+.cd__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  color: var(--zh-muted-foreground);
+}
+
+.cd__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.75rem 1.5rem 0.25rem;
+  text-align: center;
+}
+
+.cd__icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--zh-primary) 14%, transparent);
+  color: var(--zh-primary-text);
+
+  mat-icon {
+    font-size: 1.4rem;
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+}
+
+.cd--out .cd__icon {
+  background: color-mix(in oklab, var(--zh-warning) 20%, transparent);
+  color: var(--zh-warning-text);
+}
+
+.cd__title {
+  margin: 0;
+  padding: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+
+  &::before {
+    display: none;
+  }
+}
+
+.cd__subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: var(--zh-muted-foreground);
+}
+
+.cd__body {
+  padding: 1rem 1.5rem 0.25rem !important;
+}
+
+.cd__clock {
+  margin-bottom: 1rem;
+  padding: 1rem 1rem 0.85rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 1.25rem;
+  background: var(--zh-muted);
+  text-align: center;
+}
+
+.cd__time {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cd__digits {
+  font-family: var(--zh-font-display);
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--zh-foreground);
+}
+
+.cd__meridiem {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--zh-muted-foreground);
+}
+
+.cd__date {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--zh-muted-foreground);
+}
+
+.cd__summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0 0 1rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--zh-border);
+  border-radius: var(--zh-radius);
+
+  > div + div {
+    padding-left: 1rem;
+    border-left: 1px solid var(--zh-border);
+  }
+
+  dt {
+    font-size: 0.75rem;
+    color: var(--zh-muted-foreground);
+  }
+
+  dd {
+    margin: 0.1rem 0 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--zh-foreground);
+  }
+}
+
+.cd__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cd__label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--zh-foreground);
+
+    span {
+      font-weight: 400;
+      color: var(--zh-muted-foreground);
+    }
+  }
+}
+
+.cd__count {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--zh-muted-foreground);
+
+  &--full {
+    color: var(--zh-destructive-text);
+  }
+}
+
+.cd__textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--zh-border);
+  border-radius: calc(var(--zh-radius) - 2px);
+  background: var(--zh-card);
+  color: var(--zh-foreground);
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.4;
+
+  &::placeholder {
+    color: var(--zh-muted-foreground);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--zh-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--zh-primary) 22%, transparent);
+  }
+}
+
+.cd__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.cd__chip {
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--zh-border);
+  border-radius: 999px;
+  background: var(--zh-card);
+  color: var(--zh-foreground);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition:
+    background 120ms,
+    border-color 120ms;
+
+  &:hover {
+    border-color: var(--zh-primary);
+    background: color-mix(in oklab, var(--zh-primary) 8%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--zh-primary);
+    outline-offset: 2px;
+  }
+}
+
+.cd__fineprint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.9rem 0 0;
+  font-size: 0.75rem;
+  color: var(--zh-muted-foreground);
+
+  mat-icon {
+    flex-shrink: 0;
+    font-size: 0.95rem;
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+}
+
+.cd__actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.5rem !important;
+
+  button {
+    height: 2.75rem;
+  }
+}

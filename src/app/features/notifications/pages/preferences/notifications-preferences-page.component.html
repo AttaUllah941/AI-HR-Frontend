@@ -1,32 +1,36 @@
-<app-organization-status
+<app-organization-status skeleton="form"
   [loading]="loading()"
   [error]="error()"
   loadingMessage="Loading preferences…"
   errorTitle="Preferences unavailable"
   (retry)="reload()"
 >
-  <section class="notifications-page" aria-label="Notification preferences">
-    <div class="notifications-action-bar">
+  <section class="prefs" aria-label="Notification preferences">
+    <header class="prefs__head">
       <div>
-        <h2 class="notifications-page-heading">Delivery preferences</h2>
-        <p class="notifications-page-sub">
-          Choose which channels deliver each notification category.
-        </p>
+        <h2 class="prefs__title">Delivery preferences</h2>
+        <p class="prefs__sub">Choose how you want to hear about each kind of event.</p>
       </div>
-      <div class="notifications-action-bar__actions">
-        <button
-          mat-flat-button
-          color="primary"
-          type="button"
-          class="notifications-add-btn"
-          [disabled]="saving() || preferences.length === 0"
-          (click)="save()"
-          [appButtonSpinner]="saving()">
-          @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
-          {{ saving() ? 'Saving…' : 'Save preferences' }}
-        </button>
+      <div class="prefs__save">
+        @if (hasEdits()) {
+          <span class="prefs__dirty" role="status">Unsaved changes</span>
+        }
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        [disabled]="saving() || preferences.length === 0 || !hasEdits()"
+        (click)="save()"
+        [appButtonSpinner]="saving()">
+        @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
+        {{ saving() ? 'Saving…' : 'Save preferences' }}
+      </button>
       </div>
-    </div>
+    </header>
+    <p class="prefs__note">
+      Push notifications are only delivered to devices you have registered.
+      <a routerLink="../devices">Manage devices</a>
+    </p>
 
     @if (preferences.length === 0) {
       <app-empty-state
@@ -35,8 +39,8 @@
         icon="tune"
       />
     } @else {
-      <form [formGroup]="form" class="notifications-prefs-grid">
-        <div class="notifications-prefs-header" aria-hidden="true">
+      <form [formGroup]="form" class="prefs__card">
+        <div class="prefs__cols" aria-hidden="true">
           <span>Category</span>
           <span>In-app</span>
           <span>Email</span>
@@ -44,19 +48,35 @@
         </div>
         <div formArrayName="preferences">
           @for (group of preferences.controls; track group.get('category')?.value; let i = $index) {
-            <div class="notifications-pref-row" [formGroupName]="i">
-              <span class="notifications-pref-row__category">
-                {{ categoryLabel(group.get('category')?.value) }}
-              </span>
-              <label class="notifications-pref-row__toggle">
-                <mat-checkbox formControlName="inAppEnabled">In-app</mat-checkbox>
-              </label>
-              <label class="notifications-pref-row__toggle">
-                <mat-checkbox formControlName="emailEnabled">Email</mat-checkbox>
-              </label>
-              <label class="notifications-pref-row__toggle">
-                <mat-checkbox formControlName="pushEnabled">Push</mat-checkbox>
-              </label>
+            @let cat = group.get('category')?.value;
+            <div class="pref" [formGroupName]="i">
+              <div class="pref__who">
+                <span class="pref__icon pref__icon--{{ toneFor(cat) }}" aria-hidden="true">
+                  <mat-icon>{{ iconFor(cat) }}</mat-icon>
+                </span>
+                <div class="pref__text">
+                  <span class="pref__name">{{ categoryLabel(cat) }}</span>
+                  <span class="pref__desc">{{ describe(cat) }}</span>
+                </div>
+              </div>
+              <div class="pref__toggle">
+                <span class="pref__channel">In-app</span>
+                <mat-slide-toggle formControlName="inAppEnabled" [attr.aria-label]="categoryLabel(cat) + ' in-app notifications'" />
+              </div>
+              <div class="pref__toggle">
+                <span class="pref__channel">Email</span>
+                <mat-slide-toggle formControlName="emailEnabled" [attr.aria-label]="categoryLabel(cat) + ' email notifications'" />
+              </div>
+              <div class="pref__toggle">
+                <span class="pref__channel">Push</span>
+                <mat-slide-toggle formControlName="pushEnabled" [attr.aria-label]="categoryLabel(cat) + ' push notifications'" />
+              </div>
+              @if (cat === 'SECURITY' && isMuted(group)) {
+                <p class="pref__warn" role="note">
+                  <mat-icon aria-hidden="true">warning</mat-icon>
+                  You won't be told about sign-ins, password changes or suspicious activity.
+                </p>
+              }
             </div>
           }
         </div>

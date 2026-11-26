@@ -5,6 +5,29 @@
   subtitle="Personal details, security, sessions, preferences, and activity"
 />
 
+@if (identity(); as who) {
+  <section class="profile-identity" aria-label="Signed in as">
+    <span class="profile-identity__avatar" aria-hidden="true">
+      @if (who.avatarUrl && !avatarFailed()) {
+        <img [src]="who.avatarUrl" alt="" (error)="avatarFailed.set(true)" />
+      } @else {
+        {{ who.initials }}
+      }
+    </span>
+    <div class="profile-identity__text">
+      <strong>{{ who.name }}</strong>
+      <span>{{ who.email }}</span>
+    </div>
+    @if (who.roles.length) {
+      <div class="profile-identity__roles" aria-label="Your roles">
+        @for (role of who.roles; track role) {
+          <span class="profile-role-chip">{{ role }}</span>
+        }
+      </div>
+    }
+  </section>
+}
+
 <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="profile-tabs" aria-label="Profile sections">
   @for (tab of tabs; track tab.route) {
     <a

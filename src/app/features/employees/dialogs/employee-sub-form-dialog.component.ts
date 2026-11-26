@@ -17,6 +17,27 @@ import type { SubResourceType } from '../models/employee-sub-resource.types';
 import { ButtonSpinnerDirective } from '../../../shared/button-spinner/button-spinner.directive';
 import { guardDirtyDialog } from '../../../core/guards/unsaved-changes.guard';
 
+/** Optional text, date and link fields the API accepts as null (required fields are never blank in the form). */
+const NULLABLE_FIELDS = [
+  'email',
+  'degree',
+  'fieldOfStudy',
+  'grade',
+  'description',
+  'location',
+  'level',
+  'issuer',
+  'credentialId',
+  'documentUrl',
+  'fileName',
+  'fileUrl',
+  'mimeType',
+  'startDate',
+  'endDate',
+  'issuedDate',
+  'expiryDate',
+] as const;
+
 @Component({
   selector: 'app-employee-sub-form-dialog',
   standalone: true,
@@ -151,9 +172,21 @@ export class EmployeeSubFormDialogComponent implements OnInit {
     });
   }
 
+  private blanksToNull(values: Record<string, unknown>): Record<string, unknown> {
+    const out: Record<string, unknown> = { ...values };
+    for (const key of NULLABLE_FIELDS) {
+      if (typeof out[key] === 'string' && (out[key] as string).trim() === '') {
+        out[key] = null;
+      }
+    }
+    return out;
+  }
+
   private saveRequest(): Observable<unknown> {
-    const body = this.form.getRawValue() as Record<string, unknown>;
+    const raw = this.form.getRawValue() as Record<string, unknown>;
     const recordId = (this.data.record as { id?: string } | null)?.id;
+    // When editing, a cleared optional field is sent as null; the API skips an empty string.
+    const body = recordId ? this.blanksToNull(raw) : raw;
     const employeeId = this.data.employeeId;
 
     switch (this.data.type) {

@@ -1,4 +1,5 @@
 <app-organization-status
+  skeleton="profile"
   [loading]="loading()"
   [error]="error()"
   loadingMessage="Loading profile…"
@@ -10,18 +11,24 @@
       <div class="profile-action-bar">
         <div>
           <h2 class="profile-page-heading">Personal information</h2>
-          <p class="profile-page-sub">Update your name, phone, and avatar URL.</p>
+          <p class="profile-page-sub">Update your name, phone number and picture.</p>
         </div>
-        <div class="profile-action-bar__actions">
+        <div class="profile-save">
+          @if (form.dirty && !saving()) {
+            <span class="profile-dirty" role="status">Unsaved changes</span>
+          }
           <button
             mat-flat-button
             color="primary"
-            type="button"
+            type="submit"
+            form="profile-form"
             class="profile-add-btn"
-            [disabled]="form.invalid || saving()"
-            (click)="save()"
-            [appButtonSpinner]="saving()">
-            @if (!saving()) { <mat-icon aria-hidden="true">save</mat-icon> }
+            [disabled]="saving() || !form.dirty"
+            [appButtonSpinner]="saving()"
+          >
+            @if (!saving()) {
+              <mat-icon aria-hidden="true">save</mat-icon>
+            }
             {{ saving() ? 'Saving…' : 'Save changes' }}
           </button>
         </div>
@@ -29,11 +36,7 @@
 
       <div class="profile-meta-grid">
         <div class="profile-meta-chip">
-          <span class="profile-meta-chip__label">Email</span>
-          <span class="profile-meta-chip__value">{{ data.email }}</span>
-        </div>
-        <div class="profile-meta-chip">
-          <span class="profile-meta-chip__label">Status</span>
+          <span class="profile-meta-chip__label">Account status</span>
           <span class="profile-meta-chip__value">
             <span
               class="profile-status-pill"
@@ -41,33 +44,23 @@
               [class.profile-status-pill--pending]="data.status !== 'ACTIVE'"
             >
               <span class="profile-status-pill__dot" aria-hidden="true"></span>
-              {{ data.status }}
+              {{ statusLabel(data.status) }}
             </span>
           </span>
         </div>
         <div class="profile-meta-chip">
-          <span class="profile-meta-chip__label">Last login</span>
-          <span class="profile-meta-chip__value">{{ formatDate(data.lastLoginAt) }}</span>
+          <span class="profile-meta-chip__label">Last sign-in</span>
+          <span class="profile-meta-chip__value">{{ data.lastLoginAt ? formatDate(data.lastLoginAt) : 'Never' }}</span>
         </div>
         <div class="profile-meta-chip">
-          <span class="profile-meta-chip__label">Email verified</span>
-          <span class="profile-meta-chip__value">{{ formatDate(data.emailVerifiedAt) }}</span>
-        </div>
-        <div class="profile-meta-chip">
-          <span class="profile-meta-chip__label">Roles</span>
+          <span class="profile-meta-chip__label">Email</span>
           <span class="profile-meta-chip__value">
-            <span class="profile-roles">
-              @for (role of data.roles; track role) {
-                <span class="profile-role-chip">{{ role }}</span>
-              } @empty {
-                —
-              }
-            </span>
+            {{ data.emailVerifiedAt ? 'Verified ' + formatDate(data.emailVerifiedAt) : 'Not verified' }}
           </span>
         </div>
         @if (data.employee) {
           <div class="profile-meta-chip">
-            <span class="profile-meta-chip__label">Employee</span>
+            <span class="profile-meta-chip__label">Employee record</span>
             <span class="profile-meta-chip__value">
               {{ data.employee.employeeCode }}
               @if (data.employee.department?.name) {
@@ -82,42 +75,53 @@
       </div>
 
       <div class="profile-panel-card">
-        <form [formGroup]="form" class="profile-form" (ngSubmit)="save()">
+        <form [formGroup]="form" class="profile-form" id="profile-form" (ngSubmit)="save()">
           <div class="profile-form__grid">
             <mat-form-field appearance="outline">
               <mat-label>First name</mat-label>
               <input matInput formControlName="firstName" autocomplete="given-name" />
+              @if (form.controls.firstName.hasError('required')) {
+                <mat-error>Enter your first name</mat-error>
+              }
             </mat-form-field>
-
             <mat-form-field appearance="outline">
               <mat-label>Last name</mat-label>
               <input matInput formControlName="lastName" autocomplete="family-name" />
+              @if (form.controls.lastName.hasError('required')) {
+                <mat-error>Enter your last name</mat-error>
+              }
             </mat-form-field>
-
             <mat-form-field appearance="outline">
-              <mat-label>Phone</mat-label>
-              <input matInput formControlName="phone" autocomplete="tel" />
+              <mat-label>Phone (optional)</mat-label>
+              <input matInput formControlName="phone" type="tel" autocomplete="tel" />
+              @if (form.controls.phone.hasError('pattern')) {
+                <mat-error>Use digits and + ( ) - only</mat-error>
+              }
             </mat-form-field>
-
             <mat-form-field appearance="outline" class="profile-form__full">
-              <mat-label>Avatar URL</mat-label>
+              <mat-label>Picture address (optional)</mat-label>
               <input
                 matInput
                 formControlName="avatarUrl"
-                placeholder="https://… or /files/…"
+                type="url"
+                autocomplete="off"
+                placeholder="https://example.com/me.png"
               />
+              <mat-hint>A link to an image. Leave empty to show your initials.</mat-hint>
+              @if (form.controls.avatarUrl.hasError('pattern')) {
+                <mat-error>Start with https://</mat-error>
+              }
             </mat-form-field>
           </div>
 
-          @if (form.controls.avatarUrl.value.trim().startsWith('https://')) {
+          @if (previewUrl(); as url) {
             <div class="profile-avatar-preview">
-              <img
-                [src]="form.controls.avatarUrl.value!.trim()"
-                alt="Avatar preview"
-                width="72"
-                height="72"
-              />
-              <span>Preview</span>
+              @if (previewFailed()) {
+                <span role="alert">This address could not be loaded as an image.</span>
+              } @else {
+                <img [src]="url" alt="Picture preview" width="72" height="72" (error)="markPreviewFailed()" />
+                <span>Preview</span>
+              }
             </div>
           }
         </form>

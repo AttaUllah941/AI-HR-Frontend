@@ -10,10 +10,7 @@
       />
     </label>
 
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="att-action-bar__date">
-      <mat-label>Date</mat-label>
-      <input matInput type="date" [formControl]="dateControl" />
-    </mat-form-field>
+    <app-date-field label="Date" [formControl]="dateControl" class="att-action-bar__date" subscriptSizing="dynamic" />
 
     <div class="att-action-bar__actions">
       <button

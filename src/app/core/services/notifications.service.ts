@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ApiService } from './api.service';
 import { ApiResponse } from '../models/api.models';
+import { formatDate } from '../utils/date-format';
 
 export type NotificationCategory =
   | 'SYSTEM'
@@ -334,7 +335,11 @@ export class NotificationsService {
     if (!category) {
       return '—';
     }
-    return category.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    if (category === 'AI') {
+      return 'AI';
+    }
+    const text = category.replace(/_/g, ' ').toLowerCase();
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   channelLabel(channel: string | null | undefined): string {
@@ -393,7 +398,7 @@ export class NotificationsService {
     if (day < 7) {
       return `${day}d ago`;
     }
-    return date.toLocaleDateString();
+    return formatDate(date);
   }
 
   private unwrap<T>(res: ApiResponse<T>): T {

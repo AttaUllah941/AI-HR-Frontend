@@ -1,5 +1,6 @@
-<app-organization-status
+<app-organization-status skeleton="list"
   [loading]="loading()"
+  [hasData]="loaded()"
   [error]="error()"
   loadingMessage="Loading devices…"
   errorTitle="Devices unavailable"
@@ -22,13 +23,18 @@
           <mat-form-field appearance="outline" class="notifications-form__full">
             <mat-label>Device token</mat-label>
             <input matInput formControlName="token" placeholder="Push token / FCM / APNs id" />
+            @if (form.controls.token.hasError('required')) {
+              <mat-error>Enter the device token</mat-error>
+            } @else if (form.controls.token.hasError('minlength')) {
+              <mat-error>This looks too short to be a push token</mat-error>
+            }
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Platform</mat-label>
             <mat-select formControlName="platform">
               @for (p of platforms; track p) {
-                <mat-option [value]="p">{{ p }}</mat-option>
+                <mat-option [value]="p">{{ platformLabel(p) }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
@@ -78,7 +84,7 @@
               @for (item of items(); track item.id) {
                 <tr class="notifications-table__row">
                   <td data-label="Label">{{ item.label || '—' }}</td>
-                  <td data-label="Platform">{{ item.platform }}</td>
+                  <td data-label="Platform">{{ platformLabel(item.platform) }}</td>
                   <td data-label="Token">
                     <span class="notifications-token" [title]="item.token">{{ item.token }}</span>
                   </td>
@@ -99,7 +105,7 @@
                       type="button"
                       class="notifications-table__menu-btn"
                       matTooltip="Remove"
-                      aria-label="Remove device"
+                      [attr.aria-label]="'Remove device ' + (item.label || platformLabel(item.platform))"
                       (click)="removeDevice(item)"
                     >
                       <mat-icon>delete</mat-icon>

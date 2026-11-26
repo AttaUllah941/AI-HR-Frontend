@@ -1,7 +1,7 @@
 <app-organization-status
   [loading]="loading()"
   [error]="error()"
-  skeleton="kpi"
+  skeleton="stats"
   [hasData]="!!summary()"
   loadingMessage="Loading settings…"
   errorTitle="Settings unavailable"
@@ -25,6 +25,16 @@
         </div>
       </div>
 
+      @if (runtimeEmail() === 'console') {
+        <p class="settings-notice settings-notice--warn" role="note">
+          <mat-icon aria-hidden="true">mail_lock</mat-icon>
+          <span>
+            Email is set to log only, so password resets, verification and invitation emails are
+            never delivered. Connect a mail server on the
+            <a routerLink="/settings/email">Email page</a>.
+          </span>
+        </p>
+      }
       <div class="settings-meta-grid">
         <div class="settings-meta-chip">
           <span class="settings-meta-chip__label">Users</span>
@@ -38,14 +48,20 @@
         </div>
         <div class="settings-meta-chip">
           <span class="settings-meta-chip__label">Email</span>
-          <span class="settings-meta-chip__value">{{ s.config.emailProvider }}</span>
+          <span class="settings-meta-chip__value">{{ runtimeEmail() ? emailLabel(runtimeEmail()) : 'Unknown' }}</span>
           <span class="settings-meta-chip__hint">
-            API key {{ s.config.emailApiKeySet ? 'set' : 'not set' }}
+            @if (runtimeEmail() === 'console') {
+              Nobody receives these emails
+            } @else if (runtimeEmail()) {
+              In use on the server
+            } @else {
+              Could not check the server
+            }
           </span>
         </div>
         <div class="settings-meta-chip">
           <span class="settings-meta-chip__label">Storage</span>
-          <span class="settings-meta-chip__value">{{ s.config.storageProvider }}</span>
+          <span class="settings-meta-chip__value">{{ storageLabel(s.config.storageProvider) }}</span>
           <span class="settings-meta-chip__hint">File provider</span>
         </div>
       </div>
