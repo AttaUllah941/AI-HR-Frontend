@@ -37,10 +37,22 @@
     justify-content: space-between;
 
     > .kpi-card {
-      flex: 0 1 12.5rem;
+      flex: 1 1 0;
+      max-width: 12.5rem;
+      // Tablet/phone: tiles wrap onto more lines once they would get narrower than this.
+      min-width: 9rem;
       padding: 0.5rem 0.65rem !important;
       gap: 0;
       border-radius: 0.8rem !important;
+    }
+
+    // Desktop: always one line. Tiles shrink evenly (up to 12.5rem) instead of wrapping.
+    @media (min-width: 1001px) {
+      flex-wrap: nowrap;
+
+      > .kpi-card {
+        min-width: 0;
+      }
     }
 
     .kpi-card__header {
