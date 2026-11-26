@@ -10,13 +10,73 @@
   box-shadow: var(--zh-shadow-sm) !important;
 }
 
-// —— KPI cards: compact, all eight in one row on desktop (no scrolling). Narrower screens wrap
-// to 4 per row, phones to 2. ——
+// —— KPI cards: up to eight in one row on desktop, 4 per row on narrower screens, 2 on phones. ——
+// The row always fills the full width whatever the number of cards (a role can have 4, 6, 8 or more):
+// `--kpi-count` is set by the template, and every card grows to share the space of its row, so a
+// short last row stretches instead of leaving a gap. Fewer cards also get a bit more height
+// (see data-size below).
 .kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 0.75rem;
+  --kpi-gap: 0.75rem;
+  --cols: min(var(--kpi-count, 8), 8);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kpi-gap);
   margin-bottom: 1.25rem;
+
+  > .kpi-card {
+    // 1px under an exact share so sub-pixel rounding can never push the last card of a full row onto
+    // a new line; the cards grow to fill the row anyway.
+    flex: 1 1 calc((100% - (var(--cols) - 1) * var(--kpi-gap)) / var(--cols) - 1px);
+  }
+
+  // Six or fewer cards (employee view): small, fixed-width tiles that do not stretch across the row.
+  // Super admin (7+ cards) keeps the default compact sizing above.
+  &[data-size='roomy'],
+  &[data-size='spacious'] {
+    // Keep tile width, spread the free space between tiles so the row spans the full container.
+    justify-content: space-between;
+
+    > .kpi-card {
+      flex: 0 1 11rem;
+      padding: 0.5rem 0.65rem !important;
+      gap: 0;
+      border-radius: 0.8rem !important;
+    }
+
+    .kpi-card__header {
+      margin-bottom: 0.15rem;
+    }
+
+    .kpi-card__icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 0.45rem;
+
+      mat-icon {
+        font-size: 0.85rem;
+        width: 0.85rem;
+        height: 0.85rem;
+      }
+    }
+
+    .kpi-card__label {
+      font-size: 0.7rem;
+    }
+
+    .kpi-card__value {
+      font-size: 1.15rem;
+      line-height: 1.25;
+    }
+
+    .kpi-card__value--text {
+      font-size: 0.75rem;
+      line-height: 1.6;
+    }
+
+    .kpi-card__spark {
+      display: none;
+    }
+  }
 }
 
 .kpi-card {
@@ -324,7 +384,7 @@
 
 @media (max-width: 1279px) {
   .kpi-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    --cols: min(var(--kpi-count, 8), 4);
   }
 }
 
@@ -339,7 +399,7 @@
 
 @media (max-width: 640px) {
   .kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    --cols: min(var(--kpi-count, 8), 2);
   }
 
   .kpi-card {

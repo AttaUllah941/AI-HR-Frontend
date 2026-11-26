@@ -91,7 +91,12 @@
     <p class="state-msg">No metrics are available for your account yet.</p>
   }
 
-  <section class="kpi-grid" aria-label="Key metrics">
+  <section
+    class="kpi-grid"
+    aria-label="Key metrics"
+    [style.--kpi-count]="data.kpis.length"
+    [attr.data-size]="data.kpis.length <= 4 ? 'spacious' : data.kpis.length <= 6 ? 'roomy' : 'compact'"
+  >
     @for (card of data.kpis; track card.key) {
       <mat-card class="kpi-card">
         <div class="kpi-card__header">
