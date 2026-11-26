@@ -56,18 +56,18 @@ describe('dashboard chart options', () => {
     expect(bars[1]!.weekend).toBe(true);
   });
 
-  it('attendance: weekend days carry no stacked values and get a faded placeholder column', () => {
+  it('attendance: weekend days are left out of the chart', () => {
     const opt = attendanceOption(
       [
         { label: 'Fri', date: '2026-11-20', present: 10, absent: 0, late: 1 },
         { label: 'Sat', date: '2026-11-21', present: 0, absent: 0, late: 0 },
       ],
       theme,
-    ) as { series: Array<{ name: string; data: Array<number | null> }> };
+    ) as { series: Array<{ name: string; data: Array<number | null> }>; xAxis: { data: string[] } };
     const byName = Object.fromEntries(opt.series.map((s) => [s.name, s.data]));
-    expect(byName['On time']).toEqual([9, null]);
-    expect(byName['Weekend']![1]).toBeGreaterThan(0);
-    expect(byName['Weekend']![0]).toBeNull();
+    expect(byName['On time']).toEqual([9]);
+    expect(byName['Weekend']).toBeUndefined();
+    expect(opt.xAxis.data).toHaveLength(1);
   });
 
   it('attendance: uses weekday labels when the date is missing (older API)', () => {
@@ -75,7 +75,7 @@ describe('dashboard chart options', () => {
     expect(bars[0]!.weekend).toBe(true);
   });
 
-  it('department donut shows the total in the middle and sorts largest first', () => {
+  it('department ring chart sorts largest first and has no centre text', () => {
     const opt = departmentOption(
       [
         { label: 'QA', value: 7, color: '#000' },
@@ -83,8 +83,8 @@ describe('dashboard chart options', () => {
       ],
       40,
       theme,
-    ) as { title: { text: string }; series: Array<{ data: Array<{ name: string }> }> };
-    expect(opt.title.text).toBe('40');
+    ) as { title?: unknown; series: Array<{ data: Array<{ name: string }> }> };
+    expect(opt.title).toBeUndefined();
     expect(opt.series[0]!.data.map((d) => d.name)).toEqual(['Dev', 'QA']);
   });
 

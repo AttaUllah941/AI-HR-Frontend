@@ -37,7 +37,7 @@ export function axisMax(n: number): number {
 }
 
 // ---------------------------------------------------------------------------
-// Attendance: stacked bars (on time / late / absent) with weekends shown as faded columns.
+// Attendance: stacked bars (on time / late / absent), weekdays only.
 // ---------------------------------------------------------------------------
 export interface AttendanceBar {
   label: string;
@@ -66,7 +66,8 @@ export function toAttendanceBars(points: DashboardAttendancePoint[]): Attendance
 }
 
 export function attendanceOption(points: DashboardAttendancePoint[], t: ChartTheme): Opt {
-  const bars = toAttendanceBars(points);
+  // Saturday and Sunday are left out of the chart entirely.
+  const bars = toAttendanceBars(points).filter((b) => !b.weekend);
   const tallest = Math.max(1, ...bars.map((b) => b.onTime + b.late + b.absent));
   const ceiling = axisMax(tallest);
   const barWidth = 18;
@@ -83,7 +84,7 @@ export function attendanceOption(points: DashboardAttendancePoint[], t: ChartThe
     barGap: '-100%',
     itemStyle: { color, borderRadius: 2 },
     emphasis: { focus: 'series' },
-    data: bars.map((b) => (b.weekend ? null : b[key])),
+    data: bars.map((b) => b[key]),
   });
 
   return {
@@ -108,7 +109,6 @@ export function attendanceOption(points: DashboardAttendancePoint[], t: ChartThe
         const bar = bars[items[0]?.dataIndex ?? 0];
         if (!bar) return '';
         const heading = `<strong>${esc(bar.caption.replace('\n', ', '))}</strong>`;
-        if (bar.weekend) return `${heading}<br/><span style="color:${t.muted}">Weekend, no attendance expected</span>`;
         const rows = [
           ['On time', bar.onTime, colors.onTime],
           ['Late', bar.late, colors.late],
@@ -131,7 +131,7 @@ export function attendanceOption(points: DashboardAttendancePoint[], t: ChartThe
         ...axisBase(t).axisLabel,
         lineHeight: 15,
         interval: 0,
-        color: (_value: string, index: number) => (bars[index]?.weekend ? withAlpha(t.muted, 0.55) : t.muted),
+        color: t.muted,
       },
     },
     yAxis: {
@@ -143,29 +143,6 @@ export function attendanceOption(points: DashboardAttendancePoint[], t: ChartThe
       splitLine: { lineStyle: { color: t.grid, type: 'dashed', opacity: 0.8 } },
     },
     series: [
-      {
-        name: 'Weekend',
-        type: 'bar',
-        barWidth,
-        barGap: '-100%',
-        silent: true,
-        // Hatched track, like the reference's empty columns.
-        itemStyle: {
-          color: t.grid,
-          opacity: 0.55,
-          borderRadius: 6,
-          decal: {
-            symbol: 'rect',
-            symbolSize: 1,
-            rotation: Math.PI / 4,
-            dashArrayX: [1, 0],
-            dashArrayY: [2, 4],
-            color: t.muted,
-          },
-        },
-        data: bars.map((b) => (b.weekend ? ceiling : null)),
-        z: 1,
-      },
       stackSeries('On time', 'onTime', colors.onTime),
       stackSeries('Absent', 'absent', colors.absent),
       stackSeries('Late', 'late', colors.late),
@@ -174,32 +151,20 @@ export function attendanceOption(points: DashboardAttendancePoint[], t: ChartThe
 }
 
 // ---------------------------------------------------------------------------
-// Departments: donut with the total in the middle and a legend that shows count and share.
+// Departments: plain ring chart with a legend on top.
 // ---------------------------------------------------------------------------
 export function departmentOption(
   slices: DashboardDepartmentSlice[],
-  total: number,
+  _total: number,
   t: ChartTheme,
-  narrow = false,
+  _narrow = false,
 ): Opt {
   const sorted = [...slices].sort((a, b) => b.value - a.value);
-  const sum = sorted.reduce((s, x) => s + x.value, 0) || 1;
-  const pct = new Map(sorted.map((s) => [s.label, Math.round((s.value / sum) * 100)]));
-  const count = new Map(sorted.map((s) => [s.label, s.value]));
 
+  // Plain ring: contiguous slices, centred legend on top, employee total lives in the panel header.
   return {
     textStyle: { fontFamily: t.fontFamily },
     color: t.palette,
-    title: {
-      text: String(total),
-      subtext: 'employees',
-      left: narrow ? '50%' : 104,
-      top: narrow ? 56 : 'middle',
-      textAlign: 'center',
-      itemGap: 2,
-      textStyle: { fontSize: 30, fontWeight: 700, color: t.text, fontFamily: t.fontFamily },
-      subtextStyle: { fontSize: 12, color: t.muted, fontFamily: t.fontFamily },
-    },
     tooltip: {
       trigger: 'item',
       ...tooltipStyle(t),
@@ -209,38 +174,28 @@ export function departmentOption(
       },
     },
     legend: {
-      type: narrow ? 'plain' : 'scroll',
-      orient: narrow ? 'horizontal' : 'vertical',
-      ...(narrow ? { left: 'center', bottom: 0 } : { left: 224, top: 'middle' }),
-      itemWidth: 9,
-      itemHeight: 9,
-      itemGap: 11,
-      icon: 'circle',
+      type: 'scroll',
+      orient: 'horizontal',
+      top: 0,
+      left: 'center',
+      icon: 'roundRect',
+      itemWidth: 16,
+      itemHeight: 10,
+      itemGap: 12,
       tooltip: { show: true, ...tooltipStyle(t) },
       pageIconColor: t.muted,
       pageTextStyle: { color: t.muted },
-      formatter: (name: string) =>
-        narrow ? `{n|${name}}  {v|${count.get(name) ?? 0}}` : `{n|${name}}  {v|${count.get(name) ?? 0}}  {p|${pct.get(name) ?? 0}%}`,
-      textStyle: {
-        color: t.muted,
-        fontSize: 12,
-        fontFamily: t.fontFamily,
-        rich: {
-          n: { color: t.muted, width: 164, fontSize: 12, fontFamily: t.fontFamily, overflow: 'truncate', ellipsis: '…' },
-          v: { color: t.text, fontWeight: 700, width: 22, align: 'right', fontSize: 12, fontFamily: t.fontFamily },
-          p: { color: t.muted, width: 34, align: 'right', fontSize: 11, fontFamily: t.fontFamily },
-        },
-      },
+      textStyle: { color: t.muted, fontSize: 12, fontFamily: t.fontFamily },
     },
     series: [
       {
         type: 'pie',
-        radius: narrow ? [48, 70] : [64, 92],
-        center: narrow ? ['50%', 78] : [104, '50%'],
-        padAngle: 2,
+        radius: ['42%', '74%'],
+        center: ['50%', '56%'],
         avoidLabelOverlap: true,
-        itemStyle: { borderRadius: 6, borderColor: t.surface, borderWidth: 2 },
+        itemStyle: { borderWidth: 0 },
         label: { show: false },
+        labelLine: { show: false },
         emphasis: { scale: true, scaleSize: 5 },
         data: sorted.map((s) => ({ name: s.label, value: s.value })),
       },
