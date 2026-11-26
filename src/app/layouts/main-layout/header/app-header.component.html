@@ -35,6 +35,17 @@
   </form>
 
   <div class="topbar__right">
+    <button
+      mat-icon-button
+      type="button"
+      class="theme-toggle"
+      [attr.aria-label]="isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
+      [attr.title]="isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
+      (click)="toggleTheme()"
+    >
+      <mat-icon>{{ isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
+
     <button mat-stroked-button type="button" class="company-chip" [matMenuTriggerFor]="companyMenu">
       <mat-icon>apartment</mat-icon>
       <span>{{ companyName() }}</span>
