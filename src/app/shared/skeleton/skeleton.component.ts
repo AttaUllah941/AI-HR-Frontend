@@ -16,11 +16,18 @@ export type SkeletonShape = 'rect' | 'circle';
       flex: none;
       max-width: 100%;
       border-radius: var(--zh-skeleton-radius, 0.5rem);
-      background-color: var(--mat-sys-surface-container-highest, var(--zh-muted, #e6e8ee));
+      background-color: var(
+        --zh-skeleton-base,
+        var(--mat-sys-surface-container-highest, var(--zh-muted, #e6e8ee))
+      );
       background-image: linear-gradient(
         90deg,
         transparent 0%,
-        color-mix(in oklab, var(--mat-sys-surface-container-lowest, var(--zh-card, #fff)) 70%, transparent) 50%,
+        var(
+          --zh-skeleton-shine,
+          color-mix(in oklab, var(--mat-sys-surface-container-lowest, var(--zh-card, #fff)) 70%, transparent)
+        )
+          50%,
         transparent 100%
       );
       background-size: 200% 100%;

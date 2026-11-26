@@ -87,6 +87,10 @@
   --zh-input: oklch(32% 0.02 260);
   --zh-ring: oklch(70% 0.19 48);
 
+  /* Skeleton loaders: a block clearly lighter than the card, with a soft light sweep. */
+  --zh-skeleton-base: oklch(30% 0.02 260);
+  --zh-skeleton-shine: oklch(40% 0.022 260 / 0.65);
+
   --zh-sidebar: oklch(14% 0.02 260);
   --zh-sidebar-border: oklch(26% 0.02 260);
 
