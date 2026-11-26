@@ -41,6 +41,9 @@ const STATUS_OPTIONS: Array<{ value: EmployeeStatus | ''; label: string }> = [
   { value: 'ACTIVE', label: 'Active' },
   { value: 'ON_LEAVE', label: 'On leave' },
   { value: 'PROBATION', label: 'Probation' },
+  { value: 'NOTICE_PERIOD', label: 'Notice period' },
+  { value: 'TERMINATED', label: 'Terminated' },
+  { value: 'RESIGNED', label: 'Resigned' },
   { value: 'DRAFT', label: 'Draft' },
   { value: 'INACTIVE', label: 'Inactive' },
 ];

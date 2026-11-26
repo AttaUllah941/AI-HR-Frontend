@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { toIsoDate } from '../../../core/utils/date-format';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -46,7 +47,7 @@ export class HolidayFormDialogComponent {
   readonly form = this.fb.nonNullable.group({
     name: [this.data.holiday?.name ?? '', [Validators.required, Validators.maxLength(200)]],
     date: [
-      this.data.holiday?.date?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
+      this.data.holiday?.date?.slice(0, 10) ?? toIsoDate(new Date()),
       Validators.required,
     ],
     isOptional: [this.data.holiday?.isOptional ?? false],

@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
-import { filter } from 'rxjs';
+import { Subscription, filter } from 'rxjs';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
@@ -67,11 +67,17 @@ export class EmployeeDetailPageComponent implements OnInit {
     });
   }
 
+  private loadSub: Subscription | null = null;
+  private timelineSub: Subscription | null = null;
+  private activitySub: Subscription | null = null;
+
   load(id: string): void {
     this.loading.set(true);
     this.error.set(null);
 
-    this.employees.getById(id).subscribe({
+    // Switching employee quickly cancels the previous requests instead of letting them overwrite this page.
+    this.loadSub?.unsubscribe();
+    this.loadSub = this.employees.getById(id).subscribe({
       next: (employee) => {
         this.employee.set(employee);
         this.breadcrumbItems.set([
@@ -90,13 +96,15 @@ export class EmployeeDetailPageComponent implements OnInit {
   }
 
   private loadTimeline(id: string): void {
-    this.employees.getTimeline(id).subscribe({
+    this.timelineSub?.unsubscribe();
+    this.timelineSub = this.employees.getTimeline(id).subscribe({
       next: (data) => this.timeline.set(data.events),
     });
   }
 
   private loadActivity(id: string): void {
-    this.employees.getActivity(id).subscribe({
+    this.activitySub?.unsubscribe();
+    this.activitySub = this.employees.getActivity(id).subscribe({
       next: (data) => this.activity.set(data.items),
     });
   }

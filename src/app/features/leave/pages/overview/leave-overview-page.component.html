@@ -101,6 +101,7 @@
             <h3 id="lo-recent-title" class="leave-overview-heading">Recent requests</h3>
             <a routerLink="/leave/requests" class="lo-recent__all">View all</a>
           </div>
+          <div class="lo-recent__card">
           @if (recent().length === 0) {
             <p class="lo-recent__empty">
               <mat-icon aria-hidden="true">event_available</mat-icon>
@@ -120,6 +121,7 @@
               }
             </ul>
           }
+          </div>
         </section>
       }
     </div>

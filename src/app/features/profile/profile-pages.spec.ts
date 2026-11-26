@@ -226,6 +226,20 @@ describe('ProfileOverviewPageComponent', () => {
     expect(updates[0]!['firstName']).toBe('Augusta');
   });
 
+  it('only accepts an https address or a path on this site for the picture', async () => {
+    const { component } = await setup();
+    const valid = (value: string) => {
+      component.form.controls.avatarUrl.setValue(value);
+      return component.form.controls.avatarUrl.valid;
+    };
+    expect(valid('https://example.com/me.png')).toBe(true);
+    expect(valid('/api/v1/files/abc/preview')).toBe(true);
+    expect(valid('')).toBe(true);
+    expect(valid('http://example.com/me.png')).toBe(false);
+    expect(valid('javascript:alert(1)')).toBe(false);
+    expect(valid('//evil.example/a.png')).toBe(false);
+  });
+
   it('previews only secure picture addresses', async () => {
     const { fixture, component } = await setup();
     component.form.controls.avatarUrl.setValue('http://example.com/a.png');

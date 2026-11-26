@@ -16,8 +16,8 @@ import { humanizeCode } from '../../../../shared/utils/text';
 
 /** Digits with the usual separators, up to 30 characters. Empty is fine. */
 const PHONE_PATTERN = /^[+()\d\s.-]{0,30}$/;
-/** An http(s) address or a path on this site. Empty is fine. */
-const AVATAR_PATTERN = /^$|^https?:\/\/[^\s/$.?#][^\s]*$|^\/[^\s]*$/i;
+/** An https address or a path on this site (not //host). Empty is fine. */
+const AVATAR_PATTERN = /^$|^https:\/\/[^\s/$.?#][^\s]*$|^\/(?!\/)[^\s]*$/i;
 
 @Component({
   selector: 'app-profile-overview-page',

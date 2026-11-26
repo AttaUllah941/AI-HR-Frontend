@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { toIsoDate } from '../../../core/utils/date-format';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -100,7 +101,7 @@ export class AttendanceRecordFormDialogComponent {
   readonly form = this.fb.nonNullable.group({
     employeeId: [this.data.record?.employeeId ?? '', Validators.required],
     date: [
-      toDateInput(this.data.record?.date, this.data.defaultDate ?? new Date().toISOString().slice(0, 10)),
+      toDateInput(this.data.record?.date, this.data.defaultDate ?? toIsoDate(new Date())),
       Validators.required,
     ],
     checkInAt: [toDateTimeLocal(this.data.record?.checkInAt)],

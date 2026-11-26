@@ -21,7 +21,7 @@ import { ErrorStateComponent } from '../../../../shared/error-state/error-state.
 import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skeleton.component';
 import { DateFieldComponent } from '../../../../shared/components/date-field/date-field.component';
 import { AttendanceRecordFormDialogComponent } from '../../dialogs/attendance-record-form-dialog.component';
-import { formatTime } from '../../../../core/utils/date-format';
+import { formatTime, toIsoDate } from '../../../../core/utils/date-format';
 
 const STATUS_OPTIONS: Array<{ value: AttendanceStatus | ''; label: string }> = [
   { value: '', label: 'All statuses' },
@@ -83,7 +83,7 @@ export class AttendanceDailyPageComponent implements OnInit {
 
   readonly searchControl = new FormControl('', { nonNullable: true });
   readonly statusControl = new FormControl<AttendanceStatus | ''>('', { nonNullable: true });
-  readonly dateControl = new FormControl(new Date().toISOString().slice(0, 10), {
+  readonly dateControl = new FormControl(toIsoDate(new Date()), {
     nonNullable: true,
   });
 

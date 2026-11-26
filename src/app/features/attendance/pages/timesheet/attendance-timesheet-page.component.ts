@@ -16,7 +16,7 @@ import { TableSkeletonComponent } from '../../../../shared/skeleton/table-skelet
 import { ErrorStateComponent } from '../../../../shared/error-state/error-state.component';
 import { DateFieldComponent } from '../../../../shared/components/date-field/date-field.component';
 import { Subscription } from 'rxjs';
-import { formatTime, formatWeekdayDate } from '../../../../core/utils/date-format';
+import { formatTime, formatWeekdayDate, toIsoDate } from '../../../../core/utils/date-format';
 
 function monthStart(): string {
   const now = new Date();
@@ -24,7 +24,7 @@ function monthStart(): string {
 }
 
 function today(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toIsoDate(new Date());
 }
 
 @Component({

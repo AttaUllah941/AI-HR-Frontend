@@ -147,11 +147,14 @@
 
 // —— Recent requests ——
 .lo-recent {
-  padding: 1.25rem 1.35rem;
-  border: 1px solid var(--zh-border);
-  border-radius: 1.25rem;
-  background: var(--zh-card);
-  box-shadow: var(--zh-shadow-sm);
+  // The heading sits above the card (like "My balances"), so both cards start on the same line.
+  &__card {
+    padding: 1.25rem 1.35rem;
+    border: 1px solid var(--zh-border);
+    border-radius: 1.25rem;
+    background: var(--zh-card);
+    box-shadow: var(--zh-shadow-sm);
+  }
 
   &__head {
     display: flex;
